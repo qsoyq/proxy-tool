@@ -1,0 +1,32 @@
+version: '3'
+
+networks:
+  default:
+    name: my_bridge
+    external: true
+
+services:
+
+    proxy-tool:
+        platform: linux/amd64
+        build:
+          dockerfile: ./Dockerfile
+        container_name: proxy-tool
+        restart: unless-stopped
+
+
+        labels:
+            - traefik.enable=true
+
+            - traefik.http.routers.proxy-tool.rule=Host(`local.wangqs.work`) && PathPrefix(`/proxy-tool/`)
+            - traefik.http.routers.proxy-tool.entrypoints=web
+
+            - traefik.http.routers.proxy-tool-https.rule=Host(`local.wangqs.work`) && PathPrefix(`/proxy-tool/`)
+            - traefik.http.routers.proxy-tool-https.entrypoints=websecure
+            - traefik.http.routers.proxy-tool-https.tls=true
+
+            - "traefik.http.middlewares.proxy-tool-path-replace.replacepathregex.regex=^/proxy-tool/(.*)"
+            - "traefik.http.middlewares.proxy-tool-path-replace.replacepathregex.replacement=/$$1"
+
+            - traefik.http.routers.proxy-tool.middlewares=proxy-tool-path-replace@docker
+            - traefik.http.routers.proxy-tool-https.middlewares=proxy-tool-path-replace@docker
