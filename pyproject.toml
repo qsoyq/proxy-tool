@@ -85,6 +85,7 @@ hypercorn = "^0.13.2"
 pretty-errors = "^1.2.25"
 typer = { version = "^0.4.0", extras = ["all"] }
 pyyaml = "5.3.1"
+oss2 = "^2.16.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"
