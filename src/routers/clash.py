@@ -1,4 +1,5 @@
 import base64
+import socket
 import urllib.parse
 
 import httpx
@@ -50,6 +51,9 @@ def proxy_add(
     oss_bucket_name: str = Query(...),
     oss_key: str = Query(...),
 ):
+    server = server.strip()
+    check_server_format(server)
+
     auth = oss2.Auth(oss_access_key, oss_access_secret)
     bucket = oss2.Bucket(auth, oss_endpoint, oss_bucket_name)
 
@@ -84,3 +88,14 @@ def proxy_add(
     bucket.put_object(oss_key, data)
 
     return PlainTextResponse("Success")
+
+
+def check_server_format(addr: str) -> bool:
+    try:
+        socket.inet_aton(addr)
+    except socket.error:
+        try:
+            socket.gethostbyname(addr)
+        except socket.gaierror:
+            return False
+    return True
