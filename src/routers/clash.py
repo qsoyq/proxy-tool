@@ -52,19 +52,39 @@ def proxy_add(
     oss_key: str = Query(...),
 ):
     server = server.strip()
-    check_server_format(server)
+    if not check_server_format(server):
+        return PlainTextResponse("bad server", status_code=400)
 
     auth = oss2.Auth(oss_access_key, oss_access_secret)
     bucket = oss2.Bucket(auth, oss_endpoint, oss_bucket_name)
+    node = ClashProxyModel(name=name, server=server, port=port, cipher=cipher, password=password, type='ss')
 
     url = f'https://{oss_bucket_name}.{oss_endpoint}/{oss_key}'
     res = httpx.get(url)
     doc = yaml.safe_load(res.text)
-
-    node = ClashProxyModel(name=name, server=server, port=port, cipher=cipher, password=password, type='ss')
     doc['proxies'].append(node.dict())
-
     clash = ClashModel(**doc)
+
+    doc['proxy-groups'] = make_proxy_groups(clash)
+
+    data = yaml.dump(doc)
+    bucket.put_object(oss_key, data)
+
+    return PlainTextResponse("Success")
+
+
+def check_server_format(addr: str) -> bool:
+    try:
+        socket.inet_aton(addr)
+    except socket.error:
+        try:
+            socket.gethostbyname(addr)
+        except socket.gaierror:
+            return False
+    return True
+
+
+def make_proxy_groups(clash: ClashModel) -> list[dict]:
     proxies = ["auto"] + [proxy.name for proxy in clash.proxies]
 
     auto_proxies = [proxy.name for proxy in clash.proxies]
@@ -82,20 +102,4 @@ def proxy_add(
             'interval': 600
         },
     ]
-    doc['proxy-groups'] = proxy_groups
-
-    data = yaml.dump(doc)
-    bucket.put_object(oss_key, data)
-
-    return PlainTextResponse("Success")
-
-
-def check_server_format(addr: str) -> bool:
-    try:
-        socket.inet_aton(addr)
-    except socket.error:
-        try:
-            socket.gethostbyname(addr)
-        except socket.gaierror:
-            return False
-    return True
+    return proxy_groups
