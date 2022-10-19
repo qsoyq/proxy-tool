@@ -1,7 +1,7 @@
 .PHONY: default format mypy build push
 
 
-IMAGE_NAME := clpy9793/proxy-tool
+IMAGE_NAME := qsoyq/proxy-tool
 PROJECT_NAME := proxy-tool
 
 default: build push

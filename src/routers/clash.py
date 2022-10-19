@@ -1,6 +1,9 @@
 import base64
+import logging
 import socket
 import urllib.parse
+
+from typing import List
 
 import httpx
 import oss2
@@ -13,6 +16,8 @@ from pydantic import HttpUrl
 from models import ClashModel, ClashProxyModel
 
 router = APIRouter(tags=["clash"], prefix='/clash')
+
+logger = logging.getLogger(__file__)
 
 
 @router.get("/subscribe")
@@ -35,6 +40,31 @@ async def clash2subscribe(clash_url: HttpUrl = Query(..., description="clash 订
         share_uri = f"ss://{encoded}#{name}"
         proxies.append(share_uri)
     return PlainTextResponse("\n".join(proxies))
+
+
+@router.get('/1r')
+async def one_r(url: HttpUrl = Query(..., description="clash 订阅地址")):
+    """覆盖一元机场的配置文件
+
+    删除 'DOMAIN-KEYWORD,adservice,REJECT' 规则
+    """
+    cli = httpx.AsyncClient()
+    # 在一元机场需要在 ua 添加 clash, 响应内容才会是 yaml 格式的配置文件
+    res = await cli.get(url, headers={"user-agent": 'clash'})
+    content_disposition = res.headers.get('content-disposition')
+    logger.debug(res.text)
+    doc = yaml.safe_load(res.text)
+    rules: List[str] = doc.get('rules', [])
+
+    rule = 'DOMAIN-KEYWORD,adservice,REJECT'
+    if rule in rules:
+        rules.remove(rule)
+
+    content = yaml.safe_dump(doc, allow_unicode=True)
+    headers = {}
+    if content_disposition:
+        headers['content-disposition'] = content_disposition
+    return PlainTextResponse(content=content, headers=headers)
 
 
 @router.get("/proxy/add")
@@ -67,7 +97,7 @@ def proxy_add(
 
     doc['proxy-groups'] = make_proxy_groups(clash)
 
-    data = yaml.dump(doc)
+    data = yaml.safe_dump(doc, allow_unicode=True)
     bucket.put_object(oss_key, data)
 
     return PlainTextResponse("Success")
