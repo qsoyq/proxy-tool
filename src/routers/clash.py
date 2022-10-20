@@ -46,7 +46,10 @@ async def clash2subscribe(clash_url: HttpUrl = Query(..., description="clash 订
 async def one_r(url: HttpUrl = Query(..., description="clash 订阅地址")):
     """覆盖一元机场的配置文件
 
-    添加 `- DOMAIN,adservice.google.com,DIRECT` 规则
+    添加规则
+        `- DOMAIN,adservice.google.com,DIRECT`
+        `- DOMAIN-SUFFIX,g.doubleclick.net,DIRECT`
+
     """
     cli = httpx.AsyncClient()
     # 在一元机场需要在 ua 添加 clash, 响应内容才会是 yaml 格式的配置文件
@@ -56,8 +59,8 @@ async def one_r(url: HttpUrl = Query(..., description="clash 订阅地址")):
     doc = yaml.safe_load(res.text)
     rules: List[str] = doc.get('rules', [])
 
-    add_rules = ('DOMAIN,adservice.google.com,DIRECT', )
-    for rule in add_rules:
+    add_rules = ('DOMAIN,adservice.google.com,DIRECT', 'DOMAIN-SUFFIX,g.doubleclick.net,DIRECT')
+    for rule in add_rules[::-1]:
         rules.insert(0, rule)
 
     content = yaml.safe_dump(doc, allow_unicode=True)
