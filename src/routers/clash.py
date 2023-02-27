@@ -8,8 +8,9 @@ from typing import List
 import httpx
 import oss2
 import yaml
+import yaml.scanner
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Header, Query
 from fastapi.responses import PlainTextResponse
 from pydantic import HttpUrl
 
@@ -43,31 +44,66 @@ async def clash2subscribe(clash_url: HttpUrl = Query(..., description="clash 订
 
 
 @router.get('/1r')
-async def one_r(url: HttpUrl = Query(..., description="clash 订阅地址")):
+def one_r(
+    url: HttpUrl = Query(...,
+                         description="clash 订阅地址"),
+    is_clash: bool = Query(False),
+    user_agent: str = Header("",
+                             alias='user-agent')
+):
     """覆盖一元机场的配置文件
 
     添加规则
         `- DOMAIN,adservice.google.com,DIRECT`
         `- DOMAIN-SUFFIX,g.doubleclick.net,DIRECT`
 
+    - 去除带倍率的临时节点
     """
-    cli = httpx.AsyncClient()
     # 在一元机场需要在 ua 添加 clash, 响应内容才会是 yaml 格式的配置文件
-    res = await cli.get(url, headers={"user-agent": 'clash'})
-    content_disposition = res.headers.get('content-disposition')
-    logger.debug(res.text)
-    doc = yaml.safe_load(res.text)
-    rules: List[str] = doc.get('rules', [])
-
-    add_rules = ('DOMAIN,adservice.google.com,DIRECT', 'DOMAIN-SUFFIX,g.doubleclick.net,DIRECT')
-    for rule in add_rules[::-1]:
-        rules.insert(0, rule)
-
-    content = yaml.safe_dump(doc, allow_unicode=True)
+    logger.debug(f"{user_agent}")
     headers = {}
-    if content_disposition:
-        headers['content-disposition'] = content_disposition
-    return PlainTextResponse(content=content, headers=headers)
+    _is_clash = bool(is_clash or 'clash' in user_agent.lower())
+
+    if _is_clash:
+        headers['user-agent'] = 'clash'
+
+    res = httpx.get(url, headers=headers)
+    if res.is_error:
+        # 使用代理访问一元机场会遭到 cloudflare 的拦截
+        res = httpx.get(url, headers=headers, proxies={})
+
+    res.raise_for_status()
+
+    content = ""
+    if _is_clash:
+        try:
+            doc = yaml.safe_load(res.text)
+        except yaml.scanner.ScannerError:
+            # clash 文档识别失败, 直接返回订阅结果
+            return PlainTextResponse(res.text)
+
+        rules: List[str] = doc.get('rules', [])
+        add_rules = (
+            'DOMAIN,adservice.google.com,DIRECT',
+            'DOMAIN-SUFFIX,g.doubleclick.net,DIRECT',
+        )
+        for rule in add_rules[::-1]:
+            rules.insert(0, rule)
+
+        # 移除 x 倍率节点
+        for group in doc['proxy-groups']:
+            group['proxies'] = [x for x in group.get('proxies', []) if "倍率" not in x]
+
+        doc['proxies'] = [x for x in doc.get('proxies', []) if "倍率" not in x['name']]
+        content = yaml.safe_dump(doc, allow_unicode=True)
+        logger.info(doc.get('proxies'))
+
+    else:
+        s = urllib.parse.quote_plus("倍率").encode()
+        proxies = base64.b64decode(res.text).split(b'\n')
+        proxies = [p for p in proxies if s not in p.rsplit(b'#', 1)[-1]]
+        content = base64.b64encode(b"\n".join(proxies))
+    return PlainTextResponse(content=content)
 
 
 @router.get("/proxy/add")

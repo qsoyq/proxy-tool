@@ -69,10 +69,10 @@ version = "0.1.0"
 description = ""
 authors = ["wangqs <wqs1639@gmail.com>"]
 
-[[tool.poetry.source]]
-name = "aliyun"
-url = "https://mirrors.aliyun.com/pypi/simple/"
-default = true
+# [[tool.poetry.source]]
+# name = "aliyun"
+# url = "https://mirrors.aliyun.com/pypi/simple/"
+# default = true
 
 [tool.poetry.dependencies]
 python = "^3.10"

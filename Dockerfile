@@ -10,7 +10,7 @@ COPY pyproject.toml pyproject.toml
 
 COPY poetry.lock poetry.lock
 
-RUN pip install poetry -i https://mirrors.aliyun.com/pypi/simple
+RUN pip install poetry
 
 RUN poetry config virtualenvs.create false
 
