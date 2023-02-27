@@ -11,7 +11,7 @@ import yaml
 import yaml.scanner
 
 from fastapi import APIRouter, Header, Query
-from fastapi.responses import PlainTextResponse
+from fastapi.responses import HTMLResponse, PlainTextResponse
 from pydantic import HttpUrl
 
 from models import ClashModel, ClashProxyModel
@@ -40,7 +40,7 @@ async def clash2subscribe(clash_url: HttpUrl = Query(..., description="clash 订
         name = urllib.parse.quote(proxy.name)
         share_uri = f"ss://{encoded}#{name}"
         proxies.append(share_uri)
-    return PlainTextResponse("\n".join(proxies))
+    return HTMLResponse("\r\n".join(proxies))
 
 
 @router.get('/1r')
@@ -49,7 +49,8 @@ def one_r(
                          description="clash 订阅地址"),
     is_clash: bool = Query(False),
     user_agent: str = Header("",
-                             alias='user-agent')
+                             alias='user-agent'),
+    key: List[str] = Query(["倍率"])
 ):
     """覆盖一元机场的配置文件
 
@@ -73,7 +74,7 @@ def one_r(
         res = httpx.get(url, headers=headers, proxies={})
 
     res.raise_for_status()
-
+    resp_headers = {}
     content = ""
     if _is_clash:
         try:
@@ -96,14 +97,19 @@ def one_r(
 
         doc['proxies'] = [x for x in doc.get('proxies', []) if "倍率" not in x['name']]
         content = yaml.safe_dump(doc, allow_unicode=True)
-        logger.info(doc.get('proxies'))
+
+        # 写入订阅信息
+        resp_headers["subscription-userinfo"] = res.headers.get('subscription-userinfo', '')
+        resp_headers["profile-update-interval"] = res.headers.get('profile-update-interval', '')
 
     else:
         s = urllib.parse.quote_plus("倍率").encode()
-        proxies = base64.b64decode(res.text).split(b'\n')
+        proxies = base64.b64decode(res.text).split(b'\r\n')
         proxies = [p for p in proxies if s not in p.rsplit(b'#', 1)[-1]]
-        content = base64.b64encode(b"\n".join(proxies))
-    return PlainTextResponse(content=content)
+        content = base64.b64encode(b"\r\n".join(proxies).strip(b'\r\n'))
+        logger.debug(content)
+
+    return HTMLResponse(content=content, headers=resp_headers)
 
 
 @router.get("/proxy/add")
