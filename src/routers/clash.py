@@ -99,12 +99,13 @@ def one_r(
         for rule in add_rules[::-1]:
             rules.insert(0, rule)
 
-        # 移除 x 倍率节点
-        for group in doc['proxy-groups']:
-            group['proxies'] = [x for x in group.get('proxies', []) if "倍率" not in x]
+        keywords = ("倍率", "计量")
+        for keyword in keywords:
+            for group in doc['proxy-groups']:
+                group['proxies'] = [x for x in group.get('proxies', []) if keyword not in x]
 
-        doc['proxies'] = [x for x in doc.get('proxies', []) if "倍率" not in x['name']]
-        doc['proxies'] = [x for x in doc.get('proxies', []) if "计量" not in x['name']]
+            doc['proxies'] = [x for x in doc.get('proxies', []) if keyword not in x['name']]
+
         content = yaml.safe_dump(doc, allow_unicode=True)
 
     else:
