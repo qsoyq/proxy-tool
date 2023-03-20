@@ -49,11 +49,12 @@ async def clash2subscribe(clash_url: HttpUrl = Query(..., description="clash 订
 
 @router.get('/1r')
 def one_r(
+    user_agent: str = Header("",
+                             alias='user-agent'),
     url: HttpUrl = Query(...,
                          description="clash 订阅地址"),
     is_clash: bool = Query(False),
-    user_agent: str = Header("",
-                             alias='user-agent'),
+    interval: int = Query(60),
 ):
     """覆盖一元机场的配置文件
 
@@ -103,6 +104,8 @@ def one_r(
         for keyword in keywords:
             for group in doc['proxy-groups']:
                 group['proxies'] = [x for x in group.get('proxies', []) if keyword not in x]
+                if 'interval' in group:
+                    group['interval'] = interval
 
             doc['proxies'] = [x for x in doc.get('proxies', []) if keyword not in x['name']]
 
