@@ -11,7 +11,7 @@ import yaml
 import yaml.scanner
 
 from fastapi import APIRouter, Header, Query
-from fastapi.responses import HTMLResponse, PlainTextResponse
+from fastapi.responses import PlainTextResponse
 from pydantic import HttpUrl
 
 from models import ClashModel, ClashProxyModel
@@ -30,17 +30,21 @@ async def clash2subscribe(clash_url: HttpUrl = Query(..., description="clash 订
 
     proxies = []
     for proxy in clash.proxies:
+        share_uri = ''
         # 目前仅支持 ss 类型的代理
-        if proxy.type != 'ss':
-            continue
+        if proxy.type == 'ss':
+            server = f"{proxy.cipher}:{proxy.password}@{proxy.server}:{proxy.port}".encode()
+            encoded = base64.urlsafe_b64encode(server).decode()
+            name = urllib.parse.quote(proxy.name)
+            share_uri = f"ss://{encoded}#{name}"
 
-        encoded = base64.urlsafe_b64encode(f"{proxy.cipher}:{proxy.password}@{proxy.server}:{proxy.port}".encode()
-                                           ).decode()
-        name = base64.urlsafe_b64encode(f"{proxy.name}".encode()).decode()
-        name = urllib.parse.quote(proxy.name)
-        share_uri = f"ss://{encoded}#{name}"
-        proxies.append(share_uri)
-    return HTMLResponse("\r\n".join(proxies))
+        if proxy.type == 'clash':
+            share_uri = ''
+
+        if share_uri:
+            proxies.append(share_uri)
+    content = base64.b64encode(("\r\n".join(proxies) + "\r\n").encode())
+    return PlainTextResponse(content)
 
 
 @router.get('/1r')
@@ -50,7 +54,6 @@ def one_r(
     is_clash: bool = Query(False),
     user_agent: str = Header("",
                              alias='user-agent'),
-    key: List[str] = Query(["倍率"])
 ):
     """覆盖一元机场的配置文件
 
@@ -58,25 +61,30 @@ def one_r(
         `- DOMAIN,adservice.google.com,DIRECT`
         `- DOMAIN-SUFFIX,g.doubleclick.net,DIRECT`
 
-    - 去除带倍率的临时节点
+    - 去除带倍率的节点
+    - 去除带计量的节点
     """
     # 在一元机场需要在 ua 添加 clash, 响应内容才会是 yaml 格式的配置文件
     logger.debug(f"{user_agent}")
-    headers = {}
-    _is_clash = bool(is_clash or 'clash' in user_agent.lower())
 
-    if _is_clash:
-        headers['user-agent'] = 'clash'
+    if is_clash:
+        user_agent = 'clash'
 
+    headers = {"user-agent": user_agent}
     res = httpx.get(url, headers=headers)
     if res.is_error:
         # 使用代理访问一元机场会遭到 cloudflare 的拦截
         res = httpx.get(url, headers=headers, proxies={})
 
     res.raise_for_status()
+
+    # 写入订阅信息
     resp_headers = {}
+    resp_headers["subscription-userinfo"] = res.headers.get('subscription-userinfo', '')
+    resp_headers["profile-update-interval"] = res.headers.get('profile-update-interval', '')
+
     content = ""
-    if _is_clash:
+    if is_clash or 'clash' in user_agent.lower():
         try:
             doc = yaml.safe_load(res.text)
         except yaml.scanner.ScannerError:
@@ -96,20 +104,17 @@ def one_r(
             group['proxies'] = [x for x in group.get('proxies', []) if "倍率" not in x]
 
         doc['proxies'] = [x for x in doc.get('proxies', []) if "倍率" not in x['name']]
+        doc['proxies'] = [x for x in doc.get('proxies', []) if "计量" not in x['name']]
         content = yaml.safe_dump(doc, allow_unicode=True)
-
-        # 写入订阅信息
-        resp_headers["subscription-userinfo"] = res.headers.get('subscription-userinfo', '')
-        resp_headers["profile-update-interval"] = res.headers.get('profile-update-interval', '')
 
     else:
         s = urllib.parse.quote_plus("倍率").encode()
-        proxies = base64.b64decode(res.text).split(b'\r\n')
-        proxies = [p for p in proxies if s not in p.rsplit(b'#', 1)[-1]]
-        content = base64.b64encode(b"\r\n".join(proxies).strip(b'\r\n'))
+        proxies = base64.b64decode(res.text + "===").strip(b"\r\n").split(b'\r\n')
+        proxies = [p for p in proxies if s not in p]
+        content = base64.b64encode(b"\r\n".join(proxies) + b"\r\n")
         logger.debug(content)
 
-    return HTMLResponse(content=content, headers=resp_headers)
+    return PlainTextResponse(content=content, headers=resp_headers)
 
 
 @router.get("/proxy/add")
@@ -159,7 +164,7 @@ def check_server_format(addr: str) -> bool:
     return True
 
 
-def make_proxy_groups(clash: ClashModel) -> list[dict]:
+def make_proxy_groups(clash: ClashModel, interval: int = 300) -> list[dict]:
     proxies = ["auto"] + [proxy.name for proxy in clash.proxies]
 
     auto_proxies = [proxy.name for proxy in clash.proxies]
@@ -174,7 +179,7 @@ def make_proxy_groups(clash: ClashModel) -> list[dict]:
             'type': 'url-test',
             'proxies': auto_proxies,
             'url': 'https://www.v2ex.com/generate_204',
-            'interval': 600
+            'interval': interval
         },
     ]
     return proxy_groups
