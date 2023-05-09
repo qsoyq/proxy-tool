@@ -61,6 +61,7 @@ def one_r(
     添加规则
         `- DOMAIN,adservice.google.com,DIRECT`
         `- DOMAIN-SUFFIX,g.doubleclick.net,DIRECT`
+        `- DOMAIN-SUFFIX,elemecdn.com,DIRECT`
 
     - 去除带倍率的节点
     - 去除带计量的节点
@@ -96,6 +97,7 @@ def one_r(
         add_rules = (
             'DOMAIN,adservice.google.com,DIRECT',
             'DOMAIN-SUFFIX,g.doubleclick.net,DIRECT',
+            'DOMAIN-SUFFIX,elemecdn.com,DIRECT',
         )
         for rule in add_rules[::-1]:
             rules.insert(0, rule)
