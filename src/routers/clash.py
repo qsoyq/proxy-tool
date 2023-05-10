@@ -65,13 +65,12 @@ def one_r(
         `DOMAIN-SUFFIX,qq.com,DIRECT`
         `DOMAIN-SUFFIX,app-measurement.com,一元机场`
         `DOMAIN-SUFFIX,oscp.pki.goog,一元机场`
+        `DOMAIN-SUFFIX,beacons.gcp.gvt2.com,一元机场`
         `DOMAIN-SUFFIX,getapp.com,一元机场`
         `DOMAIN-SUFFIX,g2.com,一元机场`
         `DOMAIN-SUFFIX,jsdelivr.com,一元机场`
         `DOMAIN-SUFFIX,ipinfo.io,一元机场`
-        `DOMAIN-SUFFIX,your-service-provider,DIRECT`
-
-        
+        `DOMAIN-SUFFIX,your-service-provider,REJECT`
 
     - 去除带倍率的节点
     - 去除带计量的节点
@@ -111,11 +110,12 @@ def one_r(
             'DOMAIN-SUFFIX,qq.com,DIRECT',
             'DOMAIN-SUFFIX,app-measurement.com,一元机场',
             'DOMAIN-SUFFIX,oscp.pki.goog,一元机场',
+            'DOMAIN-SUFFIX,beacons.gcp.gvt2.com,一元机场',
             'DOMAIN-SUFFIX,getapp.com,一元机场',
             'DOMAIN-SUFFIX,g2.com,一元机场',
             'DOMAIN-SUFFIX,jsdelivr.com,一元机场',
             'DOMAIN-SUFFIX,ipinfo.io,一元机场',
-            'DOMAIN-SUFFIX,your-service-provider,DIRECT',
+            'DOMAIN-SUFFIX,your-service-provider,REJECT',
         )
         for rule in add_rules[::-1]:
             rules.insert(0, rule)
