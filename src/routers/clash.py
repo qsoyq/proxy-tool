@@ -71,6 +71,7 @@ def one_r(
         `DOMAIN-SUFFIX,jsdelivr.com,一元机场`
         `DOMAIN-SUFFIX,ipinfo.io,一元机场`
         `DOMAIN-SUFFIX,your-service-provider,REJECT`
+        `DOMAIN-KEYWORD,slack,DIRECT`
 
     - 去除带倍率的节点
     - 去除带计量的节点
@@ -116,6 +117,7 @@ def one_r(
             'DOMAIN-SUFFIX,jsdelivr.com,一元机场',
             'DOMAIN-SUFFIX,ipinfo.io,一元机场',
             'DOMAIN-SUFFIX,your-service-provider,REJECT',
+            'DOMAIN-KEYWORD,slack,DIRECT',
         )
         for rule in add_rules[::-1]:
             rules.insert(0, rule)
