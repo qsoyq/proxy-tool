@@ -72,6 +72,7 @@ def one_r(
         `DOMAIN-SUFFIX,ipinfo.io,一元机场`
         `DOMAIN-SUFFIX,your-service-provider,REJECT`
         `DOMAIN-KEYWORD,slack,DIRECT`
+        `DOMAIN-KEYWORD,nga,DIRECT`
 
     - 去除带倍率的节点
     - 去除带计量的节点
@@ -106,9 +107,14 @@ def one_r(
         rules: List[str] = doc.get('rules', [])
         add_rules = (
             'DOMAIN,adservice.google.com,DIRECT',
+
             'DOMAIN-SUFFIX,g.doubleclick.net,DIRECT',
             'DOMAIN-SUFFIX,elemecdn.com,DIRECT',
             'DOMAIN-SUFFIX,qq.com,DIRECT',
+            
+            'DOMAIN-KEYWORD,slack,DIRECT',
+            'DOMAIN-KEYWORD,nga,DIRECT',
+            
             'DOMAIN-SUFFIX,app-measurement.com,一元机场',
             'DOMAIN-SUFFIX,oscp.pki.goog,一元机场',
             'DOMAIN-SUFFIX,beacons.gcp.gvt2.com,一元机场',
@@ -116,8 +122,8 @@ def one_r(
             'DOMAIN-SUFFIX,g2.com,一元机场',
             'DOMAIN-SUFFIX,jsdelivr.com,一元机场',
             'DOMAIN-SUFFIX,ipinfo.io,一元机场',
+
             'DOMAIN-SUFFIX,your-service-provider,REJECT',
-            'DOMAIN-KEYWORD,slack,DIRECT',
         )
         for rule in add_rules[::-1]:
             rules.insert(0, rule)
