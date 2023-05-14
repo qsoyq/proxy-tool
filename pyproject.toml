@@ -43,20 +43,18 @@ ignore_patterns = [".venv/**/*.py", "**/*.pxd", "**/*.pyx"]
 python_version = "3.9"
 warn_return_any = true
 warn_unused_configs = true
-ignore_missing_imports = false
-plugins = ["sqlmypy", "pydantic.mypy"]
+ignore_missing_imports = true
+plugins = ["pydantic.mypy"]
 exclude = ['^venv/', '^__init__\.py$']
 
 [[tool.mypy.overrides]]
 module = [
     "uvicorn",
-    "aioredis",
     "oss2",
     "oss2.models",
-    "grpc",
-    "grpc._server",
-    "grpc._channel",
     "pretty_errors",
+    "yaml",
+    "yaml.scanner",
 ]
 ignore_missing_imports = true
 
@@ -86,6 +84,7 @@ pretty-errors = "^1.2.25"
 typer = { version = "^0.4.0", extras = ["all"] }
 pyyaml = "5.3.1"
 oss2 = "^2.16.0"
+types-pyyaml = "^6.0.12.9"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"

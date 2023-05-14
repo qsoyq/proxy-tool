@@ -21,7 +21,7 @@ repos:
       - id: check-executables-have-shebangs
 
 
--   repo: https://github.com/pre-commit/mirrors-yapf
+-   repo: https://github.com/google/yapf
     rev: v0.32.0
     hooks:
       - id: yapf
@@ -30,7 +30,7 @@ repos:
 
 
 -   repo: https://github.com/pycqa/isort
-    rev: 5.10.1
+    rev: 5.12.0
     hooks:
       - id: isort
         files: "\\.(py)$"
@@ -44,11 +44,23 @@ repos:
         args: [--config=pyproject.toml]
 
 
-# -   repo: https://github.com/pre-commit/mirrors-mypy
-#     rev: "v0.910"
+# -   repo: https://github.com/qsoyq/precommit
+#     rev: v0.0.4
 #     hooks:
-#     -   id: mypy
-#         args: [--config=pyproject.toml]
-#         additional_dependencies:
-#             - pydantic
-#             - sqlalchemy-stubs
+#       - id: check-poetry-package-version
+#         args: [--log_level=20]
+#         always_run: true
+#         pass_filenames: false
+#         verbose: false
+
+
+-   repo: https://github.com/pre-commit/mirrors-mypy
+    rev: "v1.1.1"
+    hooks:
+    -   id: mypy
+        args: ["--config=pyproject.toml"]
+        additional_dependencies:
+            - pydantic
+            - typer
+            - uvicorn
+            - fastapi

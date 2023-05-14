@@ -4,7 +4,7 @@
 IMAGE_NAME := qsoyq/proxy-tool
 PROJECT_NAME := proxy-tool
 
-default: build push
+default: format
 
 format: refactor pre-commit
 

@@ -63,6 +63,10 @@ def one_r(
         `DOMAIN-SUFFIX,g.doubleclick.net,DIRECT`
         `DOMAIN-SUFFIX,elemecdn.com,DIRECT`
         `DOMAIN-SUFFIX,qq.com,DIRECT`
+        `DOMAIN-KEYWORD,slack,DIRECT`
+        `DOMAIN-KEYWORD,nga,DIRECT`
+        'DOMAIN-SUFFIX,hdslb.com,DIRECT',
+
         `DOMAIN-SUFFIX,app-measurement.com,一元机场`
         `DOMAIN-SUFFIX,oscp.pki.goog,一元机场`
         `DOMAIN-SUFFIX,beacons.gcp.gvt2.com,一元机场`
@@ -70,9 +74,8 @@ def one_r(
         `DOMAIN-SUFFIX,g2.com,一元机场`
         `DOMAIN-SUFFIX,jsdelivr.com,一元机场`
         `DOMAIN-SUFFIX,ipinfo.io,一元机场`
+
         `DOMAIN-SUFFIX,your-service-provider,REJECT`
-        `DOMAIN-KEYWORD,slack,DIRECT`
-        `DOMAIN-KEYWORD,nga,DIRECT`
 
     - 去除带倍率的节点
     - 去除带计量的节点
@@ -107,14 +110,12 @@ def one_r(
         rules: List[str] = doc.get('rules', [])
         add_rules = (
             'DOMAIN,adservice.google.com,DIRECT',
-
             'DOMAIN-SUFFIX,g.doubleclick.net,DIRECT',
             'DOMAIN-SUFFIX,elemecdn.com,DIRECT',
             'DOMAIN-SUFFIX,qq.com,DIRECT',
-            
+            'DOMAIN-SUFFIX,hdslb.com,DIRECT',
             'DOMAIN-KEYWORD,slack,DIRECT',
             'DOMAIN-KEYWORD,nga,DIRECT',
-            
             'DOMAIN-SUFFIX,app-measurement.com,一元机场',
             'DOMAIN-SUFFIX,oscp.pki.goog,一元机场',
             'DOMAIN-SUFFIX,beacons.gcp.gvt2.com,一元机场',
@@ -122,7 +123,6 @@ def one_r(
             'DOMAIN-SUFFIX,g2.com,一元机场',
             'DOMAIN-SUFFIX,jsdelivr.com,一元机场',
             'DOMAIN-SUFFIX,ipinfo.io,一元机场',
-
             'DOMAIN-SUFFIX,your-service-provider,REJECT',
         )
         for rule in add_rules[::-1]:
@@ -143,7 +143,7 @@ def one_r(
         s = urllib.parse.quote_plus("倍率").encode()
         proxies = base64.b64decode(res.text + "===").strip(b"\r\n").split(b'\r\n')
         proxies = [p for p in proxies if s not in p]
-        content = base64.b64encode(b"\r\n".join(proxies) + b"\r\n")
+        content = base64.b64encode(b"\r\n".join(proxies) + b"\r\n").decode()
         logger.debug(content)
 
     return PlainTextResponse(content=content, headers=resp_headers)
@@ -200,7 +200,7 @@ def make_proxy_groups(clash: ClashModel, interval: int = 300) -> list[dict]:
     proxies = ["auto"] + [proxy.name for proxy in clash.proxies]
 
     auto_proxies = [proxy.name for proxy in clash.proxies]
-    proxy_groups = [
+    proxy_groups: list[dict] = [
         {
             "name": 'proxies',
             'type': 'select',
@@ -210,7 +210,7 @@ def make_proxy_groups(clash: ClashModel, interval: int = 300) -> list[dict]:
             "name": 'auto',
             'type': 'url-test',
             'proxies': auto_proxies,
-            'url': 'https://www.v2ex.com/generate_204',
+            'url': 'https://www.gstatic.com/generate_204',
             'interval': interval
         },
     ]
