@@ -59,23 +59,22 @@ def one_r(
     """覆盖一元机场的配置文件
 
     添加规则
-        `DOMAIN,adservice.google.com,DIRECT`
-        `DOMAIN-SUFFIX,g.doubleclick.net,DIRECT`
-        `DOMAIN-SUFFIX,elemecdn.com,DIRECT`
-        `DOMAIN-SUFFIX,qq.com,DIRECT`
-        `DOMAIN-KEYWORD,slack,DIRECT`
-        `DOMAIN-KEYWORD,nga,DIRECT`
+        'DOMAIN,adservice.google.com,DIRECT',
+        'DOMAIN-SUFFIX,g.doubleclick.net,DIRECT',
+        'DOMAIN-SUFFIX,elemecdn.com,DIRECT',
+        'DOMAIN-SUFFIX,qq.com,DIRECT',
         'DOMAIN-SUFFIX,hdslb.com,DIRECT',
-
-        `DOMAIN-SUFFIX,app-measurement.com,一元机场`
-        `DOMAIN-SUFFIX,oscp.pki.goog,一元机场`
-        `DOMAIN-SUFFIX,beacons.gcp.gvt2.com,一元机场`
-        `DOMAIN-SUFFIX,getapp.com,一元机场`
-        `DOMAIN-SUFFIX,g2.com,一元机场`
-        `DOMAIN-SUFFIX,jsdelivr.com,一元机场`
-        `DOMAIN-SUFFIX,ipinfo.io,一元机场`
-
-        `DOMAIN-SUFFIX,your-service-provider,REJECT`
+        'DOMAIN-SUFFIX,jable.tv,DIRECT',
+        'DOMAIN-KEYWORD,slack,DIRECT',
+        'DOMAIN-KEYWORD,nga,DIRECT',
+        'DOMAIN-SUFFIX,app-measurement.com,一元机场',
+        'DOMAIN-SUFFIX,oscp.pki.goog,一元机场',
+        'DOMAIN-SUFFIX,beacons.gcp.gvt2.com,一元机场',
+        'DOMAIN-SUFFIX,getapp.com,一元机场',
+        'DOMAIN-SUFFIX,g2.com,一元机场',
+        'DOMAIN-SUFFIX,jsdelivr.com,一元机场',
+        'DOMAIN-SUFFIX,ipinfo.io,一元机场',
+        'DOMAIN-SUFFIX,your-service-provider,REJECT',
 
     - 去除带倍率的节点
     - 去除带计量的节点
