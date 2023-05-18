@@ -61,6 +61,7 @@ def one_r(
     添加规则
         'DOMAIN,adservice.google.com,DIRECT',
         'DOMAIN,obsidian-couchdb.19940731.xyz,DIRECT',
+        'DOMAIN,azure-ubuntu.19940731.xyz,DIRECT',
         'DOMAIN-SUFFIX,g.doubleclick.net,DIRECT',
         'DOMAIN-SUFFIX,elemecdn.com,DIRECT',
         'DOMAIN-SUFFIX,qq.com,DIRECT',
@@ -112,6 +113,7 @@ def one_r(
         add_rules = (
             'DOMAIN,adservice.google.com,DIRECT',
             'DOMAIN,obsidian-couchdb.19940731.xyz,DIRECT',
+            'DOMAIN,azure-ubuntu.19940731.xyz,DIRECT',
             'DOMAIN-SUFFIX,g.doubleclick.net,DIRECT',
             'DOMAIN-SUFFIX,elemecdn.com,DIRECT',
             'DOMAIN-SUFFIX,qq.com,DIRECT',
