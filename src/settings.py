@@ -1,5 +1,5 @@
 from pydantic import BaseSettings
 
 
-class AppSettings(BaseSettings):
-    api_prefix: str = ''
+class AppSettings(BaseSettings):  # type:ignore
+    api_prefix: str = ""

@@ -1,10 +1,5 @@
 version: '3'
 
-networks:
-  default:
-    name: my_bridge
-    external: true
-
 services:
 
     proxy-tool:

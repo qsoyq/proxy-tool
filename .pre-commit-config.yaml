@@ -21,37 +21,14 @@ repos:
       - id: check-executables-have-shebangs
 
 
--   repo: https://github.com/google/yapf
-    rev: v0.32.0
-    hooks:
-      - id: yapf
-        args: ["-r", "-i"]
-        additional_dependencies: [toml]
-
-
--   repo: https://github.com/pycqa/isort
-    rev: 5.12.0
-    hooks:
-      - id: isort
-        files: "\\.(py)$"
-        args: [--settings-path=pyproject.toml]
-
-
--   repo: https://github.com/hadialqattan/pycln
-    rev: v1.1.0 # Possible releases: https://github.com/hadialqattan/pycln/releases
-    hooks:
-      - id: pycln
-        args: [--config=pyproject.toml]
-
-
-# -   repo: https://github.com/qsoyq/precommit
-#     rev: v0.0.4
-#     hooks:
-#       - id: check-poetry-package-version
-#         args: [--log_level=20]
-#         always_run: true
-#         pass_filenames: false
-#         verbose: false
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  # Ruff version.
+  rev: v0.1.9
+  hooks:
+    # Run the linter.
+    - id: ruff
+    # Run the formatter.
+    - id: ruff-format
 
 
 -   repo: https://github.com/pre-commit/mirrors-mypy
@@ -64,3 +41,5 @@ repos:
             - typer
             - uvicorn
             - fastapi
+            - httpx
+            - oss2

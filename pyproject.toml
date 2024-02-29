@@ -1,107 +1,119 @@
-[tool.isort]
-# https://pycqa.github.io/isort/docs/configuration/options.html
-# profile = "hug"
-line_length = 119
-multi_line_output = 3
-balanced_wrapping = true
-use_parentheses = true
-atomic = true
-lines_between_types = 1
-combine_as_imports = true
-
-[tool.yapf]
-# https://github.com/google/yapf#formatting-style
-based_on_style = "google"
-# https://github.com/google/yapf#knobs
-spaces_before_comment = 2
-split_before_logical_operator = true
-ALIGN_CLOSING_BRACKET_WITH_VISUAL_INDENT = true
-allow_multiline_dictionary_keys = true
-coalesce_brackets = true
-dedent_closing_brackets = true
-allow_split_before_default_or_named_assigns = false
-arithmetic_precedence_indication = true
-column_limit = 119
-indent_dictionary_value = true
-join_multiple_lines = true
-no_spaces_around_selected_binary_operators = true
-space_between_ending_comma_and_closing_bracket = true
-split_all_comma_separated_values = true
-split_all_top_level_comma_separated_values = true
-split_before_closing_bracket = true
-split_before_dict_set_generator = true
-split_before_dot = true
-split_before_expression_after_opening_paren = false
-split_before_first_argument = false
-split_complex_comprehension = true
-
-[tool.yapfignore]
-ignore_patterns = [".venv/**/*.py", "**/*.pxd", "**/*.pyx"]
-
-# mypy global options:
-[tool.mypy]
-python_version = "3.9"
-warn_return_any = true
-warn_unused_configs = true
-ignore_missing_imports = true
-plugins = ["pydantic.mypy"]
-exclude = ['^venv/', '^__init__\.py$']
-
-[[tool.mypy.overrides]]
-module = [
-    "uvicorn",
-    "oss2",
-    "oss2.models",
-    "pretty_errors",
-    "yaml",
-    "yaml.scanner",
-]
-ignore_missing_imports = true
-
-[tool.pycln]
-all = true
-
 [tool.poetry]
 name = "project"
 version = "0.1.0"
 description = ""
 authors = ["wangqs <wqs1639@gmail.com>"]
 
-# [[tool.poetry.source]]
-# name = "aliyun"
-# url = "https://mirrors.aliyun.com/pypi/simple/"
-# default = true
-
 [tool.poetry.dependencies]
 python = "^3.10"
 fastapi = "^0.73.0"
 uvicorn = "^0.17.0"
-
-
 httpx = { version = "^0.22.0", extras = ["http2", "socks"] }
 hypercorn = "^0.13.2"
 pretty-errors = "^1.2.25"
 typer = { version = "^0.4.0", extras = ["all"] }
 pyyaml = "5.3.1"
 oss2 = "^2.16.0"
-types-pyyaml = "^6.0.12.9"
+ruff = "^0.3.0"
+types-pyyaml = "^6.0.12.12"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"
 mypy = "^0.931"
-isort = "^5.10.1"
-yapf = "^0.32.0"
-pycln = "1.1.0"
 pre-commit = "^2.17.0"
 ipython = "^8.0.1"
-grpcio-tools = "^1.44.0"
-mypy-protobuf = "^3.2.0"
-diagrams = "^0.21.1"
-scalene = "^1.5.4"
-pytest-asyncio = "^0.18.2"
-mkdocs-material = "^8.2.5"
-types-pyyaml = "^6.0.11"
+
+
+[tool.ruff]
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".ipynb_checkpoints",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pyenv",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "site-packages",
+    "venv",
+]
+
+# Same as Black.
+line-length = 119
+indent-width = 4
+
+[tool.ruff.lint]
+# Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
+# Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
+# McCabe complexity (`C901`) by default.
+select = ["E4", "E7", "E9", "F"]
+ignore = []
+
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.format]
+# Like Black, use double quotes for strings.
+quote-style = "double"
+
+# Like Black, indent with spaces, rather than tabs.
+indent-style = "space"
+
+# Like Black, respect magic trailing commas.
+skip-magic-trailing-comma = false
+
+# Like Black, automatically detect the appropriate line ending.
+line-ending = "auto"
+
+# Enable auto-formatting of code examples in docstrings. Markdown,
+# reStructuredText code/literal blocks and doctests are all supported.
+#
+# This is currently disabled by default, but it is planned for this
+# to be opt-out in the future.
+docstring-code-format = true
+
+# Set the line length limit used when formatting code snippets in
+# docstrings.
+#
+# This only has an effect when the `docstring-code-format` setting is
+# enabled.
+# docstring-code-line-length = "dynamic"
+
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+[tool.mypy]
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = false
+exclude = ['^venv/', '^__init__\.py$']
+
+[[tool.mypy.overrides]]
+module = [
+    "uvicorn",
+    "oss2",
+    "yaml.*"
+]
+ignore_missing_imports = true
