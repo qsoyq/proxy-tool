@@ -31,6 +31,6 @@ def Override(
     if category is not None:
         dom["category"] = category
     if icon is not None:
-        dom["icon"] = category
+        dom["icon"] = icon
     content = yaml.safe_dump(dom, allow_unicode=True)
     return PlainTextResponse(content=content)
