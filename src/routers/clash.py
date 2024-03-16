@@ -22,6 +22,13 @@ router = APIRouter(tags=["clash"], prefix="/clash")
 logger = logging.getLogger(__file__)
 
 
+@router.get("/timeout/{timeout}")
+@router.head("/timeout/{timeout}")
+async def timeout_(timeout: float):
+    await asyncio.sleep(timeout)
+    return ""
+
+
 @router.get("/timeout")
 @router.head("/timeout")
 async def timeout(timeout: float | None = Query(None, description="可控的阻塞时间")):
