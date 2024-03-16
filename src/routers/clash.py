@@ -1,3 +1,4 @@
+import asyncio
 import base64
 import logging
 import socket
@@ -19,6 +20,14 @@ from models import ClashModel, ClashProxyModel
 router = APIRouter(tags=["clash"], prefix="/clash")
 
 logger = logging.getLogger(__file__)
+
+
+@router.get("/timeout")
+@router.head("/timeout")
+async def timeout(timeout: float | None = Query(None, description="可控的阻塞时间")):
+    if timeout is not None:
+        await asyncio.sleep(timeout)
+    return ""
 
 
 @router.get("/subscribe")
