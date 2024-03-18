@@ -5,16 +5,18 @@ import uvicorn
 
 from fastapi import FastAPI
 
-import routers.clash
-import routers.stoverride
+import routers.clash.basic
+import routers.clash.config
+import routers.stash.stoverride
 
 from settings import AppSettings
 
 cmd = typer.Typer()
 app = FastAPI()
 api_prefix = AppSettings().api_prefix
-app.include_router(routers.clash.router, prefix=api_prefix)
-app.include_router(routers.stoverride.router, prefix=api_prefix)
+app.include_router(routers.clash.basic.router, prefix=api_prefix)
+app.include_router(routers.clash.config.router, prefix=api_prefix)
+app.include_router(routers.stash.stoverride.router, prefix=api_prefix)
 
 
 @cmd.command()
