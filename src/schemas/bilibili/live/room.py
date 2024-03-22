@@ -18,8 +18,11 @@ class BilibiliRoomInfoScheme(BaseModel):
         return f"https://live.bilibili.com/{self.room_id}"
 
     @property
-    def pub_date(self) -> datetime:
+    def pub_date(self) -> datetime | None:
         assert self.live_time
+        # 鬼知道 bilibili 的接口为什么会返回这种字符串
+        if self.live_time == "0000-00-00 00:00:00":
+            return None
         return parser.parse(self.live_time)
 
     @property
@@ -29,6 +32,9 @@ class BilibiliRoomInfoScheme(BaseModel):
     def if_push(self, last_pub_date: datetime | int | str | None) -> bool:
         if last_pub_date is None:
             return True
+
+        if self.pub_date is None:
+            return False
 
         if isinstance(last_pub_date, str):
             last_pub_date = parser.parse(last_pub_date)
@@ -50,5 +56,5 @@ class LiveRoomResponseSchema(BaseModel):
     userInfo: BilibiliAnchorInRoomScheme
     roomInfo: BilibiliRoomInfoScheme
     isAlive: bool
-    pubDate: datetime
+    pubDate: datetime | None
     roomLink: str
