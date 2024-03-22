@@ -43,3 +43,4 @@ repos:
             - fastapi
             - httpx
             - oss2
+            - types-python-dateutil

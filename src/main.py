@@ -9,6 +9,7 @@ import routers.clash.basic
 import routers.clash.config
 import routers.stash.stoverride
 import routers.network.dns.doh
+import routers.bilibili.live.room
 
 from settings import AppSettings
 
@@ -19,6 +20,7 @@ app.include_router(routers.clash.basic.router, prefix=api_prefix)
 app.include_router(routers.clash.config.router, prefix=api_prefix)
 app.include_router(routers.stash.stoverride.router, prefix=api_prefix)
 app.include_router(routers.network.dns.doh.router, prefix=api_prefix)
+app.include_router(routers.bilibili.live.room.router, prefix=api_prefix)
 
 
 @cmd.command()
