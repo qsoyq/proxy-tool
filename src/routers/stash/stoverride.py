@@ -63,25 +63,25 @@ def override_v2(
             continue
         text = line.strip()
         if text.startswith("name") and name is not None:
-            line = f"name:{name}"
+            line = f"name: {name}"
             name = None
         if text.startswith("desc") and desc is not None:
-            line = f"desc:{desc}"
+            line = f"desc: {desc}"
             desc = None
         if text.startswith("category") and category is not None:
-            line = f"category:{category}"
+            line = f"category: {category}"
             category = None
         if text.startswith("icon") and icon is not None:
-            line = f"icon:{icon}"
+            line = f"icon: {icon}"
             icon = None
         lines.append(line)
     if name is not None:
-        lines.insert(0, f"name:{name}")
+        lines.insert(0, f"name: {name}")
     if desc is not None:
-        lines.insert(0, f"desc:{desc}")
+        lines.insert(0, f"desc: {desc}")
     if category is not None:
-        lines.insert(0, f"category:{category}")
+        lines.insert(0, f"category: {category}")
     if icon is not None:
-        lines.insert(0, f"icon:{icon}")
+        lines.insert(0, f"icon: {icon}")
     content = "\n".join(lines)
     return PlainTextResponse(content=content)
