@@ -15,7 +15,7 @@ class QxMatchRuleEnum(str, Enum):
     hostsuffix = "host-suffix"
 
 
-router = APIRouter(tags=["clash"], prefix="/clash/config")
+router = APIRouter(tags=["clash.config"], prefix="/clash/config")
 
 logger = logging.getLogger(__file__)
 

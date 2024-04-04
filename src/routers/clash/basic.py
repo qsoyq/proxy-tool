@@ -17,7 +17,7 @@ from pydantic import HttpUrl
 
 from models import ClashModel, ClashProxyModel
 
-router = APIRouter(tags=["clash"], prefix="/clash")
+router = APIRouter(tags=["clash.basic"], prefix="/clash")
 
 logger = logging.getLogger(__file__)
 

@@ -5,7 +5,7 @@ from fastapi import APIRouter, Query
 from pydantic import HttpUrl
 import yaml
 
-router = APIRouter(tags=["stash"], prefix="/stash/stoverride")
+router = APIRouter(tags=["stash.override"], prefix="/stash/stoverride")
 
 logger = logging.getLogger(__file__)
 
