@@ -2,10 +2,15 @@ import html
 import re
 import logging
 import httpx
+from typing import List
+from fastapi import APIRouter, Query
 
-from fastapi import APIRouter
-
-from schemas.bilibili.live.room import BilibiliRoomInfoScheme, BilibiliAnchorInRoomScheme, LiveRoomResponseSchema
+from schemas.bilibili.live.room import (
+    BilibiliRoomInfoScheme,
+    BilibiliAnchorInRoomScheme,
+    LiveRoomResponseSchema,
+    LiveRoomListRes,
+)
 
 router = APIRouter(tags=["bilibili.live"], prefix="/bilibili/live/room")
 
@@ -28,7 +33,9 @@ def getLiveRoomInfo(roomId: str):
     params = {"room_id": roomId, "from": "room"}
     resp = httpx.get(url, params=params, headers=headers, verify=False)
     resp.raise_for_status()
-    return BilibiliRoomInfoScheme(**resp.json().get("data", {}))
+    data = resp.json().get("data")
+    assert data, resp.text
+    return BilibiliRoomInfoScheme(**data)
 
 
 def getAnchorInRoom(roomId: str) -> BilibiliAnchorInRoomScheme:
@@ -39,23 +46,38 @@ def getAnchorInRoom(roomId: str) -> BilibiliAnchorInRoomScheme:
         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
         "Referer": f"https://live.bilibili.com/{roomId}",
     }
-    parmas = {"roomid": roomId}
-    resp = httpx.get(url, params=parmas, headers=headers)
+    params = {"roomid": roomId}
+    resp = httpx.get(url, params=params, headers=headers)
     resp.raise_for_status()
-    return BilibiliAnchorInRoomScheme(**resp.json()["data"]["info"])
+    data = resp.json().get("data")
+    assert data, resp.text
+    return BilibiliAnchorInRoomScheme(**data["info"])
 
 
-@router.get("/{roomId}", response_model=LiveRoomResponseSchema)
-def room(roomId):
+def getRoomById(roomId: str) -> LiveRoomResponseSchema:
     roomInfo = getLiveRoomInfo(roomId)
     userInfo = getAnchorInRoom(roomId)
     if roomInfo.description:
         roomInfo.description = remove_html_tags(html.unescape(roomInfo.description.replace("<br>", "\n")))
 
-    return {
+    body = {
         "roomInfo": roomInfo,
         "userInfo": userInfo,
         "isAlive": roomInfo.is_alive,
         "pubDate": roomInfo.pub_date,
         "roomLink": roomInfo.room_link,
     }
+    return LiveRoomResponseSchema(**body)
+
+
+@router.get("/list", summary="查询直播间列表信息", response_model=LiveRoomListRes)
+def room_list(rooms: List[int] = Query(..., description="直播间 id 列表")):
+    li = []
+    for roomId in rooms:
+        li.append(getRoomById(str(roomId)))
+    return {"list": li}
+
+
+@router.get("/{roomId}", summary="查询直播间信息", response_model=LiveRoomResponseSchema)
+def room(roomId: int = Query(..., description="直播间 id")):
+    return getRoomById(str(roomId))

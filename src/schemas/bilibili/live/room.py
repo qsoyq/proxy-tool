@@ -58,3 +58,7 @@ class LiveRoomResponseSchema(BaseModel):
     isAlive: bool
     pubDate: datetime | None
     roomLink: str
+
+
+class LiveRoomListRes(BaseModel):
+    list: list[LiveRoomResponseSchema]
