@@ -4,6 +4,7 @@ import logging
 import httpx
 from typing import List
 from fastapi import APIRouter, Query
+from concurrent.futures import ThreadPoolExecutor
 
 from schemas.bilibili.live.room import (
     BilibiliRoomInfoScheme,
@@ -15,6 +16,7 @@ from schemas.bilibili.live.room import (
 router = APIRouter(tags=["bilibili.live"], prefix="/bilibili/live/room")
 
 logger = logging.getLogger(__file__)
+room_thread_executor = ThreadPoolExecutor()
 
 
 def remove_html_tags(text: str):
@@ -72,9 +74,9 @@ def getRoomById(roomId: str) -> LiveRoomResponseSchema:
 
 @router.get("/list", summary="查询直播间列表信息", response_model=LiveRoomListRes)
 def room_list(rooms: List[int] = Query(..., description="直播间 id 列表")):
-    li = []
-    for roomId in rooms:
-        li.append(getRoomById(str(roomId)))
+    li = list(room_thread_executor.map(getRoomById, map(str, rooms)))
+    # for roomId in rooms:
+    #     li.append(getRoomById(str(roomId)))
     return {"list": li}
 
 
