@@ -24,7 +24,6 @@ async def forwarding(
     """转发请求"""
     method = req.method
     scheme = req.url.scheme
-    scheme = "https"
     query = req.url.query
     headers = {}
     headers = dict(req.headers)
