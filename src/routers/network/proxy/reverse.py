@@ -8,30 +8,13 @@ router = APIRouter(tags=["network.proxy"], prefix="/network/proxy")
 logger = logging.getLogger(__file__)
 
 
-@router.get("/reverse/{host}/", summary="forwarding")
-async def forwarding01(
-    req: Request,
-    host: str = Path(..., description="请求主机地址"),
-):
-    """转发请求"""
-    return await _forwarding(req, host, "")
-
-
-@router.get("/reverse/{host}/{path}", summary="forwarding")
-async def forwarding02(
+@router.get("/reverse/{host}/{path:path}", summary="转发请求")
+async def forwarding(
     req: Request,
     host: str = Path(..., description="请求主机地址"),
     path: str = Path("", description="请求路径"),
 ):
     """转发请求"""
-    return await _forwarding(req, host, path)
-
-
-async def _forwarding(
-    req: Request,
-    host: str,
-    path: str,
-):
     method = req.method
     scheme = req.url.scheme
     query = req.url.query
