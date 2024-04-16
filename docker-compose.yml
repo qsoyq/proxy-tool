@@ -1,12 +1,12 @@
-version: '3'
+version: '3.8'
 
 services:
-
-    proxy-tool:
-        platform: linux/amd64
-        build:
-          dockerfile: ./Dockerfile
-        container_name: proxy-tool
-        restart: unless-stopped
-        ports:
-          - 8000:8000
+  proxy-tool:
+    platform: linux/amd64
+    build:
+      dockerfile: ./Dockerfile
+    container_name: proxy-tool
+    restart: unless-stopped
+    labels:
+      - dev.orbstack.domains=proxy-tool.orb.local
+      - dev.orbstack.domains=py-proxy-api.orb.local
