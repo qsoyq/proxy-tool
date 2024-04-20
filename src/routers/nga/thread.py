@@ -36,7 +36,14 @@ url = "https://bbs.nga.cn/thread.php?fid=-7&lite=js"
 UA = "Mozilla/5.0 (iPhone; CPU iPhone OS 17_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4.1 Mobile/15E148 Safari/604.1"
 
 
-def get_threads(fid: int, uid: str, cid: str, order_by: OrderByEnum | None = OrderByEnum.lastpostdesc) -> Threads:
+def get_threads(
+    uid: str,
+    cid: str,
+    order_by: OrderByEnum | None = OrderByEnum.lastpostdesc,
+    *,
+    fid: int | None = None,
+    favor: int | None = None,
+) -> Threads:
     url = "https://bbs.nga.cn/thread.php"
 
     headers = {"user-agent": UA}
@@ -46,9 +53,13 @@ def get_threads(fid: int, uid: str, cid: str, order_by: OrderByEnum | None = Ord
     }
 
     params: dict[str, str | int] = {
-        "fid": fid,
         "lite": "js",
     }
+
+    if fid is not None:
+        params["fid"] = fid
+    if favor is not None:
+        params["favor"] = favor
 
     if order_by is not None:
         params["order_by"] = str(order_by.value)
@@ -67,9 +78,10 @@ def get_threads(fid: int, uid: str, cid: str, order_by: OrderByEnum | None = Ord
 
 @router.get("/threads", response_model=Threads)
 def threads(
-    fid: int = Query(..., description="分区ID"),
+    fid: int | None = Query(None, description="分区ID"),
+    favor: int | None = Query(None, description="收藏夹ID"),
     uid: str = Header("", description="ngaPassportUid, 验签"),
     cid: str = Header("", description="ngaPassportCid, 验签"),
     order_by: OrderByEnum = Query(..., description="排序规则"),
 ):
-    return get_threads(fid, uid, cid, order_by)
+    return get_threads(uid, cid, order_by, fid=fid, favor=favor)
