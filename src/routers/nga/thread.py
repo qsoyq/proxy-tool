@@ -55,7 +55,7 @@ def get_threads(
     }
 
     params: dict[str, str | int] = {
-        "lite": "js",
+        "__output": 11,  # 返回 json 格式
     }
 
     if fid is not None:
@@ -68,8 +68,8 @@ def get_threads(
 
     res = httpx.get(url, params=params, cookies=cookies, headers=headers)
     res.raise_for_status()
-    body = json.loads(res.text[33:])
-    threads = Threads(threads=[Thread(**t) for _, t in body["data"]["__T"].items()])
+    body = json.loads(res.text)
+    threads = Threads(threads=[Thread(**t) for t in body["data"]["__T"]])
     for t in threads.threads:
         t.postdateStr = datetime.fromtimestamp(t.postdate).strftime(r"%Y-%m-%d %H:%M:%S")
         t.lastpostStr = datetime.fromtimestamp(t.lastpost).strftime(r"%Y-%m-%d %H:%M:%S")
