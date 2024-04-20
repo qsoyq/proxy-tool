@@ -14,6 +14,7 @@ import routers.network.url.redirect
 import routers.bilibili.live.room
 import routers.convert.xml
 import routers.mikanani.rss
+import routers.nga.thread
 
 from settings import AppSettings
 
@@ -29,6 +30,7 @@ app.include_router(routers.network.url.redirect.router, prefix=api_prefix)
 app.include_router(routers.bilibili.live.room.router, prefix=api_prefix)
 app.include_router(routers.convert.xml.router, prefix=api_prefix)
 app.include_router(routers.mikanani.rss.router, prefix=api_prefix)
+app.include_router(routers.nga.thread.router, prefix=api_prefix)
 
 
 @cmd.command()
