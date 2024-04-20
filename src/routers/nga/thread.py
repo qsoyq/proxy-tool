@@ -17,6 +17,8 @@ class Thread(BaseModel):
     fid: int
     subject: str
     postdate: int
+    lastpost: int
+    lastpostStr: str | None = Field(None)
     postdateStr: str | None = Field(None)
     url: str | None = Field(None, description="帖子网页链接")
     ios_app_scheme_url: str | None = Field(None)
@@ -70,6 +72,7 @@ def get_threads(
     threads = Threads(threads=[Thread(**t) for _, t in body["data"]["__T"].items()])
     for t in threads.threads:
         t.postdateStr = datetime.fromtimestamp(t.postdate).strftime(r"%Y-%m-%d %H:%M:%S")
+        t.lastpostStr = datetime.fromtimestamp(t.lastpost).strftime(r"%Y-%m-%d %H:%M:%S")
         t.url = f"https://bbs.nga.cn/read.php?tid={t.tid}"
         t.ios_app_scheme_url = f"nga://opentype=2?tid={t.tid}&"
         t.ios_open_scheme_url = f"https://proxy-tool.19940731.xyz/api/network/url/redirect?url={t.ios_app_scheme_url}"
