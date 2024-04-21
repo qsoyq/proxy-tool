@@ -45,6 +45,7 @@ def get_threads(
     *,
     fid: int | None = None,
     favor: int | None = None,
+    if_include_child_node: bool | None = None,
 ) -> Threads:
     url = "https://bbs.nga.cn/thread.php"
 
@@ -70,6 +71,10 @@ def get_threads(
     res.raise_for_status()
     body = json.loads(res.text)
     threads = Threads(threads=[Thread(**t) for t in body["data"]["__T"]])
+
+    if fid and not if_include_child_node:
+        threads.threads = [t for t in threads.threads if t.fid == fid]
+
     for t in threads.threads:
         t.postdateStr = datetime.fromtimestamp(t.postdate).strftime(r"%Y-%m-%d %H:%M:%S")
         t.lastpostStr = datetime.fromtimestamp(t.lastpost).strftime(r"%Y-%m-%d %H:%M:%S")
@@ -86,5 +91,6 @@ def threads(
     uid: str = Header("", description="ngaPassportUid, 验签"),
     cid: str = Header("", description="ngaPassportCid, 验签"),
     order_by: OrderByEnum = Query(..., description="排序规则"),
+    if_include_child_node: bool | None = Query(None, description="当查询分区帖子时, 时候包含子分区的帖子"),
 ):
-    return get_threads(uid, cid, order_by, fid=fid, favor=favor)
+    return get_threads(uid, cid, order_by, fid=fid, favor=favor, if_include_child_node=if_include_child_node)
