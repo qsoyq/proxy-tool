@@ -23,6 +23,9 @@ class Topic(BaseTopic):
     createdStr: str | None = Field(None)
     lastModifiedStr: str | None = Field(None)
     lastTouchedStr: str | None = Field(None)
+    v2fun_urlscheme: str | None = Field(
+        None, description="帖子详情， 跳转到 v2fun, 见 https://github.com/liaoliao666/v2ex"
+    )
 
 
 class Node(BaseModel):
@@ -72,6 +75,8 @@ def get_topics(node: str, token: str, page: int = 1) -> list[Topic]:
         topic.createdStr = datetime.fromtimestamp(topic.created).strftime(r"%Y-%m-%d %H:%M:%S")
         topic.lastModifiedStr = datetime.fromtimestamp(topic.last_modified).strftime(r"%Y-%m-%d %H:%M:%S")
         topic.lastTouchedStr = datetime.fromtimestamp(topic.last_touched).strftime(r"%Y-%m-%d %H:%M:%S")
+        topic.v2fun_urlscheme = f"v2fun://topic/{topic.id}"
+
     return topics
 
 
