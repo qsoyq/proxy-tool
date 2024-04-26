@@ -44,3 +44,4 @@ repos:
             - httpx
             - oss2
             - types-python-dateutil
+            - yagmail
