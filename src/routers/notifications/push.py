@@ -140,10 +140,11 @@ def push(messages: PushMessages):
             if message.telegram:
                 current = "telegram"
                 message.telegram.push()
-            elif message.gmail:
+            if message.gmail:
                 current = "gmail"
                 message.gmail.push()
-            elif message.bark:
+            if message.bark:
+                current = "bark"
                 message.bark.push()
         except Exception as e:
             logger.warning(e, exc_info=True)
