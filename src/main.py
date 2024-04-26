@@ -17,6 +17,7 @@ import routers.convert.xml
 import routers.mikanani.rss
 import routers.nga.thread
 import routers.v2ex.nodes
+import routers.v2ex.my
 
 from settings import AppSettings
 
@@ -24,17 +25,18 @@ cmd = typer.Typer()
 app = FastAPI()
 api_prefix = AppSettings().api_prefix
 app.include_router(routers.notifications.push.router, prefix=api_prefix)
-app.include_router(routers.clash.basic.router, prefix=api_prefix)
-app.include_router(routers.clash.config.router, prefix=api_prefix)
-app.include_router(routers.stash.stoverride.router, prefix=api_prefix)
-app.include_router(routers.network.dns.doh.router, prefix=api_prefix)
-app.include_router(routers.network.proxy.reverse.router, prefix=api_prefix)
-app.include_router(routers.network.url.redirect.router, prefix=api_prefix)
 app.include_router(routers.bilibili.live.room.router, prefix=api_prefix)
 app.include_router(routers.convert.xml.router, prefix=api_prefix)
 app.include_router(routers.mikanani.rss.router, prefix=api_prefix)
 app.include_router(routers.nga.thread.router, prefix=api_prefix)
 app.include_router(routers.v2ex.nodes.router, prefix=api_prefix)
+app.include_router(routers.v2ex.my.router, prefix=api_prefix)
+app.include_router(routers.network.dns.doh.router, prefix=api_prefix)
+app.include_router(routers.network.proxy.reverse.router, prefix=api_prefix)
+app.include_router(routers.network.url.redirect.router, prefix=api_prefix)
+app.include_router(routers.clash.basic.router, prefix=api_prefix)
+app.include_router(routers.clash.config.router, prefix=api_prefix)
+app.include_router(routers.stash.stoverride.router, prefix=api_prefix)
 
 
 @cmd.command()

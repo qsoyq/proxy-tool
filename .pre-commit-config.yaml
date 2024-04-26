@@ -45,3 +45,4 @@ repos:
             - oss2
             - types-python-dateutil
             - yagmail
+            - beautifulsoup4

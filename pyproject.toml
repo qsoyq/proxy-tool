@@ -22,6 +22,7 @@ xmltodict = "^0.13.0"
 types-xmltodict = "^0.13.0.3"
 beautifulsoup4 = "^4.12.3"
 yagmail = "^0.15.293"
+types-beautifulsoup4 = "^4.12.0.20240229"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"
@@ -128,5 +129,6 @@ module = [
     "models",
     "xmltodict",
     "yagmail",
+    "bs4",
 ]
 ignore_missing_imports = true
