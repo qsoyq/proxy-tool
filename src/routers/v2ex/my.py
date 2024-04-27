@@ -17,7 +17,7 @@ class GetTopicsRes(BaseModel):
     topics: list[Topic]
 
 
-router = APIRouter(tags=["v2ex.my"], prefix="/v2ex/my")
+router = APIRouter(tags=["v2ex"], prefix="/v2ex/my")
 
 logger = logging.getLogger(__file__)
 
@@ -39,6 +39,6 @@ def get_topics(session_key: str) -> list[Topic]:
     return topics
 
 
-@router.get("/topics", response_model=GetTopicsRes)
+@router.get("/topics", summary="收藏主题列表", response_model=GetTopicsRes)
 def my_topics(session_key: str = Header(..., alias="A2", description="session, 对应 v2ex 网页请求中的 Cookie.A2字段")):
     return {"topics": get_topics(session_key)}

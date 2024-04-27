@@ -46,11 +46,19 @@ class GetTopicsRes(BaseModel):
     node: Node
 
 
+class TopicsGroup(GetTopicsRes):
+    pass
+
+
+class GetTopicsV2Res(BaseModel):
+    data: list[TopicsGroup]
+
+
 class GetNodeRes(BaseModel):
     node: Node
 
 
-router = APIRouter(tags=["v2ex.nodes"], prefix="/v2ex/nodes")
+router = APIRouter(tags=["v2ex"], prefix="/v2ex")
 
 logger = logging.getLogger(__file__)
 
@@ -80,7 +88,19 @@ def get_topics(node: str, token: str, page: int = 1) -> list[Topic]:
     return topics
 
 
-@router.get("/{node}", response_model=GetNodeRes)
+@router.get("/topics", summary="查询多节点主题列表", response_model=GetTopicsV2Res)
+def topics_v2(
+    node_li: list[str] = Query(..., description="节点名词， 如 python、gts", alias="node"),
+    p: int = Query(1, description="分页"),
+    token: str = Header(..., alias="Authorization"),
+):
+    data = []
+    for node in node_li:
+        data.append({"topics": get_topics(node, token, page=p), "node": get_node(node, token)})
+    return {"data": data}
+
+
+@router.get("/nodes/{node}", summary="查询节点信息", response_model=GetNodeRes)
 def node(
     node: str = Path(..., description="节点名词， 如 python、gts"),
     token: str = Header(..., alias="Authorization"),
@@ -88,7 +108,7 @@ def node(
     return {"node": get_node(node, token)}
 
 
-@router.get("/{node}/topics", response_model=GetTopicsRes)
+@router.get("/nodes/{node}/topics", summary="查询节点下的主题列表", response_model=GetTopicsRes)
 def topics(
     node: str = Path(..., description="节点名词， 如 python、gts"),
     p: int = Query(1, description="分页"),
