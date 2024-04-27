@@ -13,7 +13,7 @@ class ForumSectionIndex(BaseModel):
     name: str
     stid: int | None = Field(None, description="部分分区子板面的id")
     info: str | None = Field(None)
-    # TODO: 添加 logo
+    icon: str | None = Field(None, description="分区对应的logo")
 
 
 class GetForumSectionsRes(BaseModel):
@@ -29,6 +29,7 @@ class Thread(BaseModel):
     tid: int
     fid: int
     fname: str | None = Field(None, description="fid 对应的分区名称")
+    icon: str | None = Field(None, description="主题对应的分区logo")
     subject: str
     postdate: int
     lastpost: int
@@ -91,7 +92,7 @@ def get_threads(
 
     sections = get_sections()
     # nga 混用了 fid 和 stid 的概念, 当存在 stid 时, stid 即请求对应的 fid
-    sections_dict = {(x.stid or x.fid): x.name for x in sections.sections}
+    sections_dict = {(x.stid or x.fid): x for x in sections.sections}
 
     for t in threads.threads:
         t.postdateStr = datetime.fromtimestamp(t.postdate).strftime(r"%Y-%m-%d %H:%M:%S")
@@ -99,7 +100,10 @@ def get_threads(
         t.url = f"https://bbs.nga.cn/read.php?tid={t.tid}"
         t.ios_app_scheme_url = f"nga://opentype=2?tid={t.tid}&"
         t.ios_open_scheme_url = f"https://proxy-tool.19940731.xyz/api/network/url/redirect?url={t.ios_app_scheme_url}"
-        t.fname = sections_dict.get(t.fid)
+        section = sections_dict.get(t.fid)
+        if section:
+            t.fname = section.name
+            t.icon = section.icon
     return threads
 
 
@@ -131,9 +135,15 @@ def get_sections() -> GetForumSectionsRes:
     for section in data["data"]["0"]["all"].values():
         for item in section["content"].values():
             for detail in item["content"].values():
+                id_ = detail.get("stid") or detail["fid"]
+                icon = f"https://img4.nga.178.com/proxy/cache_attach/ficon/{id_}u.png"
                 sections.append(
                     ForumSectionIndex(
-                        fid=detail["fid"], name=detail["name"], stid=detail.get("stid"), info=detail.get("info")
+                        fid=detail["fid"],
+                        name=detail["name"],
+                        stid=detail.get("stid"),
+                        info=detail.get("info"),
+                        icon=icon,
                     )
                 )
 
