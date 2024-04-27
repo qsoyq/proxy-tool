@@ -3,6 +3,7 @@ from datetime import datetime
 import httpx
 from pydantic import BaseModel, Field
 from fastapi import APIRouter, Query, Header, Path
+from concurrent.futures import ThreadPoolExecutor, Future
 
 
 class BaseTopic(BaseModel):
@@ -94,9 +95,17 @@ def topics_v2(
     p: int = Query(1, description="分页"),
     token: str = Header(..., alias="Authorization"),
 ):
+    def merge_request(node: str, token: str, p: int) -> TopicsGroup:
+        return TopicsGroup(topics=get_topics(node, token, page=p), node=get_node(node, token))
+
     data = []
-    for node in node_li:
-        data.append({"topics": get_topics(node, token, page=p), "node": get_node(node, token)})
+    tasks: list[Future[TopicsGroup]] = []
+    with ThreadPoolExecutor() as executor:
+        for node in node_li:
+            t = executor.submit(merge_request, node, token, p)
+            tasks.append(t)
+        for t in tasks:
+            data.append(t.result())
     return {"data": data}
 
 

@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 from fastapi import APIRouter, Query, Header
 from datetime import datetime
 from functools import lru_cache
+from concurrent.futures import ThreadPoolExecutor, Future
 
 
 class ForumSectionIndex(BaseModel):
@@ -139,13 +140,26 @@ def threads_v2(
     if_include_child_node: bool | None = Query(None, description="当查询分区帖子时, 时候包含子分区的帖子"),
 ):
     data = []
-    for fid in fid_li or []:
-        threads = get_threads(uid, cid, order_by, fid=fid, favor=None, if_include_child_node=if_include_child_node)
-        data.append({"fid": fid, "favor": None, "threads": threads.threads})
+    with ThreadPoolExecutor() as executor:
+        tasks: dict[int, Future[Threads]] = {}
+        for fid in fid_li or []:
+            t = executor.submit(
+                get_threads, uid, cid, order_by, fid=fid, favor=None, if_include_child_node=if_include_child_node
+            )
+            tasks[fid] = t
+        for fid, t in tasks.items():
+            threads = t.result()
+            data.append({"fid": fid, "favor": None, "threads": threads.threads})
 
-    for favor in favor_li or []:
-        threads = get_threads(uid, cid, order_by, fid=None, favor=favor, if_include_child_node=if_include_child_node)
-        data.append({"fid": None, "favor": favor, "threads": threads.threads})
+        tasks = {}
+        for favor in favor_li or []:
+            t = executor.submit(
+                get_threads, uid, cid, order_by, fid=None, favor=favor, if_include_child_node=if_include_child_node
+            )
+            tasks[favor] = t
+        for favor, t in tasks.items():
+            threads = t.result()
+            data.append({"fid": None, "favor": favor, "threads": threads.threads})
 
     return {"data": data}
 
