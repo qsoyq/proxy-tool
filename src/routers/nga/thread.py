@@ -44,6 +44,16 @@ class Threads(BaseModel):
     threads: list[Thread]
 
 
+class ThreadsGroup(BaseModel):
+    fid: int | None
+    favor: int | None
+    threads: list[Thread]
+
+
+class GetThreadsV2Res(BaseModel):
+    data: list[ThreadsGroup]
+
+
 router = APIRouter(tags=["nga.thread"], prefix="/nga")
 
 logger = logging.getLogger(__file__)
@@ -119,6 +129,27 @@ def threads(
     return get_threads(uid, cid, order_by, fid=fid, favor=favor, if_include_child_node=if_include_child_node)
 
 
+@router.get("/threads/v2", response_model=GetThreadsV2Res)
+def threads_v2(
+    fid_li: list[int] | None = Query(None, description="分区ID", alias="fid"),
+    favor_li: list[int] | None = Query(None, description="收藏夹ID", alias="favor"),
+    uid: str = Header("", description="ngaPassportUid, 验签"),
+    cid: str = Header("", description="ngaPassportCid, 验签"),
+    order_by: OrderByEnum = Query(..., description="排序规则"),
+    if_include_child_node: bool | None = Query(None, description="当查询分区帖子时, 时候包含子分区的帖子"),
+):
+    data = []
+    for fid in fid_li or []:
+        threads = get_threads(uid, cid, order_by, fid=fid, favor=None, if_include_child_node=if_include_child_node)
+        data.append({"fid": fid, "favor": None, "threads": threads.threads})
+
+    for favor in favor_li or []:
+        threads = get_threads(uid, cid, order_by, fid=None, favor=favor, if_include_child_node=if_include_child_node)
+        data.append({"fid": None, "favor": favor, "threads": threads.threads})
+
+    return {"data": data}
+
+
 @router.get("/sections", response_model=GetForumSectionsRes)
 def sections():
     return get_sections()
@@ -146,5 +177,4 @@ def get_sections() -> GetForumSectionsRes:
                         icon=icon,
                     )
                 )
-
     return GetForumSectionsRes(sections=sections)
