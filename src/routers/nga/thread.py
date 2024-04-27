@@ -5,6 +5,19 @@ import httpx
 from pydantic import BaseModel, Field
 from fastapi import APIRouter, Query, Header
 from datetime import datetime
+from functools import lru_cache
+
+
+class ForumSectionIndex(BaseModel):
+    fid: int = Field(description="版面id 或当前子板面的父版面 id")
+    name: str
+    stid: int | None = Field(None, description="部分分区子板面的id")
+    info: str | None = Field(None)
+    # TODO: 添加 logo
+
+
+class GetForumSectionsRes(BaseModel):
+    sections: list[ForumSectionIndex] = Field([])
 
 
 class OrderByEnum(str, Enum):
@@ -15,6 +28,7 @@ class OrderByEnum(str, Enum):
 class Thread(BaseModel):
     tid: int
     fid: int
+    fname: str | None = Field(None, description="fid 对应的分区名称")
     subject: str
     postdate: int
     lastpost: int
@@ -75,12 +89,17 @@ def get_threads(
     if fid and not if_include_child_node:
         threads.threads = [t for t in threads.threads if t.fid == fid]
 
+    sections = get_sections()
+    # nga 混用了 fid 和 stid 的概念, 当存在 stid 时, stid 即请求对应的 fid
+    sections_dict = {(x.stid or x.fid): x.name for x in sections.sections}
+
     for t in threads.threads:
         t.postdateStr = datetime.fromtimestamp(t.postdate).strftime(r"%Y-%m-%d %H:%M:%S")
         t.lastpostStr = datetime.fromtimestamp(t.lastpost).strftime(r"%Y-%m-%d %H:%M:%S")
         t.url = f"https://bbs.nga.cn/read.php?tid={t.tid}"
         t.ios_app_scheme_url = f"nga://opentype=2?tid={t.tid}&"
         t.ios_open_scheme_url = f"https://proxy-tool.19940731.xyz/api/network/url/redirect?url={t.ios_app_scheme_url}"
+        t.fname = sections_dict.get(t.fid)
     return threads
 
 
@@ -94,3 +113,28 @@ def threads(
     if_include_child_node: bool | None = Query(None, description="当查询分区帖子时, 时候包含子分区的帖子"),
 ):
     return get_threads(uid, cid, order_by, fid=fid, favor=favor, if_include_child_node=if_include_child_node)
+
+
+@router.get("/sections", response_model=GetForumSectionsRes)
+def sections():
+    return get_sections()
+
+
+@lru_cache()
+def get_sections() -> GetForumSectionsRes:
+    """获取论坛分区信息"""
+    sections = []
+    url = "https://img4.nga.178.com/proxy/cache_attach/bbs_index_data.js"
+    resp = httpx.get(url)
+    resp.raise_for_status()
+    data = json.loads(resp.text[33:])
+    for section in data["data"]["0"]["all"].values():
+        for item in section["content"].values():
+            for detail in item["content"].values():
+                sections.append(
+                    ForumSectionIndex(
+                        fid=detail["fid"], name=detail["name"], stid=detail.get("stid"), info=detail.get("info")
+                    )
+                )
+
+    return GetForumSectionsRes(sections=sections)
