@@ -5,6 +5,7 @@ import uvicorn
 
 from fastapi import FastAPI
 
+import routers.basic
 import routers.notifications.push
 import routers.clash.basic
 import routers.clash.config
@@ -18,12 +19,12 @@ import routers.mikanani.rss
 import routers.nga.thread
 import routers.v2ex.nodes
 import routers.v2ex.my
-
 from settings import AppSettings
 
 cmd = typer.Typer()
 app = FastAPI()
 api_prefix = AppSettings().api_prefix
+app.include_router(routers.basic.router, prefix=api_prefix)
 app.include_router(routers.notifications.push.router, prefix=api_prefix)
 app.include_router(routers.bilibili.live.room.router, prefix=api_prefix)
 app.include_router(routers.convert.xml.router, prefix=api_prefix)

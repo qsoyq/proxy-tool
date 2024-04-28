@@ -130,5 +130,6 @@ module = [
     "xmltodict",
     "yagmail",
     "bs4",
+    "deps",
 ]
 ignore_missing_imports = true
