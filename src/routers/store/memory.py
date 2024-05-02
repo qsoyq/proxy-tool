@@ -1,0 +1,41 @@
+import time
+from typing import Any
+import logging
+from pydantic import BaseModel
+from fastapi import APIRouter, Path, Body
+
+
+class MemoryState(BaseModel):
+    content: Any
+    created: int
+    updated: int
+
+
+class MemoryScheme(BaseModel):
+    state: MemoryState | None
+
+
+router = APIRouter(tags=["store"], prefix="/store")
+logger = logging.getLogger(__file__)
+
+MEMO: dict[str, MemoryState] = {}
+
+
+@router.get("/memory/{key}", response_model=MemoryScheme)
+def memory_get(key: str = Path(...)):
+    content = MEMO.get(key)
+    return {"state": content}
+
+
+@router.post("/memory/{key}")
+def memory_post(
+    content: Any = Body(..., embed=True),
+    key: str = Path(...),
+):
+    global MEMO
+    current = int(time.time())
+    state = MEMO.get(key) or MemoryState(content=content, created=current, updated=current)
+    state.content = content
+    state.updated = current
+    MEMO[key] = state
+    return {}

@@ -7,6 +7,7 @@ from fastapi import FastAPI
 
 import routers.basic
 import routers.notifications.push
+import routers.store.memory
 import routers.clash.basic
 import routers.clash.config
 import routers.stash.stoverride
@@ -26,6 +27,7 @@ app = FastAPI()
 api_prefix = AppSettings().api_prefix
 app.include_router(routers.basic.router, prefix=api_prefix)
 app.include_router(routers.notifications.push.router, prefix=api_prefix)
+app.include_router(routers.store.memory.router, prefix=api_prefix)
 app.include_router(routers.bilibili.live.room.router, prefix=api_prefix)
 app.include_router(routers.convert.xml.router, prefix=api_prefix)
 app.include_router(routers.mikanani.rss.router, prefix=api_prefix)
