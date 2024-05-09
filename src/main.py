@@ -1,9 +1,11 @@
+import time
 import logging
 
 import typer
 import uvicorn
 
 from fastapi import FastAPI
+from pydantic import BaseModel
 
 import routers.basic
 import routers.notifications.push
@@ -42,6 +44,18 @@ app.include_router(routers.network.url.redirect.router, prefix=api_prefix)
 app.include_router(routers.clash.basic.router, prefix=api_prefix)
 app.include_router(routers.clash.config.router, prefix=api_prefix)
 app.include_router(routers.stash.stoverride.router, prefix=api_prefix)
+run_at_ts = int(time.time())
+
+
+class PingRes(BaseModel):
+    message: str
+    timestamp: int
+    run_at_ts: int
+
+
+@app.get("/ping", response_model=PingRes)
+async def ping():
+    return {"message": "pong", "timestamp": int(time.time()), "run_at_ts": run_at_ts}
 
 
 @cmd.command()
