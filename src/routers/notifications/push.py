@@ -13,9 +13,6 @@ from concurrent.futures import ThreadPoolExecutor
 from schemas import ErrorDetail
 
 
-executor = ThreadPoolExecutor(thread_name_prefix="notifications.push.")
-
-
 class GmailOauth2File(BaseModel):
     email_address: str
     google_client_id: str
@@ -187,9 +184,8 @@ def push_v2(messages: PushMessages):
             detail = ErrorDetail(**{"type": "value_error", "loc": loc, "message": f"{e}"})
         return detail
 
-    global executor
-    with executor:
-        arguments = [(i, x) for i, x in enumerate(messages)]
+    with ThreadPoolExecutor(thread_name_prefix="notifications.push.") as executor:
+        arguments = [range(len(messages.messages)), messages.messages]
         results = executor.map(handle_message, *arguments)
     details = [x for x in results if x]
     if details:
