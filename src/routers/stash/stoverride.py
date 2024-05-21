@@ -3,6 +3,7 @@ from fastapi.responses import PlainTextResponse
 import httpx
 from fastapi import APIRouter, Query
 from pydantic import HttpUrl
+import inspect
 import yaml
 
 router = APIRouter(tags=["stash.override"], prefix="/stash/stoverride")
@@ -104,4 +105,4 @@ def oil(provname: str = Query(..., description="省份名")):
     youjia:
         url: https://raw.githubusercontent.com/deezertidal/Surge_Module/master/files/oil.js
     """
-    return PlainTextResponse(payload.format(provname=provname))
+    return PlainTextResponse(inspect.cleandoc(payload.format(provname=provname)))
