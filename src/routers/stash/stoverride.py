@@ -102,7 +102,7 @@ def oil(provname: str = Query(..., description="省份名")):
       backgroundColor: '#c932a9'
       argument: 'provname={provname}'
     script-providers:
-    youjia:
-        url: https://raw.githubusercontent.com/deezertidal/Surge_Module/master/files/oil.js
+        youjia:
+            url: https://raw.githubusercontent.com/deezertidal/Surge_Module/master/files/oil.js
     """
     return PlainTextResponse(inspect.cleandoc(payload.format(provname=provname)))
