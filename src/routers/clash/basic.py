@@ -12,7 +12,7 @@ import yaml
 import yaml.scanner
 
 from fastapi import APIRouter, Header, Query
-from fastapi.responses import PlainTextResponse
+from fastapi.responses import PlainTextResponse, Response
 from pydantic import HttpUrl
 
 from models import ClashModel, ClashProxyModel
@@ -38,29 +38,14 @@ async def timeout(timeout: float | None = Query(None, description="可控的阻�
 
 
 @router.get("/subscribe")
-async def clash2subscribe(clash_url: HttpUrl = Query(..., description="clash 订阅地址")):
-    cli = httpx.AsyncClient()
-    res = await cli.get(str(clash_url))
-    doc = yaml.safe_load(res.text)
-    clash = ClashModel(**doc)
-
-    proxies = []
-    for proxy in clash.proxies:
-        share_uri = ""
-        # 目前仅支持 ss 类型的代理
-        if proxy.type == "ss":
-            server = f"{proxy.cipher}:{proxy.password}@{proxy.server}:{proxy.port}".encode()
-            encoded = base64.urlsafe_b64encode(server).decode()
-            name = urllib.parse.quote(proxy.name)
-            share_uri = f"ss://{encoded}#{name}"
-
-        if proxy.type == "clash":
-            share_uri = ""
-
-        if share_uri:
-            proxies.append(share_uri)
-    content = base64.b64encode(("\r\n".join(proxies) + "\r\n").encode())
-    return PlainTextResponse(content)
+def subscribe(user_agent: str = Query(None, alias="user-agent"), url: str = Query(..., description="订阅链接")):
+    """定制订阅请求"""
+    headers = {}
+    if user_agent is not None:
+        headers["user-agent"] = user_agent
+    resp = httpx.get(url, headers=headers)
+    resp.raise_for_status()
+    return Response(content=resp.text, status_code=resp.status_code)
 
 
 @router.get("/1r")
