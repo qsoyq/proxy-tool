@@ -45,7 +45,16 @@ def subscribe(user_agent: str = Query(None, alias="user-agent"), url: str = Quer
         headers["user-agent"] = user_agent
     resp = httpx.get(url, headers=headers)
     resp.raise_for_status()
-    return Response(content=resp.text, status_code=resp.status_code)
+    # 订阅信息字段
+    headers = {}
+    for field in (
+        "profile-update-interval",
+        "profile-web-page-url",
+        "subscription-userinfo",
+    ):
+        if field in resp.headers:
+            headers[field] = resp.headers[field]
+    return Response(content=resp.text, status_code=resp.status_code, headers=headers)
 
 
 @router.get("/1r")
