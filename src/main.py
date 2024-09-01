@@ -17,6 +17,7 @@ import routers.stash.stoverride
 import routers.network.dns.doh
 import routers.network.proxy.reverse
 import routers.network.url.redirect
+import routers.network.url.forward
 import routers.bilibili.live.room
 import routers.convert.xml
 import routers.mikanani.rss
@@ -41,6 +42,7 @@ app.include_router(routers.v2ex.my.router, prefix=api_prefix)
 app.include_router(routers.network.dns.doh.router, prefix=api_prefix)
 app.include_router(routers.network.proxy.reverse.router, prefix=api_prefix)
 app.include_router(routers.network.url.redirect.router, prefix=api_prefix)
+app.include_router(routers.network.url.forward.router, prefix=api_prefix)
 app.include_router(routers.clash.basic.router, prefix=api_prefix)
 app.include_router(routers.clash.config.router, prefix=api_prefix)
 app.include_router(routers.stash.stoverride.router, prefix=api_prefix)
