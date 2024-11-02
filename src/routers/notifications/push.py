@@ -70,6 +70,64 @@ class TelegramPushMessage(BaseModel):
         return res
 
 
+class TelegramPushMessageText(BaseModel):
+    text: str = Field(..., min_length=1, max_length=4096)
+    parse_mode: str | None = Field(None, description="见: https://core.telegram.org/bots/api#formatting-options")
+
+
+class TelegramPushMessagePhoto(BaseModel):
+    photo: str
+    caption: str | None
+
+
+class TelegramPushMessageMediaDetail(BaseModel):
+    type: str = Field("photo")
+    media: str = Field(...)
+    caption: str | None
+
+
+class TelegramPushMessageV3(BaseModel):
+    """https://core.telegram.org/bots/api#sendmessage"""
+
+    bot_id: str
+    chat_id: str
+    message: TelegramPushMessageText | None
+    photo: TelegramPushMessagePhoto | None
+    media: list[TelegramPushMessageMediaDetail] | None
+
+    def push(self):
+        raise NotImplementedError("TelegramPushMessageV3 不支持 push 方法")
+
+    def push_text(self) -> httpx.Response:
+        url = f"https://api.telegram.org/bot{self.bot_id}/sendMessage"
+        assert self.message
+        payload = {"chat_id": self.chat_id, "text": self.message.text}
+        if self.message.parse_mode:
+            payload["parse_mode"] = self.message.parse_mode
+
+        res = httpx.post(url, json=payload)
+        res.raise_for_status()
+        return res
+
+    def push_photo(self) -> httpx.Response:
+        url = f"https://api.telegram.org/bot{self.bot_id}/sendPhoto"
+        assert self.photo
+        payload = {"chat_id": self.chat_id, "photo": self.photo.photo}
+        if self.photo.caption:
+            payload["caption"] = self.photo.caption
+        res = httpx.post(url, json=payload)
+        res.raise_for_status()
+        return res
+
+    def push_media(self) -> httpx.Response:
+        url = f"https://api.telegram.org/bot{self.bot_id}/sendMediaGroup"
+        assert self.media
+        payload = {"chat_id": self.chat_id, "media": [x.dict() for x in self.media]}
+        res = httpx.post(url, json=payload)
+        res.raise_for_status()
+        return res
+
+
 class BarkPushLevel(str, Enum):
     active = "active"
     timeSensitive = "timeSensitive"
@@ -121,8 +179,18 @@ class PushMessage(BaseModel):
     bark: BarkPushMessage | None
 
 
+class PushMessageV3(BaseModel):
+    telegram: TelegramPushMessageV3 | None
+    gmail: GmailPushMessage | None
+    bark: BarkPushMessage | None
+
+
 class PushMessages(BaseModel):
     messages: list[PushMessage]
+
+
+class PushMessagesV3(BaseModel):
+    messages: list[PushMessageV3]
 
 
 router = APIRouter(tags=["notifications.push"], prefix="/notifications")
@@ -161,6 +229,7 @@ def push(messages: PushMessages):
 def push_v2(messages: PushMessages):
     """推送消息到各平台
     Gmail推送消息对账号密码有要求, 需要开启二步验证后使用应用程序专用密码或使用 OAuth2 令牌.
+
     采用并发处理多条消息
     """
 
@@ -172,6 +241,51 @@ def push_v2(messages: PushMessages):
             if message.telegram:
                 current = "telegram"
                 message.telegram.push()
+            if message.gmail:
+                current = "gmail"
+                message.gmail.push()
+            if message.bark:
+                current = "bark"
+                message.bark.push()
+        except Exception as e:
+            logger.warning(e, exc_info=True)
+            loc.append(current)
+            detail = ErrorDetail(**{"type": "value_error", "loc": loc, "message": f"{e}"})
+        return detail
+
+    with ThreadPoolExecutor(thread_name_prefix="notifications.push.") as executor:
+        arguments = [range(len(messages.messages)), messages.messages]
+        results = executor.map(handle_message, *arguments)
+    details = [x for x in results if x]
+    if details:
+        return JSONResponse(content={"detail": details}, status_code=HTTPStatus.INTERNAL_SERVER_ERROR)
+    return {}
+
+
+@router.post("/push/v3", summary="消息推送v3")
+def push_v3(messages: PushMessagesV3):
+    """支持Telegram 多种消息类型
+
+    采用并发处理多条消息
+    """
+
+    def handle_message(index: int, message: PushMessageV3) -> ErrorDetail | None:
+        detail = None
+        loc = ["body", "messages", index]
+        try:
+            current = ""
+            if message.telegram:
+                current = "telegram"
+                if message.telegram.message:
+                    current = "telegram.message"
+                    message.telegram.push_text()
+                if message.telegram.photo:
+                    current = "telegram.photo"
+                    message.telegram.push_photo()
+                if message.telegram.media:
+                    current = "telegram.media"
+                    message.telegram.push_media()
+
             if message.gmail:
                 current = "gmail"
                 message.gmail.push()
