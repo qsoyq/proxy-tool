@@ -336,7 +336,9 @@ def push_v3(messages: PushMessagesV3):
         results = executor.map(handle_message, *arguments)
     details = [x for x in results if x]
     if details:
-        return JSONResponse(content={"detail": details}, status_code=HTTPStatus.INTERNAL_SERVER_ERROR)
+        return JSONResponse(
+            content={"detail": [x.dict() for x in details]}, status_code=HTTPStatus.INTERNAL_SERVER_ERROR
+        )
     return {}
 
 
