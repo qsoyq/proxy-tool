@@ -23,6 +23,8 @@ types-xmltodict = "^0.13.0.3"
 beautifulsoup4 = "^4.12.3"
 yagmail = "^0.15.293"
 types-beautifulsoup4 = "^4.12.0.20240229"
+cairosvg = "^2.7.1"
+python-multipart = "^0.0.17"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"
@@ -131,5 +133,6 @@ module = [
     "yagmail",
     "bs4",
     "deps",
+    "cairosvg",
 ]
 ignore_missing_imports = true

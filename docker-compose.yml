@@ -10,3 +10,6 @@ services:
     labels:
       - dev.orbstack.domains=proxy-tool.orb.local
       - dev.orbstack.domains=py-proxy-api.orb.local
+      - "traefik.enable=true"
+      - "traefik.http.routers.proxy-tool.entrypoints=web"
+      - "traefik.http.routers.proxy-tool.rule=Host(`proxy-tool.docker.localhost`)"
