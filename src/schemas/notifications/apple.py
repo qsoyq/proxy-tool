@@ -67,7 +67,7 @@ class AppleAPNSMessage(BaseModel):
 
 class ApplePushExtParams(BaseModel):
     icon: HttpUrl | None
-    url: HttpUrl | None
+    url: str | None
     group: str = Field("Default")
 
 
