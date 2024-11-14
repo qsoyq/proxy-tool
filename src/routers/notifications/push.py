@@ -13,9 +13,6 @@ logger = logging.getLogger(__file__)
 
 @router.post("/push", summary="消息推送")
 def push(messages: PushMessages):
-    """推送消息到各平台
-    Gmail推送消息对账号密码有要求, 需要开启二步验证后使用应用程序专用密码或使用 OAuth2 令牌.
-    """
     details = []
     for i, message in enumerate(messages.messages):
         loc = ["body", "messages", i]
@@ -41,12 +38,6 @@ def push(messages: PushMessages):
 
 @router.post("/push/v2", summary="消息推送v2")
 def push_v2(messages: PushMessages):
-    """推送消息到各平台
-    Gmail推送消息对账号密码有要求, 需要开启二步验证后使用应用程序专用密码或使用 OAuth2 令牌.
-
-    采用并发处理多条消息
-    """
-
     def handle_message(index: int, message: PushMessage) -> ErrorDetail | None:
         detail = None
         loc = ["body", "messages", index]
@@ -78,11 +69,6 @@ def push_v2(messages: PushMessages):
 
 @router.post("/push/v3", summary="消息推送v3")
 def push_v3(messages: PushMessagesV3):
-    """支持Telegram 多种消息类型
-
-    采用并发处理多条消息
-    """
-
     def handle_message(index: int, message: PushMessageV3) -> ErrorDetail | None:
         detail = None
         loc = ["body", "messages", index]
@@ -108,6 +94,9 @@ def push_v3(messages: PushMessagesV3):
             if message.gotify:
                 current = "gotify"
                 message.gotify.push()
+            if message.apple:
+                current = "apple"
+                message.apple.push()
         except Exception as e:
             logger.warning(e, exc_info=True)
             loc.append(current)

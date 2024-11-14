@@ -10,14 +10,7 @@ class BarkPushLevel(str, Enum):
 
 
 class BarkPushMessage(BaseModel):
-    """https://github.com/Finb/bark-server/blob/master/docs/API_V2.md
-    ```
-    level:
-        active:默认值,系统会立即亮屏显示通知。
-        timeSensitive:时效性通知,可在专注状态下显示通知。
-        passive: 仅将通知添加到通知列表,不会亮屏提醒。
-    ```
-    """
+    """https://github.com/Finb/bark-server/blob/master/docs/API_V2.md"""
 
     device_key: str = Field(..., description="bark token, The key for each device")
 

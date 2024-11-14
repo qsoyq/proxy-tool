@@ -27,6 +27,7 @@ cairosvg = "^2.7.1"
 python-multipart = "^0.0.17"
 pip = "^24.3.1"
 pycairo = "^1.27.0"
+pyjwt = "^2.9.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"
@@ -136,5 +137,6 @@ module = [
     "bs4",
     "deps",
     "cairosvg",
+    "PyJWT"
 ]
 ignore_missing_imports = true

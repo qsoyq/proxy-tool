@@ -3,6 +3,7 @@ import schemas.notifications.telegram as telegram
 import schemas.notifications.bark as bark
 import schemas.notifications.gmail as gmail
 import schemas.notifications.gotify as gotify
+import schemas.notifications.apple as apple
 
 
 class PushMessage(BaseModel):
@@ -16,6 +17,7 @@ class PushMessageV3(BaseModel):
     gmail: gmail.GmailPushMessage | None
     bark: bark.BarkPushMessage | None
     gotify: gotify.GotifyPushMessage | None
+    apple: apple.ApplePushMessage | None
 
 
 class PushMessages(BaseModel):
