@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Dict, Any
 from functools import lru_cache
 import httpx
 from pydantic import BaseModel, Field, HttpUrl
@@ -88,6 +89,7 @@ class ApplePushMessage(ApplePushExtParams, ApplePushAuthParams):
     部分默认参数取自 bark
     """
 
+    thread_id: str | None = Field(None, alias="thread-id")  # type: ignore
     device_token: str = Field(...)
     aps: AppleAPNSMessage
 
@@ -109,7 +111,9 @@ class ApplePushMessage(ApplePushExtParams, ApplePushAuthParams):
         }
 
         ext = ApplePushExtParams(**self.dict()).dict(exclude_none=True)
-        payload = {"aps": self.aps.dict(exclude_none=True, by_alias=True)}
+        payload: Dict[str, Any] = {"aps": dict(self.aps.dict(exclude_none=True, by_alias=True))}
+        if self.thread_id:
+            payload["thread-id"] = self.thread_id
         payload.update(ext)
         resp = httpx.Client(http2=True).post(url, json=payload, headers=headers)
         resp.raise_for_status()
