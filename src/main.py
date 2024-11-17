@@ -8,6 +8,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 
 import routers.basic
+import routers.tool.basic
 import routers.notifications.push
 import routers.checkin.flyairport
 import routers.store.memory
@@ -31,6 +32,7 @@ cmd = typer.Typer()
 app = FastAPI()
 api_prefix = AppSettings().api_prefix
 app.include_router(routers.basic.router, prefix=api_prefix)
+app.include_router(routers.tool.basic.router, prefix=api_prefix)
 app.include_router(routers.notifications.push.router, prefix=api_prefix)
 app.include_router(routers.checkin.flyairport.router, prefix=api_prefix)
 app.include_router(routers.store.memory.router, prefix=api_prefix)
