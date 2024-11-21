@@ -7,6 +7,7 @@ class BarkPushLevel(str, Enum):
     active = "active"
     timeSensitive = "timeSensitive"
     passive = "passive"
+    critical = "critical"
 
 
 class BarkPushMessage(BaseModel):
@@ -16,7 +17,9 @@ class BarkPushMessage(BaseModel):
 
     title: str
     body: str
-    level: BarkPushLevel = Field(BarkPushLevel.active, description="'active', 'timeSensitive', or 'passive'")
+    level: BarkPushLevel = Field(
+        BarkPushLevel.active, description="'active', 'timeSensitive', or 'passive', or 'critical'"
+    )
 
     category: str | None = Field(None, description="Reserved field, no use yet")
 
