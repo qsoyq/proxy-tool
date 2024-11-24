@@ -2,6 +2,7 @@ import re
 import logging
 import xmltodict
 import httpx
+from functools import lru_cache
 from fastapi import APIRouter, Query
 from concurrent.futures import ThreadPoolExecutor
 
@@ -16,10 +17,13 @@ def subscribe(token: str = Query(...)):
     resp = httpx.get(url, params={"token": token})
     resp.raise_for_status()
     body = xmltodict.parse(resp.text)
-    items = body["rss"]["channel"].get("item", [])
-    if items:
-        items = list(executor.map(add_image_url, items))
-        body["rss"]["channel"]["item"] = items
+    body["rss"]["channel"].setdefault("item", [])
+    body["rss"]["channel"]["item"] = list(executor.map(add_image_url, body["rss"]["channel"]["item"]))
+    pattern = re.compile(r"^\[.*?\]\s*|\s*\[.*?\]$")
+    for item in body["rss"]["channel"]["item"]:
+        title = item["title"]
+        item["real_title"] = re.sub(pattern, "", title).strip()
+
     return body
 
 
@@ -36,6 +40,7 @@ def add_image_url(item: dict) -> dict:
     return item
 
 
+@lru_cache
 def get_image_url(link: str) -> str | None:
     pattern = r"url\((.*?)\)"
     res = httpx.get(link)
