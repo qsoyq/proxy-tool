@@ -72,6 +72,7 @@ def get_threads(
     fid: int | None = None,
     favor: int | None = None,
     if_include_child_node: bool | None = None,
+    page: int = 1,
 ) -> Threads:
     url = "https://bbs.nga.cn/thread.php"
 
@@ -83,6 +84,7 @@ def get_threads(
 
     params: dict[str, str | int] = {
         "__output": 11,  # 返回 json 格式
+        "page": page,
     }
 
     if fid is not None:
@@ -93,10 +95,10 @@ def get_threads(
     if order_by is not None:
         params["order_by"] = str(order_by.value)
 
-    res = httpx.get(url, params=params, cookies=cookies, headers=headers)
+    res = httpx.get(url, params=params, cookies=cookies, headers=headers, verify=False)
     res.raise_for_status()
     body = json.loads(res.text)
-    threads = Threads(threads=[Thread(**t) for t in body["data"]["__T"]])
+    threads = Threads(threads=[Thread(**t) for t in body["data"].get("__T", [])])
 
     if fid and not if_include_child_node:
         threads.threads = [t for t in threads.threads if t.fid == fid]
@@ -126,8 +128,11 @@ def threads(
     cid: str = Header("", description="ngaPassportCid, 验签"),
     order_by: OrderByEnum = Query(..., description="排序规则"),
     if_include_child_node: bool | None = Query(None, description="当查询分区帖子时, 时候包含子分区的帖子"),
+    page: int = Query(1, description="页"),
 ):
-    return get_threads(uid, cid, order_by, fid=fid, favor=favor, if_include_child_node=if_include_child_node)
+    return get_threads(
+        uid, cid, order_by, fid=fid, favor=favor, if_include_child_node=if_include_child_node, page=page
+    )
 
 
 @router.get("/threads/v2", summary="批量查询多分区/收藏夹帖子列表", response_model=GetThreadsV2Res)
@@ -138,13 +143,21 @@ def threads_v2(
     cid: str = Header("", description="ngaPassportCid, 验签"),
     order_by: OrderByEnum = Query(..., description="排序规则"),
     if_include_child_node: bool | None = Query(None, description="当查询分区帖子时, 时候包含子分区的帖子"),
+    page: int = Query(1, description="页"),
 ):
     data = []
     with ThreadPoolExecutor() as executor:
         tasks: dict[int, Future[Threads]] = {}
         for fid in fid_li or []:
             t = executor.submit(
-                get_threads, uid, cid, order_by, fid=fid, favor=None, if_include_child_node=if_include_child_node
+                get_threads,
+                uid,
+                cid,
+                order_by,
+                fid=fid,
+                favor=None,
+                if_include_child_node=if_include_child_node,
+                page=page,
             )
             tasks[fid] = t
         for fid, t in tasks.items():
@@ -154,7 +167,14 @@ def threads_v2(
         tasks = {}
         for favor in favor_li or []:
             t = executor.submit(
-                get_threads, uid, cid, order_by, fid=None, favor=favor, if_include_child_node=if_include_child_node
+                get_threads,
+                uid,
+                cid,
+                order_by,
+                fid=None,
+                favor=favor,
+                if_include_child_node=if_include_child_node,
+                page=page,
             )
             tasks[favor] = t
         for favor, t in tasks.items():
@@ -174,7 +194,7 @@ def get_sections() -> GetForumSectionsRes:
     """获取论坛分区信息"""
     sections = []
     url = "https://img4.nga.178.com/proxy/cache_attach/bbs_index_data.js"
-    resp = httpx.get(url)
+    resp = httpx.get(url, verify=False)
     resp.raise_for_status()
     data = json.loads(resp.text[33:])
     for section in data["data"]["0"]["all"].values():
