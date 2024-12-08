@@ -1,3 +1,4 @@
+import uuid
 import logging
 from fastapi.responses import PlainTextResponse
 import httpx
@@ -9,6 +10,14 @@ import yaml
 router = APIRouter(tags=["stash.override"], prefix="/stash/stoverride")
 
 logger = logging.getLogger(__file__)
+
+
+@router.get("/rules/random")
+def rules_random(name: str = Query("name"), category: str = Query("category"), size: int = Query(100)):
+    rules = [f"DOMAIN,{uuid.uuid4().hex}.com,DIRECT" for x in range(size)]
+    data = {"name": name, "category": category, "rules": rules}
+    res = yaml.safe_dump(data)
+    return PlainTextResponse(res, headers={"Content-Disposition": "inline"})
 
 
 @router.get("/override")
