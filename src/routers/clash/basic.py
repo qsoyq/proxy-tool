@@ -38,7 +38,12 @@ async def timeout(timeout: float | None = Query(None, description="可控的阻�
 
 
 @router.get("/subscribe")
-def subscribe(user_agent: str = Query(None, alias="user-agent"), url: str = Query(..., description="订阅链接")):
+def subscribe(
+    user_agent: str = Query(None, alias="user-agent"),
+    url: str = Query(..., description="订阅链接"),
+    additional_prefix: str | None = Query(None, description="为代理节点添加前缀", alias="additional-prefix"),
+    proxy_provider: bool = Query(False, description="是否只返回节点", alias="proxy-provider"),
+):
     """定制订阅请求"""
     headers = {}
     if user_agent is not None:
@@ -54,7 +59,17 @@ def subscribe(user_agent: str = Query(None, alias="user-agent"), url: str = Quer
     ):
         if field in resp.headers:
             headers[field] = resp.headers[field]
-    return Response(content=resp.text, status_code=resp.status_code, headers=headers)
+    content = resp.text
+    if additional_prefix:
+        dom = yaml.safe_load(content)
+        for x in dom.get("proxies", []):
+            x["name"] = additional_prefix + x["name"]
+        content = yaml.safe_dump(dom, allow_unicode=True)
+    if proxy_provider:
+        dom = yaml.safe_load(content)
+        content = yaml.safe_dump({"proxies": dom["proxies"]}, allow_unicode=True)
+    headers["content-type"] = "text/plain;charset=utf-8"
+    return Response(content=content, status_code=resp.status_code, headers=headers)
 
 
 @router.get("/1r")
