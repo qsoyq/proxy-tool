@@ -39,10 +39,12 @@ async def timeout(timeout: float | None = Query(None, description="可控的阻�
 
 @router.get("/subscribe")
 def subscribe(
-    user_agent: str = Query(None, alias="user-agent"),
+    user_agent: str = Query("StashCore/2.7.1 Stash/2.7.1 Clash/1.11.0", alias="user-agent"),
     url: str = Query(..., description="订阅链接"),
     additional_prefix: str | None = Query(None, description="为代理节点添加前缀", alias="additional-prefix"),
     proxy_provider: bool = Query(False, description="是否只返回节点", alias="proxy-provider"),
+    benchmark_url: str | None = Query(None, description="延迟测试连接", alias="benchmark-url"),
+    benchmark_timeout: float | None = Query(None, description="延迟测试超时，单位: 秒", alias="benchmark-timeout"),
 ):
     """定制订阅请求"""
     headers = {}
@@ -65,6 +67,19 @@ def subscribe(
         for x in dom.get("proxies", []):
             x["name"] = additional_prefix + x["name"]
         content = yaml.safe_dump(dom, allow_unicode=True)
+
+    if benchmark_url:
+        dom = yaml.safe_load(content)
+        for x in dom.get("proxies", []):
+            x["benchmark-url"] = benchmark_url
+        content = yaml.safe_dump(dom, allow_unicode=True)
+
+    if benchmark_timeout:
+        dom = yaml.safe_load(content)
+        for x in dom.get("proxies", []):
+            x["benchmark-timeout"] = benchmark_timeout
+        content = yaml.safe_dump(dom, allow_unicode=True)
+
     if proxy_provider:
         dom = yaml.safe_load(content)
         content = yaml.safe_dump({"proxies": dom["proxies"]}, allow_unicode=True)
