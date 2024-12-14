@@ -10,6 +10,7 @@ from pydantic import BaseModel
 import routers.basic
 import routers.tool.basic
 import routers.notifications.push
+import routers.webhook.railway
 import routers.checkin.flyairport
 import routers.store.memory
 import routers.clash.basic
@@ -34,6 +35,7 @@ api_prefix = AppSettings().api_prefix
 app.include_router(routers.basic.router, prefix=api_prefix)
 app.include_router(routers.tool.basic.router, prefix=api_prefix)
 app.include_router(routers.notifications.push.router, prefix=api_prefix)
+app.include_router(routers.webhook.railway.router, prefix=api_prefix)
 app.include_router(routers.checkin.flyairport.router, prefix=api_prefix)
 app.include_router(routers.store.memory.router, prefix=api_prefix)
 app.include_router(routers.bilibili.live.room.router, prefix=api_prefix)
