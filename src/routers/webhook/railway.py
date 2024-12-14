@@ -1,6 +1,6 @@
 import logging
 from typing import Any
-from fastapi import Query, APIRouter, Body
+from fastapi import Path, APIRouter, Body
 from schemas.webhook.railway import RailwayWebhookPayload
 from schemas.notifications.bark import BarkPushMessage, BarkPushLevel
 
@@ -17,7 +17,7 @@ def railway_webhook_options():
 
 @router.post("/bark/{token}", summary="Railway")
 def railway_webhook(
-    token: str = Query(..., description="bark token"),
+    token: str = Path(..., description="bark token"),
     payload: RailwayWebhookPayload = Body(...),
 ):
     logger.info(f"[Webhook] [Railway]{token} {payload}")
