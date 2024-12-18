@@ -47,7 +47,7 @@ class CurlDetail:
         body = self.body or ""
         template = f"""
         let url = '{self.url}'
-        let res = await {self.method.lower()}({{ url, body: '{body}', headers: {json.dumps(self.headers)})
+        let res = await {self.method.lower()}({{ url, body: '{body}', headers: {json.dumps(self.headers)}}})
         if (res.error || res.response.status >= 400) {{
             console.log(`[Error] request error: ${{res.error}}, ${{res.response.status}}, ${{res.data}}`)
         }}
