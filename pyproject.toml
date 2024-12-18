@@ -137,6 +137,7 @@ module = [
     "bs4",
     "deps",
     "cairosvg",
-    "PyJWT"
+    "PyJWT",
+    "utils"
 ]
 ignore_missing_imports = true

@@ -61,7 +61,7 @@ class CurlDetail:
             url = '{self.url}'
             headers = {repr(self.headers)}
             resp = httpx.get(url, headers=headers)
-            resp.res.raise_for_status()
+            resp.raise_for_status()
             """
         else:
             template = f"""
@@ -69,7 +69,7 @@ class CurlDetail:
             headers = {repr(self.headers)}
             content = '{body}'
             resp = httpx.{self.method.lower()}(url, content=content ,headers=headers)
-            resp.res.raise_for_status()
+            resp.raise_for_status()
             """
         return textwrap.dedent(template).strip()
 
