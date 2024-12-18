@@ -54,6 +54,25 @@ class CurlDetail:
         """
         return textwrap.dedent(template).strip()
 
+    def to_httpx(self) -> str:
+        body = self.body or ""
+        if self.method.lower() == "get":
+            template = f"""
+            url = '{self.url}'
+            headers = {repr(self.headers)}
+            resp = httpx.get(url, headers=headers)
+            resp.res.raise_for_status()
+            """
+        else:
+            template = f"""
+            url = '{self.url}'
+            headers = {repr(self.headers)}
+            content = '{body}'
+            resp = httpx.{self.method.lower()}(url, content=content ,headers=headers)
+            resp.res.raise_for_status()
+            """
+        return textwrap.dedent(template).strip()
+
 
 @dataclass
 class CurlOption:
@@ -235,4 +254,6 @@ if __name__ == "__main__":
     print(detail.to_json())
     print("=" * terminal_size)
     print(detail.to_stash())
+    print("=" * terminal_size)
+    print(detail.to_httpx())
     print("=" * terminal_size)
