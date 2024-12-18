@@ -1,3 +1,4 @@
+import textwrap
 import json
 from functools import reduce, partial
 from typing import Callable
@@ -38,6 +39,20 @@ class CurlDetail:
 
     def to_json(self) -> str:
         return json.dumps(asdict(self), ensure_ascii=False)
+
+    def to_stash(self) -> str:
+        """生成的http 请求代码参考
+        https://raw.githubusercontent.com/qsoyq/shell/main/config/stash/script/loglog.js loglog.HttpClientloglog.HttpClient
+        """
+        body = self.body or ""
+        template = f"""
+        let url = '{self.url}'
+        let res = await {self.method.lower()}({{ url, body: '{body}', headers: {json.dumps(self.headers)})
+        if (res.error || res.response.status >= 400) {{
+            console.log(`[Error] request error: ${{res.error}}, ${{res.response.status}}, ${{res.data}}`)
+        }}
+        """
+        return textwrap.dedent(template).strip()
 
 
 @dataclass
@@ -218,4 +233,6 @@ if __name__ == "__main__":
     pprint(detail)
     print("=" * terminal_size)
     print(detail.to_json())
+    print("=" * terminal_size)
+    print(detail.to_stash())
     print("=" * terminal_size)
