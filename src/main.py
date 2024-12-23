@@ -28,6 +28,7 @@ import routers.mikanani.rss
 import routers.nga.thread
 import routers.v2ex.nodes
 import routers.v2ex.my
+import routers.apple.location
 from settings import AppSettings
 
 cmd = typer.Typer()
@@ -54,6 +55,7 @@ app.include_router(routers.network.url.forward.router, prefix=api_prefix)
 app.include_router(routers.clash.basic.router, prefix=api_prefix)
 app.include_router(routers.clash.config.router, prefix=api_prefix)
 app.include_router(routers.stash.stoverride.router, prefix=api_prefix)
+app.include_router(routers.apple.location.router, prefix=api_prefix)
 run_at_ts = int(time.time())
 
 
