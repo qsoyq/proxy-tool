@@ -1,11 +1,13 @@
 import time
 import logging
+from datetime import datetime
 
 import typer
 import uvicorn
 
 from fastapi import FastAPI
 from pydantic import BaseModel
+
 
 import routers.basic
 import routers.tool.basic
@@ -59,17 +61,19 @@ app.include_router(routers.stash.stoverride.router, prefix=api_prefix)
 app.include_router(routers.apple.location.router, prefix=api_prefix)
 app.include_router(routers.iptv.sub.router, prefix=api_prefix)
 run_at_ts = int(time.time())
+run_at = datetime.fromtimestamp(run_at_ts).strftime("%Y-%m-%d %H:%M:%S")
 
 
 class PingRes(BaseModel):
     message: str
     timestamp: int
     run_at_ts: int
+    run_at: str
 
 
 @app.get("/ping", response_model=PingRes)
 async def ping():
-    return {"message": "pong", "timestamp": int(time.time()), "run_at_ts": run_at_ts}
+    return {"message": "pong", "timestamp": int(time.time()), "run_at_ts": run_at_ts, "run_at": run_at}
 
 
 @cmd.command()
