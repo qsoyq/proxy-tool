@@ -2,7 +2,7 @@ name: build push deploy
 on:
   push:
     branches:
-      - 'actions/docker'
+      - 'render'
 jobs:
   render:
     runs-on: ubuntu-latest
