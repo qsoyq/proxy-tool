@@ -2,7 +2,7 @@ name: build push deploy
 on:
   push:
     branches:
-      - '*'
+      - 'actions/docker'
 jobs:
   docker:
     runs-on: ubuntu-latest
