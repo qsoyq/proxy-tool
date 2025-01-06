@@ -2,11 +2,12 @@ import time
 import logging
 from datetime import datetime
 
+
 import typer
 import uvicorn
 
 from fastapi import FastAPI
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 import routers.basic
@@ -60,20 +61,24 @@ app.include_router(routers.clash.config.router, prefix=api_prefix)
 app.include_router(routers.stash.stoverride.router, prefix=api_prefix)
 app.include_router(routers.apple.location.router, prefix=api_prefix)
 app.include_router(routers.iptv.sub.router, prefix=api_prefix)
+
 run_at_ts = int(time.time())
 run_at = datetime.fromtimestamp(run_at_ts).strftime("%Y-%m-%d %H:%M:%S")
+version = "0.1.1"
 
 
 class PingRes(BaseModel):
-    message: str
-    timestamp: int
-    run_at_ts: int
-    run_at: str
+    message: str = "pong"
+    timestamp: int = Field(default_factory=lambda: int(time.time()))
+    current: str = Field(default_factory=lambda: datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    run_at_ts: int = run_at_ts
+    run_at: str = run_at
+    version: str = version
 
 
 @app.get("/ping", response_model=PingRes)
 async def ping():
-    return {"message": "pong", "timestamp": int(time.time()), "run_at_ts": run_at_ts, "run_at": run_at}
+    return PingRes()
 
 
 @cmd.command()
