@@ -1,21 +1,13 @@
 import io
 import logging
 import cairosvg
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import HttpUrl
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import StreamingResponse
 
 router = APIRouter(tags=["convert.svg"], prefix="/convert/svg")
 
 logger = logging.getLogger(__file__)
-
-
-class XMLConvertRes(BaseModel):
-    content: str = Field(..., description="json字符串")
-
-
-class XMLConvertReq(BaseModel):
-    content: str = Field(..., description="xml字符串")
 
 
 @router.get("/png")
