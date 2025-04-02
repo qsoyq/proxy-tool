@@ -38,6 +38,7 @@ async def timeout(timeout: float | None = Query(None, description="可控的阻�
 
 
 @router.get("/subscribe")
+@router.head("/subscribe")
 def subscribe(
     user_agent: str = Query("StashCore/2.7.1 Stash/2.7.1 Clash/1.11.0", alias="user-agent"),
     url: str = Query(..., description="订阅链接"),
@@ -130,7 +131,7 @@ def one_r(
     res = httpx.get(str(url), headers=headers)
     if res.is_error:
         # 使用代理访问一元机场会遭到 cloudflare 的拦截
-        res = httpx.get(str(url), headers=headers, proxies={})
+        res = httpx.get(str(url), headers=headers, trust_env=False)
 
     res.raise_for_status()
 
