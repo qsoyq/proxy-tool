@@ -5,12 +5,12 @@ from pydantic import HttpUrl
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import StreamingResponse
 
-router = APIRouter(tags=["convert.svg"], prefix="/convert/svg")
+router = APIRouter(tags=["Utils"], prefix="/convert/svg")
 
 logger = logging.getLogger(__file__)
 
 
-@router.get("/png")
+@router.get("/png", summary="svg2png")
 async def convert_svg_to_png(url: HttpUrl, download: bool = Query(False, description="是否下载文件")):
     # 使用 cairosvg 将 SVG 转换为 PNG
     png_content = cairosvg.svg2png(url=url)

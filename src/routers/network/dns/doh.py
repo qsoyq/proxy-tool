@@ -5,7 +5,7 @@ import httpx
 from schemas.network.dns.doh import DoHResponse
 from fastapi import APIRouter, Query
 
-router = APIRouter(tags=["network.dns"], prefix="/network/dns")
+router = APIRouter(tags=["Utils"], prefix="/network/dns")
 
 logger = logging.getLogger(__file__)
 
@@ -13,7 +13,7 @@ logger = logging.getLogger(__file__)
 default_doh = "https://1.1.1.1/dns-query"
 
 
-@router.get("/doh", summary="DoH", response_model=DoHResponse)
+@router.get("/doh", summary="DNS-Over-Https", response_model=DoHResponse)
 def doh(
     url: HttpUrl = Query(default_doh, description="使用的 dns服务https 路径"),
     name: str = Query(..., description="域名"),
@@ -22,6 +22,7 @@ def doh(
     https://1.1.1.1/dns-query</br>
     https://223.5.5.5/resolve</br>
     """
+    # TODO: 兼容不支持 HTTP JSON API 的 DOH 查询
     headers = {
         "Accept": "application/dns-json",
     }

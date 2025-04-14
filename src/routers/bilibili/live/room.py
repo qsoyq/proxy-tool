@@ -13,7 +13,7 @@ from schemas.bilibili.live.room import (
     LiveRoomListRes,
 )
 
-router = APIRouter(tags=["bilibili.live"], prefix="/bilibili/live/room")
+router = APIRouter(tags=["Utils"], prefix="/bilibili/live/room")
 
 logger = logging.getLogger(__file__)
 room_thread_executor = ThreadPoolExecutor()

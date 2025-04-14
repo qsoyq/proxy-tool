@@ -55,7 +55,7 @@ class GetThreadsV2Res(BaseModel):
     data: list[ThreadsGroup]
 
 
-router = APIRouter(tags=["nga"], prefix="/nga")
+router = APIRouter(tags=["Utils"], prefix="/nga")
 
 logger = logging.getLogger(__file__)
 
@@ -120,7 +120,7 @@ def get_threads(
     return threads
 
 
-@router.get("/threads", summary="查询帖子列表", response_model=Threads)
+@router.get("/threads", summary="查询NGA帖子列表", response_model=Threads)
 def threads(
     fid: int | None = Query(None, description="分区ID"),
     favor: int | None = Query(None, description="收藏夹ID"),
@@ -135,7 +135,7 @@ def threads(
     )
 
 
-@router.get("/threads/v2", summary="批量查询多分区/收藏夹帖子列表", response_model=GetThreadsV2Res)
+@router.get("/threads/v2", summary="批量查询NGA多分区/收藏夹帖子列表", response_model=GetThreadsV2Res)
 def threads_v2(
     fid_li: list[int] | None = Query(None, description="分区ID", alias="fid"),
     favor_li: list[int] | None = Query(None, description="收藏夹ID", alias="favor"),
@@ -184,7 +184,7 @@ def threads_v2(
     return {"data": data}
 
 
-@router.get("/sections", summary="查询分区信息", response_model=GetForumSectionsRes)
+@router.get("/sections", summary="查询NGA分区信息", response_model=GetForumSectionsRes)
 def sections():
     return get_sections()
 

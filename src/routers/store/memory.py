@@ -15,19 +15,19 @@ class MemoryScheme(BaseModel):
     state: MemoryState | None
 
 
-router = APIRouter(tags=["store"], prefix="/store")
+router = APIRouter(tags=["Utils"], prefix="/store")
 logger = logging.getLogger(__file__)
 
 MEMO: dict[str, MemoryState] = {}
 
 
-@router.get("/memory/{key}", response_model=MemoryScheme)
+@router.get("/memory/{key}", response_model=MemoryScheme, summary="读取临时缓存")
 def memory_get(key: str = Path(...)):
     content = MEMO.get(key)
     return {"state": content}
 
 
-@router.post("/memory/{key}")
+@router.post("/memory/{key}", summary="写入临时缓存")
 def memory_post(
     content: Any = Body(..., embed=True),
     key: str = Path(...),

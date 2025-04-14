@@ -3,7 +3,7 @@ import logging
 from pydantic import BaseModel, Field
 from fastapi import APIRouter
 
-router = APIRouter(tags=["checkin"], prefix="/api/checkin/flyairport")
+router = APIRouter(tags=["Utils"], prefix="/api/checkin/flyairport")
 
 logger = logging.getLogger(__file__)
 

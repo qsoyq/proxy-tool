@@ -76,7 +76,7 @@ class PingRes(BaseModel):
     version: str = version
 
 
-@app.get("/ping", response_model=PingRes)
+@app.get("/ping", response_model=PingRes, tags=["Basic"])
 async def ping():
     return PingRes()
 

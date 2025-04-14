@@ -4,14 +4,14 @@ import httpx
 from fastapi import APIRouter, Query
 from fastapi.responses import Response
 
-router = APIRouter(tags=["network.url"], prefix="/network/url")
+router = APIRouter(tags=["Utils"], prefix="/network/url")
 
 logger = logging.getLogger(__file__)
 
 
-@router.get("/forward", summary="Forward")
+@router.get("/forward", summary="代理请求")
 def get(
-    url: str = Query(..., description="待访问 url"),
+    url: str = Query(..., description="目标url"),
     user_agent: str = Query(None, description="user-agent"),
     authorization: str = Query(None, description="Authorization"),
     accept: str = Query(None, description="Accept"),

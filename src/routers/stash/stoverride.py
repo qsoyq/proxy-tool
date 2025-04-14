@@ -7,12 +7,12 @@ from pydantic import HttpUrl
 import inspect
 import yaml
 
-router = APIRouter(tags=["stash.override"], prefix="/stash/stoverride")
+router = APIRouter(tags=["Proxy"], prefix="/stash/stoverride")
 
 logger = logging.getLogger(__file__)
 
 
-@router.get("/rules/random")
+@router.get("/rules/random", summary="stash随机规则覆写生成")
 def rules_random(name: str = Query("name"), category: str = Query("category"), size: int = Query(100)):
     rules = [f"DOMAIN,{uuid.uuid4().hex}.com,DIRECT" for x in range(size)]
     data = {"name": name, "category": category, "rules": rules}
@@ -20,7 +20,7 @@ def rules_random(name: str = Query("name"), category: str = Query("category"), s
     return PlainTextResponse(res, headers={"Content-Disposition": "inline"})
 
 
-@router.get("/override")
+@router.get("/override", summary="Stash覆写修改")
 def override(
     url: HttpUrl = Query(..., description="覆写文件订阅地址"),
     name: str | None = Query(None),
@@ -49,7 +49,7 @@ def override(
     return PlainTextResponse(content=content)
 
 
-@router.get("/override/v2")
+@router.get("/override/v2", summary="Stash覆写修改V2")
 def override_v2(
     url: HttpUrl = Query(..., description="覆写文件订阅地址"),
     name: str | None = Query(None),
@@ -97,7 +97,7 @@ def override_v2(
     return PlainTextResponse(content=content)
 
 
-@router.get("/tiles/oil", summary="油价磁贴")
+@router.get("/tiles/oil", summary="Stash油价磁贴")
 def oil(provname: str = Query(..., description="省份名")):
     """
     provname=后面填写所在省份名，如不填写 默认江苏油价。provname的值不带"省"字 范例：provname=江苏，provname=上海，provname=广东。

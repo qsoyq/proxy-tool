@@ -7,12 +7,13 @@ from fastapi import APIRouter, Query
 from concurrent.futures import ThreadPoolExecutor
 
 executor = ThreadPoolExecutor()
-router = APIRouter(tags=["mikanani.rss"], prefix="/mikanani/rss")
+router = APIRouter(tags=["Utils"], prefix="/mikanani/rss")
 logger = logging.getLogger(__file__)
 
 
-@router.get("/")
+@router.get("/", summary="蜜柑计划订阅")
 def subscribe(token: str = Query(...)):
+    # TODO: add response scheme
     url = "https://mikanani.me/RSS/MyBangumi"
     resp = httpx.get(url, params={"token": token})
     resp.raise_for_status()

@@ -5,12 +5,12 @@ from schemas.webhook.railway import RailwayWebhookPayload
 from schemas.notifications.bark import BarkPushMessage, BarkPushLevel
 
 
-router = APIRouter(tags=["webhook"], prefix="/webhook/railway")
+router = APIRouter(tags=["Webhook"], prefix="/webhook/railway")
 
 logger = logging.getLogger(__file__)
 
 
-@router.options("/bark/{token}")
+@router.options("/bark/{token}", summary="Railway")
 def railway_webhook_options():
     return "ok"
 

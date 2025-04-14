@@ -3,7 +3,7 @@ from fastapi import APIRouter, Path
 from fastapi.responses import PlainTextResponse
 
 
-router = APIRouter(tags=["tool"], prefix="/apple")
+router = APIRouter(tags=["Utils"], prefix="/apple")
 
 logger = logging.getLogger(__file__)
 

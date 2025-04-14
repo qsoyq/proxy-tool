@@ -5,7 +5,7 @@ from fastapi.responses import PlainTextResponse
 import httpx
 
 
-router = APIRouter(tags=["iptv"], prefix="/iptv")
+router = APIRouter(tags=["Utils"], prefix="/iptv")
 
 logger = logging.getLogger(__file__)
 
@@ -22,7 +22,7 @@ async def fetch_iptv_content(url: str, user_agent: str, timeout: float) -> httpx
     return None
 
 
-@router.get("/subscribe", summary="订阅转换")
+@router.get("/subscribe", summary="IPTV订阅转换")
 def sub(
     user_agent: str = Query("AptvPlayer/1.3.9", description="User-Agent"),
     timeout: float = Query(3, description="单个订阅地址的超时时间"),
@@ -43,7 +43,7 @@ def sub(
     return PlainTextResponse(content)
 
 
-@router.get("/subscribe/v2", summary="订阅转换")
+@router.get("/subscribe/v2", summary="IPTV订阅转换")
 async def sub_v2(
     user_agent: str = Query("AptvPlayer/1.3.9", description="User-Agent"),
     timeout: float = Query(10, description="单个订阅地址的超时时间"),

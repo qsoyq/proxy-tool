@@ -15,12 +15,12 @@ class QxMatchRuleEnum(str, Enum):
     hostsuffix = "host-suffix"
 
 
-router = APIRouter(tags=["clash.config"], prefix="/clash/config")
+router = APIRouter(tags=["Proxy"], prefix="/clash/config")
 
 logger = logging.getLogger(__file__)
 
 
-@router.get("/qx/rules")
+@router.get("/qx/rules", summary="qx规则转clash")
 def qx(
     url: HttpUrl = Query(..., description="规则文件"),
     behavior: QxBehaviourEnum = Query(..., description="接受处理的行为"),
@@ -28,7 +28,7 @@ def qx(
     """将 qx 的规则配置文件转换为 clash 可识别的 rule-set 文件
     匹配规则支持:
         - host-suffix
-        行为
+
     """
     domains = []
     resp = httpx.get(str(url))
@@ -43,6 +43,5 @@ def qx(
         if type_ != QxMatchRuleEnum.hostsuffix:
             continue
         domains.append(f"+.{domain}")
-    logger.debug(f"count: {len(domains)}")
-    content = yaml.safe_dump({"payload": domains})
+    content = yaml.safe_dump({"payload": domains}, allow_unicode=True)
     return PlainTextResponse(content=content)

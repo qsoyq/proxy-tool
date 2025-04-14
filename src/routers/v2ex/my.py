@@ -25,7 +25,7 @@ class GetTopicsData:
     has_next_page: bool
 
 
-router = APIRouter(tags=["v2ex"], prefix="/v2ex/my")
+router = APIRouter(tags=["Utils"], prefix="/v2ex/my")
 
 logger = logging.getLogger(__file__)
 
@@ -41,16 +41,16 @@ def get_topics(session_key: str, page: int = 1) -> GetTopicsData:
     has_next_page = True if ele and "disable_now" not in ele.attrs.get("class", []) else False
 
     for item in items:
-        link = item.find("a", class_="topic-link")
-        title = link.text
-        tid = link.attrs["id"].split("-")[-1]
-        lastTouchedStr = item.find("span", class_="topic_info").find("span").attrs["title"]
+        link = item.find("a", class_="topic-link")  # type:ignore
+        title = link.text  # type:ignore
+        tid = link.attrs["id"].split("-")[-1]  # type:ignore
+        lastTouchedStr = item.find("span", class_="topic_info").find("span").attrs["title"]  # type:ignore
         last_touched = int(parser.parse(lastTouchedStr).timestamp())
         topics.append(Topic(id=tid, title=title, lastTouchedStr=lastTouchedStr, last_touched=last_touched))
     return GetTopicsData(topics=topics, has_next_page=has_next_page)
 
 
-@router.get("/topics", summary="收藏主题列表", response_model=GetTopicsRes)
+@router.get("/topics", summary="V2ex收藏主题列表", response_model=GetTopicsRes)
 def my_topics(
     session_key: str = Header(..., alias="A2", description="session, 对应 v2ex 网页请求中的 Cookie.A2字段"),
     page: int = Query(1, alias="p", description="页码"),

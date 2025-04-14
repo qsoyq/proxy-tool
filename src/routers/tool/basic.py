@@ -6,7 +6,7 @@ from fastapi.responses import HTMLResponse
 
 import random
 
-router = APIRouter(tags=["tool"], prefix="/tool")
+router = APIRouter(tags=["Utils"], prefix="/tool")
 
 logger = logging.getLogger(__file__)
 
