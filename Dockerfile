@@ -1,10 +1,9 @@
-FROM python:3.10
+FROM python:3.10.17
+# TODO: upgrade base image
 
 ENV TZ=Asia/Shanghai
 
 WORKDIR /app/
-
-ENV PYTHONPATH="/app:${PYTHONPATH}"
 
 COPY pyproject.toml pyproject.toml
 
@@ -22,4 +21,4 @@ RUN mkdir -p /logs
 
 EXPOSE 8000
 
-CMD python main.py -p 8000
+CMD ["python", "main.py", "-p", "8000"]
