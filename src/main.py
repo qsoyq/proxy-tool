@@ -32,6 +32,7 @@ import routers.nga.thread
 import routers.v2ex.nodes
 import routers.v2ex.my
 import routers.apple.location
+import routers.apple.ics
 import routers.iptv.sub
 from settings import AppSettings
 
@@ -60,6 +61,7 @@ app.include_router(routers.clash.basic.router, prefix=api_prefix)
 app.include_router(routers.clash.config.router, prefix=api_prefix)
 app.include_router(routers.stash.stoverride.router, prefix=api_prefix)
 app.include_router(routers.apple.location.router, prefix=api_prefix)
+app.include_router(routers.apple.ics.router, prefix=api_prefix)
 app.include_router(routers.iptv.sub.router, prefix=api_prefix)
 
 run_at_ts = int(time.time())

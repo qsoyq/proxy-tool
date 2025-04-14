@@ -53,6 +53,26 @@ test = ["anyio[trio]", "coverage[toml] (>=4.5)", "hypothesis (>=4.0)", "mock (>=
 trio = ["trio (<0.22)"]
 
 [[package]]
+name = "arrow"
+version = "1.3.0"
+description = "Better dates & times for Python"
+optional = false
+python-versions = ">=3.8"
+groups = ["main"]
+files = [
+    {file = "arrow-1.3.0-py3-none-any.whl", hash = "sha256:c728b120ebc00eb84e01882a6f5e7927a53960aa990ce7dd2b10f39005a67f80"},
+    {file = "arrow-1.3.0.tar.gz", hash = "sha256:d4540617648cb5f895730f1ad8c82a65f2dad0166f57b75f3ca54759c4d67a85"},
+]
+
+[package.dependencies]
+python-dateutil = ">=2.7.0"
+types-python-dateutil = ">=2.8.10"
+
+[package.extras]
+doc = ["doc8", "sphinx (>=7.0.0)", "sphinx-autobuild", "sphinx-autodoc-typehints", "sphinx_rtd_theme (>=1.3.0)"]
+test = ["dateparser (==1.*)", "pre-commit", "pytest", "pytest-cov", "pytest-mock", "pytz (==2021.1)", "simplejson (==3.*)"]
+
+[[package]]
 name = "asgiref"
 version = "3.8.1"
 description = "ASGI specs, helper code, and adapters"
@@ -104,7 +124,7 @@ version = "25.3.0"
 description = "Classes Without Boilerplate"
 optional = false
 python-versions = ">=3.8"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "attrs-25.3.0-py3-none-any.whl", hash = "sha256:427318ce031701fea540783410126f03899a97ffc6f61596ad581ac2e40e3bc3"},
     {file = "attrs-25.3.0.tar.gz", hash = "sha256:75d7cefc7fb576747b2c81b4442d4d4a1ce0900973527c011d1030fd3bf4af1b"},
@@ -780,6 +800,25 @@ files = [
     {file = "hyperframe-6.1.0-py3-none-any.whl", hash = "sha256:b03380493a519fce58ea5af42e4a42317bf9bd425596f7a0835ffce80f1a42e5"},
     {file = "hyperframe-6.1.0.tar.gz", hash = "sha256:f630908a00854a7adeabd6382b43923a4c4cd4b821fcb527e6ab9e15382a3b08"},
 ]
+
+[[package]]
+name = "ics"
+version = "0.7.2"
+description = "Python icalendar (rfc5545) parser"
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "ics-0.7.2-py2.py3-none-any.whl", hash = "sha256:5fcf4d29ec6e7dfcb84120abd617bbba632eb77b097722b7df70e48dbcf26103"},
+    {file = "ics-0.7.2.tar.gz", hash = "sha256:6743539bca10391635249b87d74fcd1094af20b82098bebf7c7521df91209f05"},
+]
+
+[package.dependencies]
+arrow = ">=0.11"
+attrs = ">=19.1.0"
+python-dateutil = "*"
+six = ">1.5"
+tatsu = ">4.2"
 
 [[package]]
 name = "identify"
@@ -1900,6 +1939,22 @@ anyio = ">=3.0.0,<4"
 full = ["itsdangerous", "jinja2", "python-multipart", "pyyaml", "requests"]
 
 [[package]]
+name = "tatsu"
+version = "5.13.1"
+description = "TatSu takes a grammar in a variation of EBNF as input, and outputs a memoizing PEG/Packrat parser in Python."
+optional = false
+python-versions = ">=3.10"
+groups = ["main"]
+files = [
+    {file = "TatSu-5.13.1-py3-none-any.whl", hash = "sha256:941e12df8798f444957600346c52a5ff3455f485de5b4570a3a71a00ed896a14"},
+    {file = "tatsu-5.13.1.tar.gz", hash = "sha256:df8c216eecd09af9b5b308624f1bfda1e4b5af3d3df1bdc4f331a1e8ea6bc012"},
+]
+
+[package.extras]
+colorization = ["colorama"]
+parproc = ["rich"]
+
+[[package]]
 name = "tinycss2"
 version = "1.4.0"
 description = "A tiny CSS parser"
@@ -2219,4 +2274,4 @@ dkim = ["dkimpy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.10"
-content-hash = "2dbb877b9766e452dc82e3137ae813b2b54e1935784757445cb0d9d486083516"
+content-hash = "1f440a086fcf0005c9384b12cb54592d4e8204ad7b0aaef5a88263a8ebe3557f"
