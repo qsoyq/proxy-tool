@@ -29,6 +29,8 @@ pip = "^24.3.1"
 pycairo = "^1.27.0"
 pyjwt = "^2.9.0"
 ics = "^0.7.2"
+dateparser = "^1.2.1"
+types-dateparser = "^1.2.0.20250408"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^6.2.5"
@@ -141,6 +143,7 @@ module = [
     "PyJWT",
     "utils",
     "ics",
-    "ics.alarm.display"
+    "ics.alarm.display",
+    "dateparser"
 ]
 ignore_missing_imports = true
