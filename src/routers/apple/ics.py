@@ -105,6 +105,7 @@ async def github_repo_issues(
         issues = res.json()
         if not issues:
             return PlainTextResponse("No related issue found.", status_code=404)
+        logger.info(f"{issues}")
         github_issues = [GithubIssue(**issue) for issue in issues]
 
     events = github_issues_to_calendar(github_issues)
