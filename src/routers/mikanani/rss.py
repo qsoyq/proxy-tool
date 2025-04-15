@@ -5,15 +5,15 @@ import httpx
 from functools import lru_cache
 from fastapi import APIRouter, Query
 from concurrent.futures import ThreadPoolExecutor
+from schemas.mikanani import MikananiResSchema, mikanani_rss_subscribe_responses
 
 executor = ThreadPoolExecutor()
 router = APIRouter(tags=["Utils"], prefix="/mikanani/rss")
 logger = logging.getLogger(__file__)
 
 
-@router.get("/", summary="蜜柑计划订阅")
-def subscribe(token: str = Query(...)):
-    # TODO: add response scheme
+@router.get("/", summary="蜜柑计划订阅", response_model=MikananiResSchema, responses=mikanani_rss_subscribe_responses)
+def subscribe(token: str = Query(...)) -> MikananiResSchema:
     url = "https://mikanani.me/RSS/MyBangumi"
     resp = httpx.get(url, params={"token": token})
     resp.raise_for_status()
@@ -24,8 +24,7 @@ def subscribe(token: str = Query(...)):
     for item in body["rss"]["channel"]["item"]:
         title = item["title"]
         item["real_title"] = re.sub(pattern, "", title).strip()
-
-    return body
+    return MikananiResSchema(**body)
 
 
 def add_image_url(item: dict) -> dict:
