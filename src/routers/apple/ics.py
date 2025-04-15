@@ -69,7 +69,7 @@ async def github_repo_issues(
     state: GithubIssueState | None = Query(None),
     sort: GithubIssueSort | None = Query(None),
     direction: GithubIssueDirection | None = Query(None),
-    per_page: int | None = Query(None, ge=1, le=100),
+    per_page: int = Query(100, ge=1, le=100),
     page: int | None = Query(None, ge=1),
 ):
     """
@@ -83,6 +83,7 @@ async def github_repo_issues(
         "Authorization": f"Bearer {token}",
         "X-GitHub-Api-Version": "2022-11-28",
     }
+
     params = {
         "milestone": milestone,
         "assignee": assignee,
@@ -98,15 +99,16 @@ async def github_repo_issues(
     }
 
     params = {k: v for k, v in params.items() if v is not None}
+    github_issues = []
     async with httpx.AsyncClient(headers=headers) as client:
-        res = await client.get(url, params=params)
-        if res.is_error:
-            return PlainTextResponse(res.text, status_code=res.status_code)
-        issues = res.json()
-        if not issues:
-            return PlainTextResponse("No related issue found.", status_code=404)
-        logger.info(f"{issues}")
-        github_issues = [GithubIssue(**issue) for issue in issues]
+        while True:
+            res = await client.get(url, params=params)
+            if res.is_error:
+                return PlainTextResponse(res.text, status_code=res.status_code)
+            issues = list(res.json())
+            github_issues.extend([GithubIssue(**issue) for issue in issues])
+            if len(issues) < per_page:
+                break
 
     events = github_issues_to_calendar(github_issues)
 
