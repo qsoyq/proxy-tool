@@ -2,6 +2,8 @@ import re
 import logging
 import httpx
 import dateparser
+import asyncio
+from bs4 import BeautifulSoup
 from fastapi import APIRouter, Query, Path
 from fastapi.responses import PlainTextResponse
 from datetime import datetime, timedelta
@@ -37,6 +39,40 @@ def github_issues_to_calendar(issues: list[GithubIssue]) -> list[Event]:
         e.uid = str(issue.id)
         events.append(e)
         logger.info(f"{e}")
+    return events
+
+
+async def vlrgg_event_to_calendar(vlrgg_event: str) -> list[Event]:
+    events = []
+    async with httpx.AsyncClient() as client:
+        url = f"https://www.vlr.gg/event/matches/{vlrgg_event}/"
+        resp = await client.get(url)
+        document = BeautifulSoup(resp.text, "lxml")
+        wf_title = document.select_one('h1[class="wf-title"]').text.strip()  # type: ignore
+        wf_label_list = document.select('div[class="wf-label mod-large"]')
+        label_list = [label.text.strip() for label in wf_label_list]
+        wf_card_list = document.select('div[class="wf-card"]')
+
+        for index, wf_card in enumerate(wf_card_list):
+            date = label_list[index]
+            for item in wf_card.select("a"):
+                match_url = f'https://www.vlr.gg{item["href"]}'
+                card_time = item.select_one("div[class='match-item-time']").text.strip()  # type: ignore
+                # 网站默认使用 PDT 时区, 此处时区需要持续观察
+                match_datetime = dateparser.parse(f"{date} {card_time} PDT")
+                teams = []
+                for team in item.select("div[class='match-item-vs-team-name']"):
+                    team_text = team.select_one("div[class='text-of']")
+                    if team_text:
+                        teams.append(team_text.text.strip())
+
+                e = Event()
+                if match_datetime:
+                    e.begin = e.end = match_datetime
+                e.name = f'{" vs ".join(teams)}'
+                e.description = f"{wf_title}"
+                e.url = match_url
+                events.append(e)
     return events
 
 
@@ -115,4 +151,14 @@ async def github_repo_issues(
     c = Calendar()
     for e in events:
         c.events.add(e)
+    return PlainTextResponse(c.serialize())
+
+
+@router.get("/ics/vlrgg/event/matches", summary="Valorant 赛事订阅")
+async def vlrgg(events: list[str] = Query(..., description="赛事ID")):
+    """赛程数据源自: https://www.vlr.gg/events"""
+    results = await asyncio.gather(*[vlrgg_event_to_calendar(event) for event in events])
+    c = Calendar()
+    for result in results:
+        c.events |= set(result)
     return PlainTextResponse(c.serialize())
