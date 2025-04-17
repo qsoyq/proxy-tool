@@ -28,6 +28,7 @@ import routers.convert.xml
 import routers.convert.svg
 import routers.convert.curl
 import routers.mikanani.rss
+import routers.mikanani.bangumi
 import routers.nga.thread
 import routers.v2ex.nodes
 import routers.v2ex.my
@@ -50,6 +51,7 @@ app.include_router(routers.convert.xml.router, prefix=api_prefix)
 app.include_router(routers.convert.svg.router, prefix=api_prefix)
 app.include_router(routers.convert.curl.router, prefix=api_prefix)
 app.include_router(routers.mikanani.rss.router, prefix=api_prefix)
+app.include_router(routers.mikanani.bangumi.router, prefix=api_prefix)
 app.include_router(routers.nga.thread.router, prefix=api_prefix)
 app.include_router(routers.v2ex.nodes.router, prefix=api_prefix)
 app.include_router(routers.v2ex.my.router, prefix=api_prefix)
