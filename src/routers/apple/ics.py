@@ -72,6 +72,7 @@ async def vlrgg_event_to_calendar(vlrgg_event: str) -> list[Event]:
                 e.name = f'{" vs ".join(teams)}'
                 e.description = f"{wf_title}"
                 e.url = match_url
+                logger.debug(f"[Valorant Matches]: {e.name} - {e.begin} - {e.end}")
                 events.append(e)
     return events
 
