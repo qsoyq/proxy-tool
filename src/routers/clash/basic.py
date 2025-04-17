@@ -36,7 +36,7 @@ def subscribe(
     benchmark_url: str | None = Query(
         None, description="延迟测试连接, 如: http://cp.cloudflare.com/", alias="benchmark-url"
     ),
-    benchmark_timeout: float | None = Query(1, description="延迟测试超时，单位: 秒", alias="benchmark-timeout"),
+    benchmark_timeout: float | None = Query(None, description="延迟测试超时，单位: 秒", alias="benchmark-timeout"),
 ):
     headers = {}
     if user_agent is not None:
