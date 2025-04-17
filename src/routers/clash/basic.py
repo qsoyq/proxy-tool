@@ -33,7 +33,9 @@ def subscribe(
     url: str = Query(..., description="订阅链接"),
     additional_prefix: str | None = Query(None, description="为代理节点添加前缀", alias="additional-prefix"),
     proxy_provider: bool = Query(False, description="是否只返回节点", alias="proxy-provider"),
-    benchmark_url: str | None = Query("http://cp.cloudflare.com/", description="延迟测试连接", alias="benchmark-url"),
+    benchmark_url: str | None = Query(
+        None, description="延迟测试连接, 如: http://cp.cloudflare.com/", alias="benchmark-url"
+    ),
     benchmark_timeout: float | None = Query(1, description="延迟测试超时，单位: 秒", alias="benchmark-timeout"),
 ):
     headers = {}
