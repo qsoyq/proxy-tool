@@ -6,7 +6,7 @@ import asyncio
 from bs4 import BeautifulSoup
 from fastapi import APIRouter, Query, Path
 from fastapi.responses import PlainTextResponse
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from ics import Calendar, Event
 from ics.alarm.display import DisplayAlarm
 from schemas.github.issues import GithubIssueState, GithubIssueSort, GithubIssueDirection, GithubIssue
@@ -67,11 +67,13 @@ async def vlrgg_event_to_calendar(vlrgg_event: str) -> list[Event]:
                         teams.append(team_text.text.strip())
 
                 e = Event()
-                if match_datetime:
-                    e.begin = e.end = match_datetime
                 e.name = f'{" vs ".join(teams)}'
                 e.description = f"{wf_title}"
                 e.url = match_url
+                if match_datetime:
+                    e.begin = e.end = match_datetime.astimezone(timezone.utc)
+                else:
+                    logger.warning(f"can't parse match time: {e.name} - {match_url}")
                 logger.debug(f"[Valorant Matches]: {e.name} - {e.begin} - {e.end}")
                 events.append(e)
     return events
