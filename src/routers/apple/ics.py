@@ -54,7 +54,7 @@ async def vlrgg_event_to_calendar(vlrgg_event: str) -> list[Event]:
         wf_card_list = document.select('div[class="wf-card"]')
 
         for index, wf_card in enumerate(wf_card_list):
-            date = label_list[index].replace("Today", "").strip()
+            date = label_list[index].replace("Today", "").replace("Yesterday", "").strip()
             for item in wf_card.select("a"):
                 match_url = f'https://www.vlr.gg{item["href"]}'
                 card_time = item.select_one("div[class='match-item-time']").text.strip()  # type: ignore
