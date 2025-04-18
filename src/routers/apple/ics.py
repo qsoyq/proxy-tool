@@ -74,7 +74,7 @@ async def vlrgg_event_to_calendar(vlrgg_event: str) -> list[Event]:
                     e.begin = e.end = match_datetime.astimezone(timezone.utc)
                 else:
                     logger.warning(f"can't parse match time: {e.name} - {match_url}")
-                logger.debug(f"[Valorant Matches]: {e.name} - {e.begin} - {e.end}")
+                logger.debug(f"[Valorant Matches]: {e.name} - {date} {card_time} - {e.begin} - {e.end}")
                 events.append(e)
     return events
 
