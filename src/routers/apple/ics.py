@@ -38,8 +38,19 @@ def github_issues_to_calendar(issues: list[GithubIssue]) -> list[Event]:
         e.url = issue.html_url
         e.uid = str(issue.id)
         events.append(e)
-        logger.info(f"{e}")
+        logger.debug(f"[github_issues_to_calendar]: {e}")
     return events
+
+
+async def fetch_vlrgg_event_match_time(url) -> datetime | None:
+    async with httpx.AsyncClient() as client:
+        resp = await client.get(url)
+        resp.raise_for_status()
+        document = BeautifulSoup(resp.text, "lxml")
+        texts = [x.text.strip() for x in document.select("div[class='moment-tz-convert']")]
+        datetimestr = " ".join(texts)
+    logger.debug(f"[VLRGG Event Match Time]: {datetimestr} - {url}")
+    return dateparser.parse(datetimestr)  # type: ignore
 
 
 async def vlrgg_event_to_calendar(vlrgg_event: str) -> list[Event]:
@@ -49,17 +60,11 @@ async def vlrgg_event_to_calendar(vlrgg_event: str) -> list[Event]:
         resp = await client.get(url)
         document = BeautifulSoup(resp.text, "lxml")
         wf_title = document.select_one('h1[class="wf-title"]').text.strip()  # type: ignore
-        wf_label_list = document.select('div[class="wf-label mod-large"]')
-        label_list = [label.text.strip() for label in wf_label_list]
         wf_card_list = document.select('div[class="wf-card"]')
 
-        for index, wf_card in enumerate(wf_card_list):
-            date = label_list[index].replace("Today", "").replace("Yesterday", "").strip()
+        for wf_card in wf_card_list:
             for item in wf_card.select("a"):
                 match_url = f'https://www.vlr.gg{item["href"]}'
-                card_time = item.select_one("div[class='match-item-time']").text.strip()  # type: ignore
-                # 网站默认使用 PDT 时区, 此处时区需要持续观察
-                match_datetime = dateparser.parse(f"{date} {card_time} PDT")
                 teams = []
                 for team in item.select("div[class='match-item-vs-team-name']"):
                     team_text = team.select_one("div[class='text-of']")
@@ -70,11 +75,12 @@ async def vlrgg_event_to_calendar(vlrgg_event: str) -> list[Event]:
                 e.name = f'{" vs ".join(teams)}'
                 e.description = f"{wf_title}"
                 e.url = match_url
+                match_datetime = await fetch_vlrgg_event_match_time(match_url)
                 if match_datetime:
                     e.begin = e.end = match_datetime.astimezone(timezone.utc)
                 else:
                     logger.warning(f"can't parse match time: {e.name} - {match_url}")
-                logger.debug(f"[Valorant Matches]: {e.name} - {date} {card_time} - {e.begin} - {e.end}")
+                logger.debug(f"[Valorant Matches]: {e.name} - {e.begin} - {e.end}")
                 events.append(e)
     return events
 
