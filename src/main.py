@@ -68,7 +68,7 @@ app.include_router(routers.iptv.sub.router, prefix=api_prefix)
 
 run_at_ts = int(time.time())
 run_at = datetime.fromtimestamp(run_at_ts).strftime("%Y-%m-%d %H:%M:%S")
-version = "0.1.6"
+version = "0.1.7"
 
 
 class PingRes(BaseModel):
