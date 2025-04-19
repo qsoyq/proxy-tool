@@ -18,7 +18,7 @@ router = APIRouter(tags=["Utils"], prefix="/apple")
 logger = logging.getLogger(__file__)
 
 fetch_vlrgg_match_time_semaphore = asyncio.Semaphore(AppSettings().ics_fetch_vlrgg_match_time_semaphore)
-vlrgg_match_time_memo: dict[str, datetime] = {}
+vlrgg_match_time_memo: dict[str, int] = {}
 
 
 def github_issues_to_calendar(issues: list[GithubIssue]) -> list[Event]:
@@ -51,16 +51,16 @@ def get_cached_vlrgg_match_time(url: str) -> datetime | None:
 
     cached = vlrgg_match_time_memo.get(url)
     if cached:
-        cached = cached.astimezone(timezone.utc)
+        cached_match_datetime = datetime.fromtimestamp(cached).astimezone(timezone.utc)
         now = datetime.now().astimezone(timezone.utc)
         max_datetime = now + timedelta(hours=6)
         min_datetime = now - timedelta(hours=6)
-        if min_datetime < cached < max_datetime:
+        if min_datetime < cached_match_datetime < max_datetime:
             logger.debug(f"[get_cached_vlrgg_match_time]: skip for {url}")
             return None
         else:
             logger.debug(f"[get_cached_vlrgg_match_time]: cache hit for {url}, {cached}")
-            return cached
+            return cached_match_datetime
     logger.debug(f"[get_cached_vlrgg_match_time]: cache miss for {url}")
     return None
 
@@ -78,9 +78,9 @@ async def fetch_vlrgg_event_match_time(url: str) -> tuple[str, datetime | None]:
             texts = [x.text.strip() for x in document.select("div[class='moment-tz-convert']")]
             datetimestr = " ".join(texts)
             logger.debug(f"[VLRGG Event Match Time]: {datetimestr} - {url}")
-            datetime_ = dateparser.parse(datetimestr)
-            if datetime_:
-                vlrgg_match_time_memo[url] = datetime_
+            match_datetime = dateparser.parse(datetimestr)
+            if match_datetime:
+                vlrgg_match_time_memo[url] = int(match_datetime.timestamp())
             return (url, dateparser.parse(datetimestr))  # type: ignore
 
 
