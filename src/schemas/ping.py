@@ -5,10 +5,7 @@ from pathlib import Path
 
 import psutil
 from pydantic import BaseModel, Field
-
-run_at_ts = int(time.time())
-run_at = datetime.fromtimestamp(run_at_ts).strftime("%Y-%m-%d %H:%M:%S")
-version = "0.1.15"
+from settings import run_at, run_at_ts, version
 
 
 def get_default_memory() -> "MemoryUsage":

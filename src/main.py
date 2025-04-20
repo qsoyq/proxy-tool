@@ -1,4 +1,6 @@
+import gc
 import logging
+import asyncio
 
 
 import typer
@@ -33,7 +35,7 @@ import routers.apple.location
 import routers.apple.ics
 import routers.iptv.sub
 from settings import AppSettings
-from schemas.ping import ping_responses, PingRes
+from schemas.ping import ping_responses, PingRes, get_default_memory
 
 cmd = typer.Typer()
 app = FastAPI()
@@ -64,9 +66,37 @@ app.include_router(routers.apple.location.router, prefix=api_prefix)
 app.include_router(routers.apple.ics.router, prefix=api_prefix)
 app.include_router(routers.iptv.sub.router, prefix=api_prefix)
 
+logger = logging.getLogger(__file__)
+
+
+@app.on_event("startup")
+async def startup_event():
+    async def background_gc():
+        while True:
+            memory = get_default_memory()
+            memory_percent = float(memory.percent[:-1])
+            settings = AppSettings()
+            if memory_percent >= settings.gc_trigger_memory_percent_limit:
+                logger.debug(
+                    f"[background_gc]: trigger gc collect because memory exceeds 80, current: {memory_percent}",
+                )
+                gc.collect()
+            await asyncio.sleep(settings.gc_trigger_memory_percent_interval)
+
+    app.state.background_gc_task = asyncio.create_task(background_gc())
+
+
+@app.on_event("shutdown")
+async def shutdown():
+    task: asyncio.Task = app.state.background_gc_task
+    if not task.done:
+        task.cancel()
+        logger.info("[shutdown]: background_gc task cancelled")
+
 
 @app.get("/ping", response_model=PingRes, tags=["Basic"], responses=ping_responses)
 async def ping():
+    print(app.state.background_gc_task)
     return PingRes()
 
 
