@@ -31,6 +31,7 @@ pyjwt = "^2.9.0"
 ics = "^0.7.2"
 dateparser = "^1.2.1"
 types-dateparser = "^1.2.0.20250408"
+psutil = "^7.0.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^6.2.5"
@@ -128,22 +129,20 @@ explicit_package_bases = true
 
 [[tool.mypy.overrides]]
 module = [
+    "routers.*",
+    "schemas.*",
+    "settings.*",
+    "models.*",
+    "utils.*",
     "uvicorn",
     "oss2",
     "yaml.*",
-    "routers.*",
-    "schemas.*",
-    "settings",
-    "models",
     "xmltodict",
     "yagmail",
     "bs4",
     "deps",
     "cairosvg",
     "PyJWT",
-    "utils",
-    "ics",
-    "ics.alarm.display",
-    "dateparser"
+    "ics.*"
 ]
 ignore_missing_imports = true

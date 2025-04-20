@@ -4,5 +4,6 @@ services:
     build:
       dockerfile: ./Dockerfile
     restart: unless-stopped
+    mem_limit: 256m
     ports:
       - 8000:8000

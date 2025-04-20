@@ -1,13 +1,10 @@
-import time
 import logging
-from datetime import datetime
 
 
 import typer
 import uvicorn
 
 from fastapi import FastAPI
-from pydantic import BaseModel, Field
 
 
 import routers.basic
@@ -36,6 +33,7 @@ import routers.apple.location
 import routers.apple.ics
 import routers.iptv.sub
 from settings import AppSettings
+from schemas.ping import ping_responses, PingRes
 
 cmd = typer.Typer()
 app = FastAPI()
@@ -66,21 +64,8 @@ app.include_router(routers.apple.location.router, prefix=api_prefix)
 app.include_router(routers.apple.ics.router, prefix=api_prefix)
 app.include_router(routers.iptv.sub.router, prefix=api_prefix)
 
-run_at_ts = int(time.time())
-run_at = datetime.fromtimestamp(run_at_ts).strftime("%Y-%m-%d %H:%M:%S")
-version = "0.1.13"
 
-
-class PingRes(BaseModel):
-    message: str = "pong"
-    timestamp: int = Field(default_factory=lambda: int(time.time()))
-    current: str = Field(default_factory=lambda: datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    run_at_ts: int = run_at_ts
-    run_at: str = run_at
-    version: str = version
-
-
-@app.get("/ping", response_model=PingRes, tags=["Basic"])
+@app.get("/ping", response_model=PingRes, tags=["Basic"], responses=ping_responses)
 async def ping():
     return PingRes()
 
