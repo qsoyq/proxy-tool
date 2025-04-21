@@ -45,3 +45,19 @@ def qx(
         domains.append(f"+.{domain}")
     content = yaml.safe_dump({"payload": domains}, allow_unicode=True)
     return PlainTextResponse(content=content)
+
+
+@router.get("/qx/nocomments", summary="移除文本中的部分注释")
+async def qx_no_comments(
+    url: HttpUrl = Query(..., description="规则文件"),
+):
+    """script-hub 处理带有注释的 qx 规则会存在异常"""
+    resp = httpx.get(str(url), verify=False)
+    resp.raise_for_status()
+    lines = []
+    for line in resp.text.split("\n"):
+        if line.startswith("#!") or not line.startswith("#"):
+            if line:
+                lines.append(line)
+    content = "\n\n".join(lines)
+    return PlainTextResponse(content=content)
