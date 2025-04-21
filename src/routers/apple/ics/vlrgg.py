@@ -55,7 +55,6 @@ async def fetch_vlrgg_event_match_time(url: str) -> tuple[str, datetime | None]:
                 logger.debug(f"[VLRGG Event Match Time]: {utc_ts} - {url}")
                 match_datetime = dateparser.parse(utc_ts)
             if match_datetime:
-                match_datetime = match_datetime.replace(tzinfo=timezone.utc)
                 vlrgg_match_time_memo[url] = int(match_datetime.timestamp())
             return (url, match_datetime)
 
