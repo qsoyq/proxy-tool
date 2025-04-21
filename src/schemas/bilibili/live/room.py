@@ -62,3 +62,36 @@ class LiveRoomResponseSchema(BaseModel):
 
 class LiveRoomListRes(BaseModel):
     list: list[LiveRoomResponseSchema]
+
+
+live_room_list_success_example = {
+    "list": [
+        {
+            "userInfo": {
+                "uid": 3494368814041403,
+                "uname": "莓泥小酱",
+                "face": "https://i2.hdslb.com/bfs/face/98c9bbc2edbd32e9873941b9af9cddb985622386.jpg",
+            },
+            "roomInfo": {
+                "uid": 3494368814041403,
+                "room_id": 30167396,
+                "title": "【歌杂】小唱一晚！",
+                "description": "",
+                "live_status": 1,
+                "live_time": "2025-04-22 02:11:38",
+                "user_cover": "https://i0.hdslb.com/bfs/live/new_room_cover/ca7fc707cc2edda2707ab27ff0458e5e82e87d5e.jpg",
+                "keyframe": "https://i0.hdslb.com/bfs/live-key-frame/keyframe04220340000030167396pocyax.jpg",
+            },
+            "isAlive": True,
+            "pubDate": "2025-04-22T02:11:38",
+            "roomLink": "https://live.bilibili.com/30167396",
+        }
+    ]
+}
+
+get_live_room_list_responses: dict[int | str, dict[str, object]] = {
+    200: {
+        "description": "200 Successful Response",
+        "content": {"application/json": {"example": live_room_list_success_example}},
+    }
+}
