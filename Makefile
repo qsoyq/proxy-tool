@@ -14,3 +14,6 @@ precommit:
 
 mypy:
 	@mypy .
+
+test:
+	@PYTHONPATH=./src pytest

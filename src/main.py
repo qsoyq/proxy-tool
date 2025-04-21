@@ -100,7 +100,7 @@ async def shutdown():
 
 @app.get("/ping", response_model=PingRes, tags=["Basic"], responses=ping_responses)
 async def ping():
-    print(app.state.background_gc_task)
+    assert getattr(app.state, "background_gc_task", None)
     return PingRes()
 
 

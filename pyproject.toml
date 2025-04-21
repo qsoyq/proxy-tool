@@ -143,6 +143,7 @@ module = [
     "deps",
     "cairosvg",
     "PyJWT",
-    "ics.*"
+    "ics.*",
+    "main"
 ]
 ignore_missing_imports = true
