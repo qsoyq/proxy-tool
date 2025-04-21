@@ -51,7 +51,7 @@ async def fetch_vlrgg_event_match_time(url: str) -> tuple[str, datetime | None]:
             match_datetime = None
             if tag:
                 utc_ts = tag.attrs["data-utc-ts"]
-                utc_ts = f"{utc_ts} EST"
+                utc_ts = f"{utc_ts} EDT"
                 logger.debug(f"[VLRGG Event Match Time]: {utc_ts} - {url}")
                 match_datetime = dateparser.parse(utc_ts)
             if match_datetime:
