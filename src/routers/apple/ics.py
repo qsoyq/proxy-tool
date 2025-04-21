@@ -53,8 +53,8 @@ def get_cached_vlrgg_match_time(url: str) -> datetime | None:
     if cached:
         cached_match_datetime = datetime.fromtimestamp(cached).astimezone(timezone.utc)
         now = datetime.now().astimezone(timezone.utc)
-        max_datetime = now + timedelta(hours=6)
-        min_datetime = now - timedelta(hours=6)
+        max_datetime = now + timedelta(hours=12)
+        min_datetime = now - timedelta(hours=3)
         if min_datetime < cached_match_datetime < max_datetime:
             logger.debug(f"[get_cached_vlrgg_match_time]: skip for {url}")
             return None
@@ -75,13 +75,17 @@ async def fetch_vlrgg_event_match_time(url: str) -> tuple[str, datetime | None]:
             resp = await client.get(url)
             resp.raise_for_status()
             document = BeautifulSoup(resp.text, "lxml")
-            texts = [x.text.strip() for x in document.select("div[class='moment-tz-convert']")]
-            datetimestr = " ".join(texts)
-            logger.debug(f"[VLRGG Event Match Time]: {datetimestr} - {url}")
-            match_datetime = dateparser.parse(datetimestr)
+            tag = document.select_one("div[class='moment-tz-convert']")
+            match_datetime = None
+            if tag:
+                utc_ts = tag.attrs["data-utc-ts"]
+                utc_ts = f"{utc_ts} EST"
+                logger.debug(f"[VLRGG Event Match Time]: {utc_ts} - {url}")
+                match_datetime = dateparser.parse(utc_ts)
             if match_datetime:
+                match_datetime = match_datetime.replace(tzinfo=timezone.utc)
                 vlrgg_match_time_memo[url] = int(match_datetime.timestamp())
-            return (url, dateparser.parse(datetimestr))  # type: ignore
+            return (url, match_datetime)
 
 
 async def add_vlrgg_event_march_time(events: list[Event]):
