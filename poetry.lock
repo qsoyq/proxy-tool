@@ -957,6 +957,17 @@ files = [
 ]
 
 [[package]]
+name = "json2html"
+version = "1.3.0"
+description = "JSON to HTML Table Representation"
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "json2html-1.3.0.tar.gz", hash = "sha256:8951a53662ae9cfd812685facdba693fc950ffc1c1fd1a8a2d3cf4c34600689c"},
+]
+
+[[package]]
 name = "lxml"
 version = "5.3.2"
 description = "Powerful and Pythonic XML processing library combining libxml2/libxslt with the ElementTree API."
@@ -1750,6 +1761,26 @@ docs = ["sphinx", "sphinx-rtd-theme", "zope.interface"]
 tests = ["coverage[toml] (==5.0.4)", "pytest (>=6.0.0,<7.0.0)"]
 
 [[package]]
+name = "pyopenssl"
+version = "25.0.0"
+description = "Python wrapper module around the OpenSSL library"
+optional = false
+python-versions = ">=3.7"
+groups = ["main"]
+files = [
+    {file = "pyOpenSSL-25.0.0-py3-none-any.whl", hash = "sha256:424c247065e46e76a37411b9ab1782541c23bb658bf003772c3405fbaa128e90"},
+    {file = "pyopenssl-25.0.0.tar.gz", hash = "sha256:cd2cef799efa3936bb08e8ccb9433a575722b9dd986023f1cabc4ae64e9dac16"},
+]
+
+[package.dependencies]
+cryptography = ">=41.0.5,<45"
+typing-extensions = {version = ">=4.9", markers = "python_version < \"3.13\" and python_version >= \"3.8\""}
+
+[package.extras]
+docs = ["sphinx (!=5.2.0,!=5.2.0.post0,!=7.2.5)", "sphinx_rtd_theme"]
+test = ["pretend", "pytest (>=3.0.1)", "pytest-rerunfailures"]
+
+[[package]]
 name = "pytest"
 version = "6.2.5"
 description = "pytest: simple powerful testing with Python"
@@ -1800,6 +1831,22 @@ files = [
     {file = "python_multipart-0.0.17-py3-none-any.whl", hash = "sha256:15dc4f487e0a9476cc1201261188ee0940165cffc94429b6fc565c4d3045cb5d"},
     {file = "python_multipart-0.0.17.tar.gz", hash = "sha256:41330d831cae6e2f22902704ead2826ea038d0419530eadff3ea80175aec5538"},
 ]
+
+[[package]]
+name = "python-ssl-checker"
+version = "1.1.0"
+description = "Python script that collects SSL/TLS information from hosts"
+optional = false
+python-versions = ">=3.6"
+groups = ["main"]
+files = [
+    {file = "python_ssl_checker-1.1.0-py3-none-any.whl", hash = "sha256:1bd7118b15952f1945a5575222772e5dbfce464311ab00a5731f76f46dc61578"},
+    {file = "python_ssl_checker-1.1.0.tar.gz", hash = "sha256:bfbcc4243b23c500eafef83a8b3940c8a8ace85cc25d70ca0355be47440228dd"},
+]
+
+[package.dependencies]
+json2html = "*"
+pyopenssl = "*"
 
 [[package]]
 name = "pytz"
@@ -2485,4 +2532,4 @@ dkim = ["dkimpy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.10"
-content-hash = "80ce2a20eee07bf55e9257a57e9c36e66de1e987cceb1259ff610083e5793b39"
+content-hash = "1864b09a902a5df98b2bbbea0d560103d7cb07daf02290ebf3ceab26e3d1ccdb"

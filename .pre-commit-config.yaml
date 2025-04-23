@@ -52,3 +52,4 @@ repos:
           - types-dateparser
           - types-psutil
           - pytest
+          - python-ssl-checker

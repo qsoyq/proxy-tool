@@ -32,6 +32,7 @@ ics = "^0.7.2"
 dateparser = "^1.2.1"
 types-dateparser = "^1.2.0.20250408"
 psutil = "^7.0.0"
+python-ssl-checker = "^1.1.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^6.2.5"
@@ -144,6 +145,7 @@ module = [
     "cairosvg",
     "PyJWT",
     "ics.*",
-    "main"
+    "main",
+    "ssl_checker"
 ]
 ignore_missing_imports = true
