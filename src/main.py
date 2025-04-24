@@ -18,6 +18,7 @@ import routers.store.memory
 import routers.clash.basic
 import routers.clash.config
 import routers.stash.stoverride
+import routers.stash.ruleset
 import routers.network.dns.doh
 import routers.network.proxy.reverse
 import routers.network.url.redirect
@@ -66,6 +67,7 @@ app.include_router(routers.network.ssl.router, prefix=api_prefix)
 app.include_router(routers.clash.basic.router, prefix=api_prefix)
 app.include_router(routers.clash.config.router, prefix=api_prefix)
 app.include_router(routers.stash.stoverride.router, prefix=api_prefix)
+app.include_router(routers.stash.ruleset.router, prefix=api_prefix)
 app.include_router(routers.apple.location.router, prefix=api_prefix)
 app.include_router(routers.apple.ics.router, prefix=api_prefix)
 app.include_router(routers.apple.ics.github.router, prefix=api_prefix)
