@@ -1,10 +1,10 @@
 import os
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 import psutil
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 from settings import run_at, run_at_ts, version
 
 
@@ -36,6 +36,25 @@ def get_memory_max() -> float | None:
     return None
 
 
+def format_timedelta(td: timedelta) -> str:
+    days = td.days
+    hours, remainder = divmod(td.seconds, 3600)
+    minutes, seconds = divmod(remainder, 60)
+
+    formatted = ""
+    if days:
+        formatted = f"{formatted}{days}d"
+    if hours:
+        formatted = f"{formatted}{hours}h"
+    if minutes:
+        formatted = f"{formatted}{minutes}m"
+    if seconds:
+        formatted = f"{formatted}{seconds}s"
+
+    formatted = f"{days}d{hours}h{minutes}m{seconds}s"
+    return formatted
+
+
 class MemoryUsage(BaseModel):
     """仅限在容器中运行时，max 有效"""
 
@@ -57,7 +76,19 @@ class PingRes(BaseModel):
     run_at_ts: int = run_at_ts
     run_at: str = run_at
     version: str = version
+    uptime: str = Field("")
     usage: Usage = Field(default_factory=Usage)
+
+    @validator("uptime", always=True)
+    def set_uptime(cls, v, values):
+        run_at_ts = values.get("run_at_ts", "")
+        current = values.get("timestamp", "")
+        uptime = ""
+        if run_at_ts and current:
+            delta = datetime.fromtimestamp(current) - datetime.fromtimestamp(run_at_ts)
+            uptime = format_timedelta(delta)
+
+        return uptime or "N/A"
 
 
 ping_response_example = {
