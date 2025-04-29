@@ -115,3 +115,22 @@ def oil(provname: str = Query(..., description="省份名")):
             url: https://raw.githubusercontent.com/deezertidal/Surge_Module/master/files/oil.js
     """
     return PlainTextResponse(inspect.cleandoc(payload.format(provname=provname)))
+
+
+@router.get("/tiles/github/rate-limit", summary="绕过针对 CN 的 `You have triggered a rate limit` 限制")
+def github_rate_limit():
+    """ """
+    content = """
+    name: Github Rate Limit
+    desc: |-
+        绕过针对 CN 的 `You have triggered a rate limit` 限制
+    category: enhance
+    icon: https://raw.githubusercontent.com/qsoyq/icons/main/assets/icon/github.png
+    http:
+        mitm:
+            - "gist.githubusercontent.com"
+            - "raw.githubusercontent.com"
+        header-rewrite:
+            - https://(gist|raw).githubusercontent.com request-replace Accept-Language en-us
+    """
+    return PlainTextResponse(inspect.cleandoc(content))
