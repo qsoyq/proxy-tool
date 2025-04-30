@@ -117,9 +117,10 @@ def oil(provname: str = Query(..., description="省份名")):
     return PlainTextResponse(inspect.cleandoc(payload.format(provname=provname)))
 
 
-@router.get("/tiles/github/rate-limit", summary="绕过针对 CN 的 `You have triggered a rate limit` 限制")
+@router.get("/tiles/github/rate-limit", summary="GitHub访问429限制")
 def github_rate_limit():
-    """ """
+    """绕过针对 CN 的 `You have triggered a rate limit` 限制"""
+
     content = """
     name: Github Rate Limit
     desc: |-
@@ -130,7 +131,8 @@ def github_rate_limit():
         mitm:
             - "gist.githubusercontent.com"
             - "raw.githubusercontent.com"
+            - "avatars.githubusercontent.com"
         header-rewrite:
-            - https://(gist|raw).githubusercontent.com request-replace Accept-Language en-us
+            - https://(avatars|gist|raw).githubusercontent.com request-replace Accept-Language en-us
     """
     return PlainTextResponse(inspect.cleandoc(content))
