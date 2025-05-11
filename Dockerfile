@@ -11,7 +11,7 @@ COPY poetry.lock poetry.lock
 
 RUN pip install poetry
 
-RUN poetry config virtualenvs.create false
+RUN poetry config virtualenvs.create true
 
 RUN poetry install --no-root
 
@@ -21,4 +21,4 @@ RUN mkdir -p /logs
 
 EXPOSE 8000
 
-CMD ["python", "main.py", "-p", "8000"]
+CMD ["poetry", "run", "python", "main.py", "-p", "8000"]
