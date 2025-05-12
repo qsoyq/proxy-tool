@@ -108,9 +108,7 @@ async def timeout(timeout: float | None = Query(None, description="可控的阻�
 @router.get("/subscribe", summary="Clash订阅转换")
 @router.head("/subscribe", include_in_schema=False)
 def subscribe(
-    user_agent: str = Query(
-        "StashCore/3.1.0 Stash/3.1.0 Clash/1.11.0",
-    ),
+    user_agent: str = Query("clash.meta"),
     url: str = Query(..., description="订阅链接"),
     proxy_provider: bool = Query(False, description="是否只返回节点", alias="proxy-provider"),
     sort_by_name: bool = Query(True, description="按名称排序节点", alias="sort-by-name"),
