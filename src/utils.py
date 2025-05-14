@@ -1,9 +1,19 @@
+import time
+import ssl
+import asyncio
+import types
+from datetime import datetime, timezone
+from cryptography import x509
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import hashes
+from cryptography.x509.oid import NameOID
 import textwrap
 import json
 from functools import reduce, partial
 from typing import Callable
 import shlex
 from dataclasses import dataclass, asdict
+from schemas.network.ssl import SSLCertSchema
 
 
 def optional_chain(obj, keys: str):
@@ -227,33 +237,186 @@ class CurlParser:
         self.index += step
 
 
-if __name__ == "__main__":
-    cmd = """
-    curl -X POST "https://sss-web.tastientech.com/api/sign/member/signV2" \
-    -H "Host: sss-web.tastientech.com" \
-    -H"Referer: https://servicewechat.com/wx557473f23153a429/378/page-frame.html" \
-    -H"Accept-Encoding: gzip,compress,br,deflate" \
-    -H"Content-Length: 70" \
-    -H"User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 18_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.54(0x18003622) NetType/WIFI Language/zh_CN" \
-    -H"Version: 3.2.3" \
-    -H"Channel: 1" \
-    -H"Content-Type: application/json" \
-    -H"Connection: keep-alive" \
-    -d'{"activityId":54,"memberName":"xxx","memberPhone":"xxx"}'
-    """.strip()
-    detail = CurlParser(cmd).parse()
+class AsyncSSLClientContext:
+    def __init__(self, host: str, port: int = 443, verify: bool = False):
+        self._host = host
+        self._port = port
+        self._resolved_ip = None
+        self.reader: asyncio.StreamReader | None = None
+        self.writer: asyncio.StreamWriter | None = None
+        self._ssl_ctx = ssl.create_default_context()
+        if verify:
+            self._ssl_ctx.check_hostname = True
+            self._ssl_ctx.verify_mode = ssl.VerifyMode.CERT_REQUIRED
+        else:
+            self._ssl_ctx.check_hostname = False
+            self._ssl_ctx.verify_mode = ssl.VerifyMode.CERT_NONE
 
-    from pprint import pprint
-    import os
+        self._ssl_ctx._msg_callback = self.ssl_msg_callbacl  # type: ignore
+        self._certificate_buf = b""
+        self._cert: x509.Certificate | None = None
 
-    terminal_size = os.get_terminal_size().columns
-    pprint(cmd)
-    print("=" * terminal_size)
-    pprint(detail)
-    print("=" * terminal_size)
-    print(detail.to_json())
-    print("=" * terminal_size)
-    print(detail.to_stash())
-    print("=" * terminal_size)
-    print(detail.to_httpx())
-    print("=" * terminal_size)
+    async def __aenter__(self):
+        reader, writer = await asyncio.open_connection(self._host, self._port, ssl=self._ssl_ctx)
+
+        self.reader = reader
+        self.writer = writer
+        transport = writer.transport
+        peername = transport.get_extra_info("peername")
+        if peername:
+            self._resolved_ip = peername[0]
+        return self
+
+    async def __aexit__(self, exc_type: type | None, exc_val: BaseException | None, exc_tb: types.TracebackType):
+        if self.writer:
+            self.writer.close()
+            await self.writer.wait_closed()
+
+        if exc_val:
+            self.exception = (exc_tb, exc_val, exc_tb)
+            return False
+
+    async def get_peer_certificate(self) -> SSLCertSchema | None:
+        async with self:
+            return self.certificate
+
+    def ssl_msg_callbacl(
+        self,
+        conn: ssl.SSLObject,
+        direction: str,
+        version: ssl.TLSVersion,
+        content_type: ssl._TLSContentType,  # type: ignore
+        msg_type: ssl._TLSMessageType,  # type: ignore
+        data: bytes,
+    ):
+        try:
+            if content_type == ssl._TLSContentType.HANDSHAKE:  # type: ignore
+                # cert_msg_types = (ssl._TLSMessageType.CERTIFICATE, ssl._TLSMessageType.CERTIFICATE_VERIFY)  # type: ignore
+                cert_msg_types = (ssl._TLSMessageType.CERTIFICATE,)  # type: ignore
+                if msg_type in cert_msg_types:
+                    self._certificate_buf += data
+                if direction == "read" and msg_type == ssl._TLSMessageType.FINISHED:  # type: ignore
+                    self.cert = self.certificate_parse(self._certificate_buf)
+
+        except Exception as exp:
+            print(exp)
+
+    def certificate_parse(self, byte_data: bytes) -> x509.Certificate | None:
+        cert_data = None
+        cert = None
+
+        # Find the start of the DER sequence (0x30) which should be followed by length bytes
+        # Looking for 0x30 0x82 which indicates a length > 127 bytes encoded in the next 2 bytes
+        der_start_index = byte_data.find(b"\x30\x82")
+
+        if der_start_index != -1:
+            # Read the two length bytes after 0x30 0x82
+            if der_start_index + 3 < len(byte_data):
+                length_bytes = byte_data[der_start_index + 2 : der_start_index + 4]
+                der_length = (length_bytes[0] << 8) + length_bytes[1]
+                # The total size of the DER structure is 1 (tag 0x30) + 3 (length bytes 0x82 + 2 bytes) + der_length
+                total_der_size = 1 + 3 + der_length
+                # Ensure the extracted slice is within the bounds of the original data
+                if der_start_index + total_der_size <= len(byte_data):
+                    cert_data = byte_data[der_start_index : der_start_index + total_der_size]
+                    self.certificate = x509.load_der_x509_certificate(cert_data, default_backend())
+        return cert
+
+    @property
+    def certificate(self) -> SSLCertSchema | None:
+        cert = self._cert
+        if not cert:
+            return None
+        subject = cert.subject
+        issued_to = subject.rfc4514_string()  # Get the full subject string
+        issued_o = (
+            subject.get_attributes_for_oid(NameOID.ORGANIZATION_NAME)[0].value
+            if subject.get_attributes_for_oid(NameOID.ORGANIZATION_NAME)
+            else None
+        )
+        issuer = cert.issuer
+        issuer_c = (
+            issuer.get_attributes_for_oid(NameOID.COUNTRY_NAME)[0].value
+            if issuer.get_attributes_for_oid(NameOID.COUNTRY_NAME)
+            else None
+        )
+        issuer_o = (
+            issuer.get_attributes_for_oid(NameOID.ORGANIZATION_NAME)[0].value
+            if issuer.get_attributes_for_oid(NameOID.ORGANIZATION_NAME)
+            else None
+        )
+        issuer_ou = (
+            issuer.get_attributes_for_oid(NameOID.ORGANIZATIONAL_UNIT_NAME)[0].value
+            if issuer.get_attributes_for_oid(NameOID.ORGANIZATIONAL_UNIT_NAME)
+            else None
+        )
+        issuer_cn = (
+            issuer.get_attributes_for_oid(NameOID.COMMON_NAME)[0].value
+            if issuer.get_attributes_for_oid(NameOID.COMMON_NAME)
+            else None
+        )
+        cert_sn = str(cert.serial_number)
+        cert_sha1 = cert.fingerprint(hashes.SHA1()).hex()
+        cert_alg_oid = cert.signature_algorithm_oid
+        cert_alg_name = cert.signature_hash_algorithm.name if cert.signature_hash_algorithm else str(cert_alg_oid)
+        cert_ver = cert.version.value
+        cert_sans = "N/A"
+        cert_sans_li = []
+        try:
+            san_extension = cert.extensions.get_extension_for_class(x509.SubjectAlternativeName)
+            for name in san_extension.value.get_values_for_type(x509.DNSName):
+                cert_sans_li.append(f"DNS:{name}")
+            for name in san_extension.value.get_values_for_type(x509.RFC822Name):
+                cert_sans_li.append(f"email:{name}")
+            for name in san_extension.value.get_values_for_type(x509.UniformResourceIdentifier):
+                cert_sans_li.append(f"URI:{name}")
+            for name in san_extension.value.get_values_for_type(x509.IPAddress):  # type: ignore
+                cert_sans_li.append(f"IP Address:{name}")
+        except x509.ExtensionNotFound:
+            cert_sans = "N/A"
+        if cert_sans_li:
+            cert_sans = "; ".join(cert_sans_li)
+
+        now = datetime.now(tz=timezone.utc)
+        current = time.time()
+
+        cert_exp = current > cert.not_valid_after_utc.timestamp()
+
+        # cert_valid: Certificate Validity Period (Not Before and Not After)
+        cert_valid_from = cert.not_valid_before_utc
+        cert_valid_to = cert.not_valid_after_utc
+        from_t = cert_valid_from.timestamp()
+        to_t = cert_valid_to.timestamp()
+        cert_valid = from_t <= current <= to_t
+
+        validity_days = (cert_valid_to - cert_valid_from).days
+        days_left = (cert_valid_to - now).days if cert_valid_to > now else 0
+        # Now you can use these variables in your context dictionary
+        context = {
+            "host": self._host,
+            "tcp_port": int(self._port),
+            "resolved_ip": self._resolved_ip,
+            "issued_to": issued_to,
+            "issued_o": issued_o,
+            "issuer_c": issuer_c,
+            "issuer_o": issuer_o,
+            "issuer_ou": issuer_ou,
+            "issuer_cn": issuer_cn,
+            "cert_sn": cert_sn,
+            "cert_sha1": cert_sha1,
+            "cert_alg": cert_alg_name,  # Or cert_alg_oid for the OID
+            "cert_ver": cert_ver,
+            "cert_sans": cert_sans,
+            "cert_exp": cert_exp,
+            "cert_valid": cert_valid,
+            "valid_from": cert_valid_from.strftime("%Y-%m-%d"),
+            "valid_till": cert_valid_to.strftime("%Y-%m-%d"),
+            "validity_days": validity_days,
+            "days_left": days_left,
+            "valid_days_to_expire": days_left,
+        }
+        return SSLCertSchema(**context)
+
+    @certificate.setter
+    def certificate(self, cert: x509.Certificate | None):
+        self._cert = cert

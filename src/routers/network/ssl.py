@@ -1,9 +1,11 @@
 import logging
+import asyncio
 
 import ssl_checker
 from fastapi import APIRouter, Query
 from concurrent.futures import ThreadPoolExecutor
 from schemas.network.ssl import SSLCertsResSchema, SSLCertSchema
+from utils import AsyncSSLClientContext
 
 
 router = APIRouter(tags=["Utils"], prefix="/network/ssl")
@@ -26,3 +28,11 @@ def certs(hosts: list[str] = Query(..., description="域名列表")):
     with ThreadPoolExecutor() as exector:
         result = exector.map(get_peer_cert_context, hosts)
     return {"li": result}
+
+
+@router.get("/certs/v2", summary="查询网站证书信息", response_model=SSLCertsResSchema)
+async def certs_v2(hosts: list[str] = Query(..., description="域名列表")):
+    results = await asyncio.gather(
+        *[AsyncSSLClientContext(host, verify=False).get_peer_certificate() for host in hosts]
+    )
+    return {"li": results}

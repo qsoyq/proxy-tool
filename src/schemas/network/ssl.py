@@ -3,7 +3,8 @@ from pydantic import BaseModel, Field
 
 class SSLCertSchema(BaseModel):
     host: str
-    resolved_ip: str
+    tcp_port: int
+    resolved_ip: str | None = Field(None)
     issued_to: str
     issued_o: str | None = Field(None)
     issuer_c: str | None = Field(None)
@@ -20,9 +21,8 @@ class SSLCertSchema(BaseModel):
     valid_from: str | None = Field(None)
     valid_till: str | None = Field(None)
     validity_days: int
-    days_left: int
     valid_days_to_expire: int
-    tcp_port: int
+    days_left: int | None = Field(None, deprecated=True)
 
 
 class SSLCertsResSchema(BaseModel):

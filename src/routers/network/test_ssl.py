@@ -10,6 +10,12 @@ def client():
 
 
 def test_ssl_certs(client: TestClient):
-    hosts = ["p.19940731.xyz"]
+    hosts = ["p.19940731.xyz", "www.baidu.com", "www.youtube.com"]
     response = client.get("/api/network/ssl/certs", params={"hosts": hosts})
+    assert response.status_code == 200
+
+
+def test_ssl_certs_v2(client: TestClient):
+    hosts = ["p.19940731.xyz", "www.baidu.com", "www.youtube.com"]
+    response = client.get("/api/network/ssl/certs/v2", params={"hosts": hosts})
     assert response.status_code == 200
