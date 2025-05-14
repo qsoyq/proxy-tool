@@ -12,3 +12,6 @@ def client():
 def test_ping(client: TestClient):
     response = client.get("/ping")
     assert response.status_code == 200
+
+    response = client.get("/")
+    assert response.status_code == 200
