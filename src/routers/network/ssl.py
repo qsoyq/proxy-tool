@@ -25,13 +25,15 @@ def get_peer_cert_context(host: str, port: int = 443) -> SSLCertSchema | None:
 
 @router.get("/certs", summary="查询网站证书信息", response_model=SSLCertsResSchema)
 def certs(hosts: list[str] = Query(..., description="域名列表")):
+    """使用 ssl_checker 实现"""
     with ThreadPoolExecutor() as exector:
         result = exector.map(get_peer_cert_context, hosts)
     return {"li": result}
 
 
-@router.get("/certs/v2", summary="查询网站证书信息", response_model=SSLCertsResSchema)
+@router.get("/certs/v2", summary="查询网站证书信息V2", response_model=SSLCertsResSchema)
 async def certs_v2(hosts: list[str] = Query(..., description="域名列表")):
+    """使用 asyncio 实现"""
     results = await asyncio.gather(
         *[AsyncSSLClientContext(host, verify=False).get_peer_certificate() for host in hosts]
     )
