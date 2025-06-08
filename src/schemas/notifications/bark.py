@@ -16,7 +16,7 @@ class BarkPushMessage(BaseModel):
     device_key: str = Field(..., description="bark token, The key for each device")
 
     title: str
-    body: str
+    body: str = Field(..., max_length=1024, description="bark-server 或 APNs 的限制约在 1600 个字符")
     level: BarkPushLevel = Field(
         BarkPushLevel.active, description="'active', 'timeSensitive', or 'passive', or 'critical'"
     )
