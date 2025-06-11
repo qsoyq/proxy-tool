@@ -88,6 +88,7 @@ def add_emoji_prefix(name: str) -> str:
         "葡萄牙": "PT",
         "澳大利亚": "AU",
         "哈萨克斯坦": "KZ",
+        "韩国": "KR",
     }
     for region, code in region_table.items():
         if region in name:
