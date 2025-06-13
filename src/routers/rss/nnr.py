@@ -18,7 +18,9 @@ def traffic_used_by_day(req: Request, ssid: str = Path(..., description="Cookie,
     """过去 31d 的流量统计， 见 https://nnr.moe/user/traffic"""
     host = req.url.hostname
     port = req.url.port
-    resp = []
+    if port is None:
+        port = 80 if req.url.scheme == "http" else 443
+
     url = "https://nnr.moe/user/traffic"
     headers = {
         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
@@ -42,20 +44,24 @@ def traffic_used_by_day(req: Request, ssid: str = Path(..., description="Cookie,
     if tag:
         data = json.loads(tag.text)
         ds = data["ds"]
-        today = datetime.today()
+        today = datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
         timezone = pytz.timezone("Asia/Shanghai")
         today = timezone.localize(today)
         for index, count in enumerate(ds):
             day = today + timedelta(days=index - 31 + 1)
             used = count / 1024 / 1024 / 1024 if count else 0
-            resp.append((day, used))
             datestr = day.strftime("%Y.%m.%d")
             entry = fg.add_entry()
-            entry.id(f"nnr.traffic.{datestr}")
+            if day == today:
+                now = datetime.now()
+                entry.id(f"nnr.traffic.{now.strftime('%Y.%m.%d.%H')}")
+            else:
+                entry.id(f"nnr.traffic.{datestr}")
             entry.title(f"NNR {datestr} 流量使用(GB): {used:.3f}")
             entry.published(day)
             entry.author({"name": "qsssssssss", "email": "p@19940731.xyz"})
             entry.content(f"NNR {datestr} 流量使用(GB): {used:.3f}")
+            entry.link(href="https://nnr.moe/user/traffic")
 
     rss_xml = fg.rss_str(pretty=True)
     return rss_xml
