@@ -38,6 +38,7 @@ import routers.apple.ics
 import routers.apple.ics.github
 import routers.apple.ics.vlrgg
 import routers.iptv.sub
+import routers.rss.nnr
 from settings import AppSettings
 from schemas.ping import ping_responses, PingRes, get_default_memory
 
@@ -73,6 +74,7 @@ app.include_router(routers.apple.ics.router, prefix=api_prefix)
 app.include_router(routers.apple.ics.github.router, prefix=api_prefix)
 app.include_router(routers.apple.ics.vlrgg.router, prefix=api_prefix)
 app.include_router(routers.iptv.sub.router, prefix=api_prefix)
+app.include_router(routers.rss.nnr.router, prefix=api_prefix)
 
 logger = logging.getLogger(__file__)
 

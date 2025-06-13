@@ -53,3 +53,4 @@ repos:
                 - types-psutil
                 - pytest
                 - python-ssl-checker
+                - feedgen

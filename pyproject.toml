@@ -34,6 +34,8 @@ types-dateparser = "^1.2.0.20250408"
 psutil = "^7.0.0"
 python-ssl-checker = "^1.1.0"
 pytest-asyncio = "^0.26.0"
+feedgen = "^1.0.0"
+pytz = "^2025.2"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2"
@@ -147,6 +149,9 @@ module = [
     "PyJWT",
     "ics.*",
     "main",
-    "ssl_checker"
+    "ssl_checker",
+    "pytz",
+    "feedgen.*"
 ]
 ignore_missing_imports = true
+follow_untyped_imports = true
