@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import pytz
 import httpx
 from bs4 import BeautifulSoup as soup
-from fastapi import APIRouter, Path, Request
+from fastapi import APIRouter, Path, Request, Response
 import feedgen.feed
 
 
@@ -57,11 +57,12 @@ def traffic_used_by_day(req: Request, ssid: str = Path(..., description="Cookie,
                 entry.id(f"nnr.traffic.{now.strftime('%Y.%m.%d.%H')}")
             else:
                 entry.id(f"nnr.traffic.{datestr}")
-            entry.title(f"NNR {datestr} 流量使用(GB): {used:.3f}")
+            entry.title(f"NNR {datestr} 流量使用")
+            entry.content(f"共使用(GB): {used:.3f}")
             entry.published(day)
             entry.author({"name": "qsssssssss", "email": "p@19940731.xyz"})
-            entry.content(f"NNR {datestr} 流量使用(GB): {used:.3f}")
             entry.link(href="https://nnr.moe/user/traffic")
 
     rss_xml = fg.rss_str(pretty=True)
-    return rss_xml
+    return Response(content=rss_xml, media_type="application/xml")
+    # return rss_xml
