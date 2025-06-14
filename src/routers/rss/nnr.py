@@ -35,7 +35,7 @@ def traffic_used_by_day(req: Request, ssid: str = Path(..., description="Cookie,
     fg.subtitle("过去 31d 的流量使用情况")
     fg.author({"name": "qsssssssss", "email": "p@19940731.xyz"})
     fg.link(href="https://nnr.moe/user/traffic", rel="alternate")
-    fg.logo("https://nnr.moe/img/logo.svg")
+    fg.logo("https://p.19940731.xyz/api/convert/svg/png?url=https%3A%2F%2Fnnr.moe%2Fimg%2Flogo.svg&download=false")
     fg.link(href=f"https://{host}:{port}/api/traffic/used/day/{ssid}", rel="self")
     fg.language("zh-CN")
 
