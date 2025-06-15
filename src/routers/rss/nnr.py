@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import pytz
 import httpx
 from bs4 import BeautifulSoup as soup
-from fastapi import APIRouter, Path, Request, Response
+from fastapi import APIRouter, Path, Request, Response, Query
 import feedgen.feed
 
 
@@ -14,7 +14,11 @@ logger = logging.getLogger(__file__)
 
 
 @router.get("/traffic/used/day/{ssid}")
-def traffic_used_by_day(req: Request, ssid: str = Path(..., description="Cookie, login state")):
+def traffic_used_by_day(
+    req: Request,
+    ssid: str = Path(..., description="Cookie, login state"),
+    with_today: bool = Query(False, description="是否包含今日统计数据，默认不包含"),
+):
     """过去 31d 的流量统计， 见 https://nnr.moe/user/traffic"""
     host = req.url.hostname
     port = req.url.port
@@ -51,11 +55,15 @@ def traffic_used_by_day(req: Request, ssid: str = Path(..., description="Cookie,
             day = today + timedelta(days=index - 31 + 1)
             used = count / 1024 / 1024 / 1024 if count else 0
             datestr = day.strftime("%Y.%m.%d")
-            entry = fg.add_entry()
+
             if day == today:
+                if not with_today:
+                    continue
+                entry = fg.add_entry()
                 now = datetime.now()
                 entry.id(f"nnr.traffic.{now.strftime('%Y.%m.%d.%H')}")
             else:
+                entry = fg.add_entry()
                 entry.id(f"nnr.traffic.{datestr}")
             entry.title(f"NNR {datestr} 流量使用")
             entry.content(f"共使用(GB): {used:.3f}")
