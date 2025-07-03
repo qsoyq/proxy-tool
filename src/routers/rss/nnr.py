@@ -73,4 +73,3 @@ def traffic_used_by_day(
 
     rss_xml = fg.rss_str(pretty=True)
     return Response(content=rss_xml, media_type="application/xml")
-    # return rss_xml
