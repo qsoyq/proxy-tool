@@ -1,13 +1,14 @@
 import asyncio
 import logging
 import socket
-
+from functools import cache
 
 import httpx
 import yaml
 
 from fastapi import APIRouter, Query
 from fastapi.responses import Response, PlainTextResponse
+from settings import RegionCodeTable
 
 from models import ClashModel
 
@@ -45,7 +46,6 @@ def make_proxy_groups(clash: ClashModel, interval: int = 300) -> list[dict]:
 
 
 def country_code_to_emoji(country_code: str) -> str | None:
-    # 将代码转为大写
     country_code = country_code.upper()
     three_to_two = {
         "USA": "US",
@@ -64,33 +64,10 @@ def country_code_to_emoji(country_code: str) -> str | None:
     return "".join(emoji_chars)
 
 
+@cache
 def add_emoji_prefix(name: str) -> str:
-    region_table = {
-        "香港": "HK",
-        "台湾": "TW",
-        "美国": "US",
-        "日本": "JP",
-        "新加坡": "SG",
-        "英国": "GB",
-        "乌克兰": "UA",
-        "以色列": "IL",
-        "俄罗斯": "RU",
-        "印度": "IN",
-        "加拿大": "CA",
-        "德国": "DE",
-        "土耳其": "TR",
-        "尼日利亚": "NG",
-        "朝鲜": "KP",
-        "意大利": "IT",
-        "柬埔寨": "KH",
-        "越南": "VN",
-        "阿根廷": "AR",
-        "葡萄牙": "PT",
-        "澳大利亚": "AU",
-        "哈萨克斯坦": "KZ",
-        "韩国": "KR",
-    }
-    for region, code in region_table.items():
+    """http://www.freejson.com/countrycode.html"""
+    for region, code in RegionCodeTable.items():
         if region in name:
             emoji = country_code_to_emoji(code)
             if emoji and emoji not in name:
