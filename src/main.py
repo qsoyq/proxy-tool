@@ -40,11 +40,11 @@ import routers.apple.ics.vlrgg
 import routers.iptv.sub
 import routers.rss.nnr
 import routers.rss.day1024
-from settings import AppSettings
+from settings import AppSettings, version
 from schemas.ping import ping_responses, PingRes, get_default_memory
 
 cmd = typer.Typer()
-app = FastAPI()
+app = FastAPI(title="proxy tool", version=version)
 api_prefix = AppSettings().api_prefix
 app.include_router(routers.basic.router, prefix=api_prefix)
 app.include_router(routers.tool.basic.router, prefix=api_prefix)

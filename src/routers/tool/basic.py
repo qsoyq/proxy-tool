@@ -1,10 +1,22 @@
 import urllib.parse
 import logging
+import random
 from typing import List
 from fastapi import APIRouter, Query
 from fastapi.responses import HTMLResponse
+from bs4 import BeautifulSoup as soup
+import httpx
+from pydantic import BaseModel, Field
 
-import random
+
+class CountryCodeSchema(BaseModel):
+    name: str = Field(..., description="名称, 如中国")
+    code: str = Field(..., description="代码, 如CN")
+
+
+class CountryCodeResSchema(BaseModel):
+    data: list[CountryCodeSchema]
+
 
 router = APIRouter(tags=["Utils"], prefix="/tool")
 
@@ -59,3 +71,29 @@ def eat(choices: List[str] = Query(..., description="选择列表, 随机返回�
     </html>
     """
     return HTMLResponse(content=body, headers={"content-type": "text/html; charset=UTF-8"})
+
+
+@router.get("/countrycode/freejson", response_model=CountryCodeResSchema)
+def countrycode():
+    """数据来源: http://www.freejson.com/countrycode.html"""
+    url = "http://www.freejson.com/countrycode.html"
+    res = httpx.get(url, verify=False)
+    res.raise_for_status()
+
+    document = soup(res.text, "lxml")
+    tbody = document.select_one("tbody")
+    ret = []
+    more = {"尼尔利亚": "NG", "台湾": "TW"}
+    mapping = {}
+    if tbody:
+        trs = tbody.select("tr")
+        if trs:
+            trs = trs[1:]
+            for tr in trs:
+                tds = tr.select("td")
+                _, name, code, _, _ = tds
+                if name.text and code.text and code.text != "\xa0":
+                    mapping[name.text] = code.text
+    mapping.update(more)
+    ret = [{"name": name, "code": code} for name, code in mapping.items()]
+    return ret
