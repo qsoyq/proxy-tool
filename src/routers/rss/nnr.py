@@ -5,6 +5,7 @@ import pytz
 import httpx
 from bs4 import BeautifulSoup as soup
 from fastapi import APIRouter, Path, Request, Response, Query
+from fastapi.responses import JSONResponse
 import feedgen.feed
 
 
@@ -31,6 +32,8 @@ def traffic_used_by_day(
     }
     cookies = {"ssid": ssid}
     res = httpx.get(url, headers=headers, cookies=cookies)
+    if res.is_redirect:
+        return JSONResponse({"msg": "ssid has been expired"})
     res.raise_for_status()
 
     fg = feedgen.feed.FeedGenerator()
