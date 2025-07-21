@@ -45,7 +45,7 @@ def rss(req: Request):
     fg.id("https://1024.day/?sort=newest")
     fg.title("1024.day 新鲜出炉")
     fg.subtitle("新鲜出炉的帖子")
-    fg.author({"name": "qsssssssss", "email": "1024.qs@19940731.xyz"})
+    fg.author({"name": "qsssssssss", "email": "support@19940731.xyz"})
     fg.link(href="https://1024.day/?sort=newest", rel="alternate")
     fg.logo("https://1024.day/favicon.ico")
     fg.link(href=f"https://{host}:{port}/api/rss/1024.day/newest", rel="self")
