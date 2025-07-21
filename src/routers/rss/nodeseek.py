@@ -49,7 +49,7 @@ def newest(
     fg.author({"name": "qsssssssss", "email": "support@19940731.xyz"})
     fg.link(href="https://www.nodeseek.com/", rel="alternate")
     fg.logo("https://www.nodeseek.com/static/image/favicon/favicon-32x32.png")
-    fg.link(href=f"https://{host}:{port}/api/rss/nodessek/category/newest", rel="self")
+    fg.link(href=f"https://{host}:{port}/api/rss/nodessek/category/{category}", rel="self")
     fg.language("zh-CN")
     for item in post_list:
         a = item.select_one("div > a")
