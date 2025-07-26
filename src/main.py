@@ -41,6 +41,7 @@ import routers.iptv.sub
 import routers.rss.nnr
 import routers.rss.day1024
 import routers.rss.nodeseek
+import routers.rss.v2ex
 from settings import AppSettings, version
 from schemas.ping import ping_responses, PingRes, get_default_memory
 
@@ -79,6 +80,7 @@ app.include_router(routers.iptv.sub.router, prefix=api_prefix)
 app.include_router(routers.rss.nnr.router, prefix=api_prefix)
 app.include_router(routers.rss.day1024.router, prefix=api_prefix)
 app.include_router(routers.rss.nodeseek.router, prefix=api_prefix)
+app.include_router(routers.rss.v2ex.router, prefix=api_prefix)
 
 logger = logging.getLogger(__file__)
 
