@@ -12,7 +12,8 @@ logger = logging.getLogger(__file__)
 
 async def fetch_jsonfeed_items(topic: str) -> list[JSONFeedItem]:
     url = f"https://www.v2ex.com/feed/{topic}.json"
-    resp = httpx.get(url)
+    async with httpx.AsyncClient() as client:
+        resp = await client.get(url)
     resp.raise_for_status()
     return [JSONFeedItem(**x) for x in resp.json()["items"]]
 
