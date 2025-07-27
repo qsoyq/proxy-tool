@@ -67,7 +67,7 @@ async def add_vlrgg_event_march_time(events: list[Event]):
         url_to_match_time[url] = datetime
 
     for e in events:
-        match_datetime = url_to_match_time.get(e.url)
+        match_datetime = url_to_match_time.get(e.url) if e.url else None
         if match_datetime:
             e.begin = e.end = match_datetime.astimezone(timezone.utc)
         else:
@@ -102,7 +102,7 @@ async def vlrgg_event_to_calendar(vlrgg_event: str) -> list[Event]:
 
 
 @router.get("/event/matches", summary="Valorant 赛事订阅")
-async def vlrgg(events: list[str] = Query(..., description="赛事ID")):
+async def vlrgg(events: list[str] = Query([2499, 2498], description="赛事ID")):
     """赛程数据源自: https://www.vlr.gg/events"""
     results = await asyncio.gather(*[vlrgg_event_to_calendar(event) for event in events])
     c = Calendar()
