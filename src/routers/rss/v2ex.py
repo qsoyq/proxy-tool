@@ -67,9 +67,9 @@ async def favorite(
     feed = {
         "version": "https://jsonfeed.org/version/1",
         "title": "V2ex",
-        "description": "V2ex RSS 订阅聚合",
+        "description": "V2ex 收藏帖子RSS订阅",
         "home_page_url": "https://v2ex.com",
-        "feed_url": f"{req.url.scheme}://{host}:{port}/api/rss/jsonfeed/v2ex/aggregation",
+        "feed_url": f"{req.url.scheme}://{host}:{port}/api/rss/jsonfeed/v2ex/favorite",
         "icon": "https://www.v2ex.com/favicon.ico",
         "favicon": "https://www.v2ex.com/favicon.ico",
         "items": items,
