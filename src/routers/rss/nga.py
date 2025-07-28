@@ -41,7 +41,7 @@ def favorite(
     fg.subtitle("按回复时间")
     fg.author({"name": "qsssssssss", "email": "support@19940731.xyz"})
     fg.link(href="https://bbs.nga.cn/", rel="alternate")
-    fg.logo("https://bbs.nga.cn/favicon.ico")
+    fg.logo("https://raw.githubusercontent.com/qsoyq/icons/main/assets/icon/nga.png")
     fg.link(href=f"https://{host}:{port}/api/rss/nga/favor/{favorid}", rel="self")
     fg.language("zh-CN")
     # 过滤权限不足/已过期的帖子
@@ -101,7 +101,7 @@ def _threads(
     fg.subtitle("按创建时间")
     fg.author({"name": "qsssssssss", "email": "support@19940731.xyz"})
     fg.link(href="https://bbs.nga.cn/", rel="alternate")
-    fg.logo("https://bbs.nga.cn/favicon.ico")
+    fg.logo("https://raw.githubusercontent.com/qsoyq/icons/main/assets/icon/nga.png")
     fg.link(href=f"https://{host}:{port}/api/rss/nga/threads", rel="self")
     fg.language("zh-CN")
 
