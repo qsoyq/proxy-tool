@@ -142,7 +142,7 @@ def threads_v2(
     uid: str = Header("", description="ngaPassportUid, 验签"),
     cid: str = Header("", description="ngaPassportCid, 验签"),
     order_by: OrderByEnum = Query(..., description="排序规则"),
-    if_include_child_node: bool | None = Query(None, description="当查询分区帖子时, 时候包含子分区的帖子"),
+    if_include_child_node: bool | None = Query(None, description="当查询分区帖子时, 是否包含子分区的帖子"),
     page: int = Query(1, description="页"),
 ):
     data = []
