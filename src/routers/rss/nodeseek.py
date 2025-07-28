@@ -18,6 +18,7 @@ def newest(
     session: str = Query(None, description="Cookie.session, 登陆可见的版块需要"),
     smac: str = Query(None, description="Cookie.smac, 登陆可见的版块需要"),
     category: str = Path(..., description="分类名称, 如tech"),
+    cookie: str = Query("", description="完整 Cookie 字符串, 存在时无视 session 和 smac"),
 ):
     """Nodeseek 分类帖子新鲜出炉
 
@@ -40,7 +41,8 @@ def newest(
         "smac": smac,
         "sortBy": "postTime",
     }
-
+    if cookie:
+        cookies = {k: v for k, v in (item.split("=") for item in cookie.strip().split("; "))}
     resp = httpx.get(url, headers=headers, verify=False, cookies=cookies)
     if resp.is_error:
         return JSONResponse({"msg": resp.text}, status_code=resp.status_code)
