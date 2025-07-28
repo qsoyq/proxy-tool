@@ -15,25 +15,32 @@ logger = logging.getLogger(__file__)
 @router.get("/{category}")
 def newest(
     req: Request,
-    session: str = Query(None, description="Cookie session, 访问内版时需要"),
-    smac: str = Query(None, description="Cookie smac, 访问内版时需要"),
-    category: str = Path(..., description="分类名称, 如 inside"),
+    session: str = Query(None, description="Cookie.session, 登陆可见的版块需要"),
+    smac: str = Query(None, description="Cookie.smac, 登陆可见的版块需要"),
+    category: str = Path(..., description="分类名称, 如tech"),
 ):
-    """Nodeseek 分类帖子新鲜出炉"""
+    """Nodeseek 分类帖子新鲜出炉
+
+    部分登陆可见的帖子，需要传递 smac 和 session 参数
+
+    在网页控制台中输出当前域的 cookie: console.log(document.cookie);
+    """
     host = req.url.hostname
     port = req.url.port
     if port is None:
         port = 80 if req.url.scheme == "http" else 443
 
-    url = f"https://www.nodeseek.com/categories/{category}?sortBy=postTime"
+    url = f"https://www.nodeseek.com/categories/{category}"
     headers = {
         "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
     }
-    cookies = {}
-    if session is not None:
-        cookies["session"] = session
-    if smac is not None:
-        cookies["smac"] = smac
+    cookies = {
+        "colorscheme": "light",
+        "session": session,
+        "smac": smac,
+        "sortBy": "postTime",
+    }
+
     resp = httpx.get(url, headers=headers, verify=False, cookies=cookies)
     if resp.is_error:
         return JSONResponse({"msg": resp.text}, status_code=resp.status_code)
