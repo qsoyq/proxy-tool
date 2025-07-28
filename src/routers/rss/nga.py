@@ -41,6 +41,8 @@ def favorite(
     fg.logo("https://bbs.nga.cn/favicon.ico")
     fg.link(href=f"https://{host}:{port}/api/rss/nga/favor/{favorid}", rel="self")
     fg.language("zh-CN")
+    # 过滤权限不足/已过期的帖子
+    threads.threads = [t for t in threads.threads if not t.lastpost]
     for thread in threads.threads:
         entry = fg.add_entry()
         entry.id(str(thread.fid))
