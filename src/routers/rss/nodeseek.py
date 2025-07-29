@@ -1,5 +1,5 @@
 import logging
-import httpx
+import cloudscraper
 from fastapi import APIRouter, Request, Response, Query, Path
 from fastapi.responses import JSONResponse
 import feedgen.feed
@@ -32,9 +32,6 @@ def newest(
         port = 80 if req.url.scheme == "http" else 443
 
     url = f"https://www.nodeseek.com/categories/{category}"
-    headers = {
-        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
-    }
     cookies = {
         "colorscheme": "light",
         "session": session,
@@ -42,12 +39,12 @@ def newest(
         "sortBy": "postTime",
     }
     if cookie:
-        cookies = {k: v for k, v in (item.split("=") for item in cookie.strip().split("; "))}
-    resp = httpx.get(url, headers=headers, verify=False, cookies=cookies)
-    if resp.is_error:
+        cookies = {k.strip(): v.strip() for k, v in (item.split("=") for item in cookie.strip().split("; "))}
+    scraper = cloudscraper.create_scraper()
+    resp = scraper.get(url, cookies=cookies)
+    if not resp.ok:
         return JSONResponse({"msg": resp.text}, status_code=resp.status_code)
 
-    resp.raise_for_status()
     document = soup(resp.text, "lxml")
     post_list = document.select("div[class='post-list-content']")
 

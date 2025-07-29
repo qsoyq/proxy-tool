@@ -36,6 +36,7 @@ python-ssl-checker = "^1.1.0"
 pytest-asyncio = "^0.26.0"
 feedgen = "^1.0.0"
 pytz = "^2025.2"
+cloudscraper = "^1.2.71"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2"
@@ -152,7 +153,9 @@ module = [
     "main",
     "ssl_checker",
     "pytz",
-    "feedgen.*"
+    "feedgen.*",
+    "cloudscraper",
+    "requests.*",
 ]
 ignore_missing_imports = true
 follow_untyped_imports = true

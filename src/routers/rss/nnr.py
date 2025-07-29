@@ -2,7 +2,7 @@ import json
 import logging
 from datetime import datetime, timedelta
 import pytz
-import httpx
+import cloudscraper
 from bs4 import BeautifulSoup as soup
 from fastapi import APIRouter, Path, Request, Response, Query
 from fastapi.responses import JSONResponse
@@ -27,14 +27,15 @@ def traffic_used_by_day(
         port = 80 if req.url.scheme == "http" else 443
 
     url = "https://nnr.moe/user/traffic"
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
-    }
     cookies = {"ssid": ssid}
-    res = httpx.get(url, headers=headers, cookies=cookies)
-    if res.is_redirect:
-        return JSONResponse({"msg": "ssid has been expired"})
-    res.raise_for_status()
+    scraper = cloudscraper.create_scraper()
+    resp = scraper.get(url, cookies=cookies)
+
+    if resp.is_redirect:
+        return JSONResponse({"msg": "ssid has been expired"}, status_code=400)
+
+    if not resp.ok:
+        return JSONResponse({"msg": resp.text}, status_code=resp.status_code)
 
     fg = feedgen.feed.FeedGenerator()
     fg.id("https://nnr.moe/user/traffic")
@@ -46,7 +47,7 @@ def traffic_used_by_day(
     fg.link(href=f"https://{host}:{port}/api/traffic/used/day/{ssid}", rel="self")
     fg.language("zh-CN")
 
-    document = soup(res.text, "lxml")
+    document = soup(resp.text, "lxml")
     tag = document.select_one("#traffic_data")
     if tag:
         data = json.loads(tag.text)
