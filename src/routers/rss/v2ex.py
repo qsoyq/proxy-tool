@@ -19,7 +19,7 @@ async def fetch_jsonfeed_items(topic: str) -> list[JSONFeedItem]:
     return [JSONFeedItem(**x) for x in resp.json()["items"]]
 
 
-@router.get("/aggregation", response_model=JSONFeed)
+@router.get("/aggregation", response_model=JSONFeed, summary="V2ex 节点 RSS 订阅聚合")
 async def aggregation(req: Request, topics: list[str] = Query([], description="订阅主题, 如 wechat、design")):
     """RSS 聚合
 
@@ -48,7 +48,7 @@ async def aggregation(req: Request, topics: list[str] = Query([], description="�
     return feed
 
 
-@router.get("/favorite", response_model=JSONFeed)
+@router.get("/favorite", response_model=JSONFeed, summary="V2ex 收藏帖回复 RSS 订阅")
 async def favorite(
     req: Request,
     session_key: str = Query(..., description="V2ex 登录态,Cookie.A2"),

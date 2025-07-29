@@ -14,7 +14,7 @@ router = APIRouter(tags=["Utils"], prefix="/rss/nnr")
 logger = logging.getLogger(__file__)
 
 
-@router.get("/traffic/used/day/{ssid}")
+@router.get("/traffic/used/day/{ssid}", summary="NNR 日流量 RSS 订阅")
 def traffic_used_by_day(
     req: Request,
     ssid: str = Path(..., description="Cookie, login state"),

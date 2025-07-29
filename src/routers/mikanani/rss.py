@@ -12,7 +12,9 @@ router = APIRouter(tags=["Utils"], prefix="/mikanani/rss")
 logger = logging.getLogger(__file__)
 
 
-@router.get("/", summary="蜜柑计划订阅", response_model=MikananiResSchema, responses=mikanani_rss_subscribe_responses)
+@router.get(
+    "/", summary="蜜柑计划 RSS 订阅", response_model=MikananiResSchema, responses=mikanani_rss_subscribe_responses
+)
 def subscribe(token: str = Query(...)) -> MikananiResSchema:
     url = "https://mikanani.me/RSS/MyBangumi"
     resp = httpx.get(url, params={"token": token})

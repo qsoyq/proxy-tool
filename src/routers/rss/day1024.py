@@ -26,7 +26,7 @@ class Post(BaseModel):
     shareUrl: str
 
 
-@router.get("/newest")
+@router.get("/newest", summary="1024.day 新贴 RSS 订阅")
 def rss(req: Request):
     """1024.day 新鲜出炉 rss 订阅"""
     host = req.url.hostname

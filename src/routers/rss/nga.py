@@ -14,7 +14,7 @@ router = APIRouter(tags=["Utils"], prefix="/rss/nga")
 logger = logging.getLogger(__file__)
 
 
-@router.get("/favor/{favorid}")
+@router.get("/favor/{favorid}", summary="NGA 收藏贴回复 RSS 订阅")
 def favorite(
     req: Request,
     favorid: int = Path(None, description="收藏夹ID"),
@@ -59,7 +59,7 @@ def favorite(
     return Response(content=rss_xml, media_type="application/xml")
 
 
-@router.get("/threads")
+@router.get("/threads", summary="NGA 分区新贴 RSS 订阅")
 def _threads(
     req: Request,
     fids: list[int] = Query(..., description="分区 id 列表"),

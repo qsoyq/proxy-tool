@@ -12,7 +12,7 @@ router = APIRouter(tags=["Utils"], prefix="/rss/nodeseek/category")
 logger = logging.getLogger(__file__)
 
 
-@router.get("/{category}")
+@router.get("/{category}", summary="Nodeseek 板块新贴 RSS 订阅")
 def newest(
     req: Request,
     session: str = Query(None, description="Cookie.session, 登陆可见的版块需要"),
