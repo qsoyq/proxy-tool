@@ -133,6 +133,7 @@ explicit_package_bases = true
 
 [[tool.mypy.overrides]]
 module = [
+    "exception.*",
     "routers.*",
     "schemas.*",
     "settings.*",

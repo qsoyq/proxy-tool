@@ -9,6 +9,7 @@ import uvicorn
 from fastapi import FastAPI
 
 
+from exception import register_exception_handler
 import routers.basic
 import routers.tool.basic
 import routers.notifications.push
@@ -84,6 +85,8 @@ app.include_router(routers.rss.nodeseek.router, prefix=api_prefix)
 app.include_router(routers.rss.v2ex.router, prefix=api_prefix)
 app.include_router(routers.rss.nga.router, prefix=api_prefix)
 
+register_exception_handler(app)
+
 logger = logging.getLogger(__file__)
 
 
@@ -128,7 +131,6 @@ def http(
 ):
     """启动 http 服务"""
     logging.basicConfig(level=log_level)
-
     logging.info(f"http server listening on {host}:{port}")
     uvicorn.run("main:app", host=host, port=port, reload=reload)
 
