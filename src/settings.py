@@ -5,7 +5,7 @@ from pydantic import BaseSettings
 
 run_at_ts = int(time.time())
 run_at = datetime.fromtimestamp(run_at_ts).strftime(r"%Y-%m-%d %H:%M:%S")
-version = "0.1.61"
+version = "0.1.62"
 
 
 class AppSettings(BaseSettings):  # type:ignore

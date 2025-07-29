@@ -1,4 +1,5 @@
 import logging
+import urllib.parse
 import cloudscraper
 from fastapi import APIRouter, Request, Response, Query, Path
 from fastapi.responses import JSONResponse
@@ -65,9 +66,11 @@ def newest(
         href = f"https://www.nodeseek.com{a.attrs['href']}"  # type: ignore
         title = a.text
         datetime = parse(item.select_one("a[class='info-item info-last-comment-time'] > time").attrs["datetime"])  # type: ignore
+        ret = urllib.parse.urlparse(href)
+        uid = ret.path.split("/")[-1].split("-")[1]
 
         entry = fg.add_entry()
-        entry.id(href)
+        entry.id(uid)
         entry.title(title)
         entry.content("")
         entry.published(datetime)
