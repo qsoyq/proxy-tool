@@ -17,8 +17,9 @@ def newest(
     req: Request,
     session: str = Query(None, description="Cookie.session, 登陆可见的版块需要"),
     smac: str = Query(None, description="Cookie.smac, 登陆可见的版块需要"),
-    category: str = Path(..., description="分类名称, 如tech"),
+    category: str = Path(..., description="版块名称, 如tech"),
     cookie: str = Query("", description="完整 Cookie 字符串, 存在时无视 session 和 smac"),
+    sortby: str = Query("postTime", description="排序方式, postTime、replyTime"),
 ):
     """Nodeseek 分类帖子新鲜出炉
 
@@ -31,12 +32,12 @@ def newest(
     if port is None:
         port = 80 if req.url.scheme == "http" else 443
 
-    url = f"https://www.nodeseek.com/categories/{category}"
+    url = f"https://www.nodeseek.com/categories/{category}?sortBy={sortby}"
     cookies = {
         "colorscheme": "light",
         "session": session,
         "smac": smac,
-        "sortBy": "postTime",
+        "sortBy": sortby,
     }
     if cookie:
         cookies = {k.strip(): v.strip() for k, v in (item.split("=") for item in cookie.strip().split("; "))}
