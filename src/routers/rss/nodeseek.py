@@ -71,7 +71,7 @@ def newest(
 
         entry = fg.add_entry()
         entry.id(uid)
-        entry.title(title)
+        entry.title(f"{category}- {title}")
         entry.content("")
         entry.published(datetime)
         entry.link(href=href)
