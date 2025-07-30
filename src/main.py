@@ -38,6 +38,7 @@ import routers.apple.location
 import routers.apple.ics
 import routers.apple.ics.github
 import routers.apple.ics.vlrgg
+import routers.apple.ics.gofans
 import routers.iptv.sub
 import routers.rss.nnr
 import routers.rss.day1024
@@ -78,6 +79,7 @@ app.include_router(routers.apple.location.router, prefix=api_prefix)
 app.include_router(routers.apple.ics.router, prefix=api_prefix)
 app.include_router(routers.apple.ics.github.router, prefix=api_prefix)
 app.include_router(routers.apple.ics.vlrgg.router, prefix=api_prefix)
+app.include_router(routers.apple.ics.gofans.router, prefix=api_prefix)
 app.include_router(routers.iptv.sub.router, prefix=api_prefix)
 app.include_router(routers.rss.nnr.router, prefix=api_prefix)
 app.include_router(routers.rss.day1024.router, prefix=api_prefix)
