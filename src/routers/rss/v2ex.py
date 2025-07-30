@@ -60,7 +60,7 @@ async def favorite(
     session_key: str = Query(..., description="V2ex 登录态,Cookie.A2"),
     page: int = Query(1, description="收藏页，默认为 1"),
 ):
-    """RSS 聚合
+    """RSS 收藏贴回复订阅
 
     https://www.v2ex.com/feed/{topic}.json
     """
@@ -85,7 +85,7 @@ async def favorite(
         payload = {
             "author": {},
             "url": f"https://v2ex.com/t/{topic.id}",
-            "title": topic.title,
+            "title": f"Favorite - {topic.title}",
             "id": topic.id,
             "date_published": topic.lastTouchedStr,
         }
