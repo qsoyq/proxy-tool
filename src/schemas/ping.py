@@ -1,5 +1,6 @@
 import os
 import time
+import pytz
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -72,7 +73,9 @@ class Usage(BaseModel):
 class PingRes(BaseModel):
     message: str = "pong"
     timestamp: int = Field(default_factory=lambda: int(time.time()))
-    current: str = Field(default_factory=lambda: datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    current: str = Field(
+        default_factory=lambda: pytz.timezone("Asia/Shanghai").localize(datetime.now()).strftime("%Y-%m-%d %H:%M:%S%Z")
+    )
     run_at_ts: int = run_at_ts
     run_at: str = run_at
     version: str = version

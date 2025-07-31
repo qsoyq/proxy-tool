@@ -1,11 +1,12 @@
 import time
+import pytz
 from datetime import datetime
 from pydantic import BaseSettings
 
 
 run_at_ts = int(time.time())
-run_at = datetime.fromtimestamp(run_at_ts).strftime(r"%Y-%m-%d %H:%M:%S")
-version = "0.1.67"
+run_at = pytz.timezone("Asia/Shanghai").localize(datetime.fromtimestamp(run_at_ts)).strftime("%Y-%m-%d %H:%M:%S%Z")
+version = "0.1.68"
 
 
 class AppSettings(BaseSettings):  # type:ignore
