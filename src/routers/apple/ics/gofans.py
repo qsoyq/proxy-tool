@@ -12,8 +12,7 @@ router = APIRouter(tags=["Utils"], prefix="/apple/ics/gofans")
 logger = logging.getLogger(__file__)
 
 
-async def fetch_gofans_calendar(kind: int, limit: int = 20, page: int = 1) -> list[Event]:
-    events: list[Event] = []
+async def get_gofans_app_records(limit: int, page: int, kind: int) -> httpx.Response:
     headers = {
         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
         "Accept": "application/json, text/plain, */*",
@@ -27,6 +26,14 @@ async def fetch_gofans_calendar(kind: int, limit: int = 20, page: int = 1) -> li
     if data.get("code") == 401:
         logger.warning("[Ics.Gofans] Unauthorized")
         raise HTTPException(502, "Unauthorized")
+    return resp
+
+
+async def fetch_gofans_calendar(kind: int, limit: int = 20, page: int = 1) -> list[Event]:
+    events: list[Event] = []
+
+    resp = await get_gofans_app_records(limit, page, kind)
+    data = resp.json()
 
     timezone = pytz.timezone("Asia/Shanghai")
     today = timezone.localize(datetime.today())
