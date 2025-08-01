@@ -57,7 +57,7 @@ async def ios(
     return Response(content=rss_xml, media_type="application/xml")
 
 
-@router.get("/macOS", summary="AppleStore iOS 限免RSS订阅")
+@router.get("/macOS", summary="AppleStore macOS 限免RSS订阅")
 async def macOS(
     req: Request,
     limit: int = Query(20),
