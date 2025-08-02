@@ -48,7 +48,7 @@ def favorite(
     threads.threads = [t for t in threads.threads if t.lastpost]
     for thread in threads.threads:
         entry = fg.add_entry()
-        entry.id(str(thread.tid))
+        entry.id(f"{thread.tid}-{thread.lastpost}")
         entry.title(thread.subject)
         entry.content("")
         timezone = pytz.timezone("Asia/Shanghai")
