@@ -49,6 +49,7 @@ import routers.rss.gofans
 import routers.rss.loon
 from settings import AppSettings, version
 from schemas.ping import ping_responses, PingRes, get_default_memory
+from responses import PingResponse
 
 cmd = typer.Typer()
 app = FastAPI(title="proxy tool", version=version)
@@ -121,8 +122,8 @@ async def shutdown():
         logger.info("[shutdown]: background_gc task cancelled")
 
 
-@app.get("/", response_model=PingRes, tags=["Basic"], responses=ping_responses)
-@app.get("/ping", response_model=PingRes, tags=["Basic"], responses=ping_responses)
+@app.get("/", response_model=PingRes, tags=["Basic"], responses=ping_responses, response_class=PingResponse)
+@app.get("/ping", response_model=PingRes, tags=["Basic"], responses=ping_responses, response_class=PingResponse)
 async def ping():
     assert getattr(app.state, "background_gc_task", None)
     return PingRes.construct()
