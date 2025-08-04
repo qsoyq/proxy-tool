@@ -85,7 +85,7 @@ async def favorite(
         payload = {
             "author": {},
             "url": f"https://v2ex.com/t/{topic.id}",
-            "title": f"Favorite - {topic.title}",
+            "title": f"{topic.title}",
             "id": topic.id,
             "date_published": topic.lastTouchedStr,
         }
