@@ -35,7 +35,9 @@ async def get_channel_messages(channelName: str) -> list[TelegramChannalMessage]
 
     document = soup(res.text, "lxml")
     img_css = "body > header > div > div.tgme_header_info > a.tgme_header_link > i > img"
-    head = document.select_one(img_css).attrs["src"]  # type: ignore
+    head_tag = document.select_one(img_css)
+    if head_tag:
+        head = head_tag.attrs["src"]
     tgme_widget_message = document.select("body > main > div > section > div .tgme_widget_message")
     for widget in tgme_widget_message:
         title = text = ""
