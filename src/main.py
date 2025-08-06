@@ -47,6 +47,7 @@ import routers.rss.v2ex
 import routers.rss.nga
 import routers.rss.gofans
 import routers.rss.loon
+import routers.rss.telegram
 from settings import AppSettings, version
 from schemas.ping import ping_responses, PingRes, get_default_memory
 from responses import PingResponse
@@ -91,6 +92,7 @@ app.include_router(routers.rss.v2ex.router, prefix=api_prefix)
 app.include_router(routers.rss.nga.router, prefix=api_prefix)
 app.include_router(routers.rss.gofans.router, prefix=api_prefix)
 app.include_router(routers.rss.loon.router, prefix=api_prefix)
+app.include_router(routers.rss.telegram.router, prefix=api_prefix)
 
 register_exception_handler(app)
 
