@@ -86,7 +86,7 @@ async def channel(req: Request, channels: list[str] = Query(..., description="ch
     fg.author({"name": "qsssssssss", "email": "support@19940731.xyz"})
     fg.link(href="https://docs.19940731.xyz", rel="alternate")
     fg.logo("https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Telegram.png")
-    fg.link(href=f"https://{host}/rss/telegram/channel", rel="self")
+    fg.link(href=f"https://{host}/api/rss/telegram/channel", rel="self")
     fg.language("zh-CN")
     tasks = await asyncio.gather(*[get_channel_messages(channelName) for channelName in channels])
     for item in chain(*tasks):
