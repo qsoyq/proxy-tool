@@ -43,7 +43,9 @@ async def get_channel_messages(channelName: str) -> list[TelegramChannalMessage]
         username, msgid = _arr[0], _arr[1]
         textTag = widget.select_one(".js-message_text")
         if textTag:
-            title = widget.select_one(".js-message_text > b").get_text()  # type: ignore
+            title_tag = widget.select_one(".js-message_text > b")  # type: ignore
+            if title_tag:
+                title = title_tag.get_text()
             text = format_telegram_message_text(widget.select_one(".js-message_text"))  # type: ignore
             if not title and text:
                 title = text.split("\n")[0]
