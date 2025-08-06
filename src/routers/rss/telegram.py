@@ -1,5 +1,7 @@
 import logging
+import urllib.parse
 import asyncio
+import contextvars
 from itertools import chain
 import dateparser
 import httpx
@@ -9,6 +11,8 @@ from bs4 import Tag
 import feedgen.feed
 from schemas.rss.telegram import TelegramChannalMessage
 
+
+URLScheme = contextvars.ContextVar("URLScheme", default=True)
 
 router = APIRouter(tags=["Utils"], prefix="/rss/telegram")
 
@@ -66,32 +70,47 @@ async def get_channel_messages(channelName: str) -> list[TelegramChannalMessage]
 def make_feed_entry_by_telegram_message(
     fg: feedgen.feed.FeedGenerator, message: TelegramChannalMessage
 ) -> feedgen.feed.FeedEntry:
+    urlscheme = URLScheme.get()
     entry: feedgen.feed.FeedEntry = fg.add_entry()
     entry.id(message.msgid)
     entry.title(message.title)
     entry.content(message.text)
     entry.published(dateparser.parse(message.updated))
-    entry.link(href=f"https://t.me/{message.channelName}/{message.msgid}")
+    if urlscheme:
+        qs = urllib.parse.urlencode({"url": f"tg://resolve?domain={message.username}&post={message.msgid}&single"})
+        url = f"https://p.19940731.xyz/api/network/url/redirect?{qs}"
+        entry.link(href=url)
+    else:
+        entry.link(href=f"https://t.me/{message.channelName}/{message.msgid}")
     return entry
 
 
 @router.get("/channel", summary="Telegram Channel RSS Subscribe")
-async def channel(req: Request, channels: list[str] = Query(..., description="channel name")):
+async def channel(
+    req: Request,
+    channels: list[str] = Query(..., description="channel name"),
+    urlscheme: bool = Query(True, description="是否返回 URLScheme 直接跳转到 App"),
+):
     """Telegram Channel RSS Subscribe"""
-    host = req.url.hostname
-    fg = feedgen.feed.FeedGenerator()
-    fg.id("Telegram Channel RSS Subscribe")
-    fg.title("Telegram Channel RSS Subscribe")
-    fg.subtitle("Telegram Channel RSS Subscribe")
-    fg.author({"name": "qsssssssss", "email": "support@19940731.xyz"})
-    fg.link(href="https://docs.19940731.xyz", rel="alternate")
-    fg.logo("https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Telegram.png")
-    fg.link(href=f"https://{host}/api/rss/telegram/channel", rel="self")
-    fg.language("zh-CN")
-    tasks = await asyncio.gather(*[get_channel_messages(channelName) for channelName in channels])
-    for item in chain(*tasks):
-        feed = make_feed_entry_by_telegram_message(fg, item)
-        fg.add_entry(feed)
-    rss_xml = fg.rss_str(pretty=True)
-
+    try:
+        token = URLScheme.set(urlscheme)
+        host = req.url.hostname
+        fg = feedgen.feed.FeedGenerator()
+        fg.id("Telegram Channel RSS Subscribe")
+        fg.title("Telegram Channel RSS Subscribe")
+        fg.subtitle("Telegram Channel RSS Subscribe")
+        fg.author({"name": "qsssssssss", "email": "support@19940731.xyz"})
+        fg.link(href="https://docs.19940731.xyz", rel="alternate")
+        fg.logo("https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Telegram.png")
+        fg.link(href=f"https://{host}/api/rss/telegram/channel", rel="self")
+        fg.language("zh-CN")
+        tasks = await asyncio.gather(*[get_channel_messages(channelName) for channelName in channels])
+        for item in chain(*tasks):
+            feed = make_feed_entry_by_telegram_message(fg, item)
+            fg.add_entry(feed)
+        rss_xml = fg.rss_str(pretty=True)
+    except Exception as e:
+        raise e
+    finally:
+        URLScheme.reset(token)
     return Response(content=rss_xml, media_type="application/xml")
