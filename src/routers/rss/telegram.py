@@ -89,7 +89,7 @@ def make_feed_entry_by_telegram_message(
 async def channel(
     req: Request,
     channels: list[str] = Query(..., description="channel name"),
-    urlscheme: bool = Query(True, description="是否返回 URLScheme 直接跳转到 App"),
+    urlscheme: bool = Query(False, description="是否返回 URLScheme 直接跳转到 App"),
 ):
     """Telegram Channel RSS Subscribe"""
     try:
