@@ -1,4 +1,5 @@
 import uuid
+import json
 import logging
 from fastapi.responses import PlainTextResponse
 import httpx
@@ -135,4 +136,45 @@ def github_rate_limit():
         header-rewrite:
             - https://(avatars|gist|raw).githubusercontent.com request-replace Accept-Language en-us
     """
+    return PlainTextResponse(inspect.cleandoc(content))
+
+
+@router.get("/headers", summary="Header调试覆写")
+def http_header_override(
+    name: str = Query("http-header"),
+    mitm: str = Query(..., description="中间人攻击域名"),
+    match: str = Query(..., description="匹配的 URL"),
+    headers: list[str] = Query([], description="需要抓包的Header"),
+    cookies: list[str] = Query([], description="需要抓包的Cookie"),
+):
+    """输出 Header 抓包覆写"""
+    # _headers = ",".join(map(lambda x: f'"{x}"', headers))
+    # _cookies = ",".join(map(lambda x: f'"{x}"', cookies))
+    argument = json.dumps({"headers": headers, "cookies": cookies})
+    content = f"""
+    name: {name}
+    desc: |-
+    category: debug
+    icon: https://raw.githubusercontent.com/qsoyq/shell/main/assets/icon/debug.png
+
+    http:
+        mitm:
+            - "{mitm}"
+        script:
+            -   match: {match}
+                name: {name}
+                type: request
+                require-body: false
+                timeout: 10
+                argument: |-
+                    {argument}
+                binary-mode: false
+                debug: true
+
+    script-providers:
+        {name}:
+            url: https://raw.githubusercontent.com/qsoyq/stash/main/script/debug/http-header.js
+            interval: 86400
+    """
+    # .format(name=name, mitm=mitm, match=match, argument=argument)
     return PlainTextResponse(inspect.cleandoc(content))
