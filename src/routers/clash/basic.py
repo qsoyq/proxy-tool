@@ -2,7 +2,10 @@ import asyncio
 import logging
 import socket
 from functools import cache
+from copy import deepcopy
+from datetime import datetime
 
+import pytz
 import httpx
 import yaml
 
@@ -100,6 +103,10 @@ def subscribe(
         None, description="延迟测试连接, 如: http://cp.cloudflare.com/", alias="benchmark-url"
     ),
     benchmark_timeout: float | None = Query(None, description="延迟测试超时，单位: 秒", alias="benchmark-timeout"),
+    subscription_remark: str = Query("统计", description="订阅数据统计标识符"),
+    add_total_used_remark: bool = Query(True, description="是否添加一个标注流量使用的节点"),
+    add_refresh_time_remark: bool = Query(True, description="是否添加一个订阅更新日期的节点"),
+    add_expire_remark: bool = Query(True, description="是否添加一个标注过期时间的节点"),
 ):
     headers = {}
     if user_agent is not None:
@@ -115,14 +122,16 @@ def subscribe(
     ):
         if field in resp.headers:
             headers[field] = resp.headers[field]
+    subscription = headers.get("subscription-userinfo")
+    subscription_meta = {}
+    if subscription:
+        subscription_meta = {k.strip(): v.strip() for item in subscription.split(";") for k, v in [item.split("=")]}
+
     content = resp.text
-    document = None
     try:
         document = yaml.safe_load(content)
     except Exception:
-        pass
-    if not isinstance(document, dict):
-        return PlainTextResponse("解析链接失败，未返回合法的 YAML 格式数据", status_code=400)
+        return PlainTextResponse("解析订阅失败，未返回合法的 YAML 格式数据", status_code=400)
 
     if benchmark_url:
         for x in document.get("proxies", []):
@@ -144,7 +153,42 @@ def subscribe(
 
     if sort_by_name:
         document["proxies"] = sorted(document["proxies"], key=lambda x: x["name"])
+    if document.get("proxies"):
+        try:
+            tz = pytz.timezone("Asia/Shanghai")
+            if add_expire_remark and subscription_meta.get("expire"):
+                remark = (
+                    datetime.fromtimestamp(int(subscription_meta["expire"]))
+                    .astimezone(tz)
+                    .strftime("%Y-%m-%d %H:%M:%S CST")
+                )
+                name = f"{additional_prefix}{subscription_remark}｜expire｜{remark}"
+                add_remark_node(document["proxies"], name)
+
+            if add_refresh_time_remark:
+                remark = datetime.now(tz).strftime("%Y-%m-%d %H:%M:%S CST")
+                name = f"{additional_prefix}{subscription_remark}｜update｜{remark}"
+                add_remark_node(document["proxies"], name)
+
+            if add_total_used_remark and subscription_meta.get("total"):
+                total = float(subscription_meta["total"]) / 1024 / 1024 / 1024
+                used = float(
+                    (int(subscription_meta["upload"]) + int(subscription_meta["download"])) / 1024 / 1024 / 1024
+                )
+                remark = f"{used:.2f}/{total:.2f}GB"
+                name = f"{additional_prefix}{subscription_remark}｜{remark}"
+                add_remark_node(document["proxies"], name)
+
+        except Exception as e:
+            logger.warning(f"[Clash Subscribe] add subscription remark error: {e}")
 
     content = yaml.safe_dump(document, allow_unicode=True)
     headers["content-type"] = "text/plain;charset=utf-8"
     return Response(content=content, status_code=resp.status_code, headers=headers)
+
+
+def add_remark_node(proxies: list, name: str):
+    p = deepcopy(proxies[0])
+    p["name"] = name
+    p["benchmark-disabled"] = True
+    proxies.append(p)
