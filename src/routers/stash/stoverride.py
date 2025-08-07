@@ -1,5 +1,6 @@
 import uuid
 import json
+import urllib.parse
 import logging
 from fastapi.responses import PlainTextResponse
 import httpx
@@ -148,8 +149,6 @@ def http_header_override(
     cookies: list[str] = Query([], description="需要抓包的Cookie"),
 ):
     """输出 Header 抓包覆写"""
-    # _headers = ",".join(map(lambda x: f'"{x}"', headers))
-    # _cookies = ",".join(map(lambda x: f'"{x}"', cookies))
     argument = json.dumps({"headers": headers, "cookies": cookies})
     content = f"""
     name: {name}
@@ -176,5 +175,7 @@ def http_header_override(
             url: https://raw.githubusercontent.com/qsoyq/stash/main/script/debug/http-header.js
             interval: 86400
     """
-    # .format(name=name, mitm=mitm, match=match, argument=argument)
-    return PlainTextResponse(inspect.cleandoc(content))
+    r_headers = {
+        "Content-Disposition": f"inline;filename*=UTF-8''{urllib.parse.quote(name)}.stoverride",
+    }
+    return PlainTextResponse(inspect.cleandoc(content), headers=r_headers)
