@@ -5,7 +5,7 @@ import httpx
 from fastapi import APIRouter, Request, Response, HTTPException
 from pydantic import BaseModel, Field
 import feedgen.feed
-from schemas.rss.jsonfeed import JSONFeed, JSONFeedItem, JSONFeedItemAuthor
+from schemas.rss.jsonfeed import JSONFeed, JSONFeedItem, JSONFeedAuthor
 from responses import PrettyJSONResponse
 
 
@@ -125,7 +125,7 @@ def jsonfeed(req: Request):
         _payload["id"] = f"t6-{_payload['id']}"
         u = users.get(item["relationships"]["user"]["data"]["id"])
         if u:
-            _payload["author"] = JSONFeedItemAuthor(
+            _payload["author"] = JSONFeedAuthor(
                 **{
                     "url": f"https://1024.day/u/{u.username}",
                     "name": u.displayName,
