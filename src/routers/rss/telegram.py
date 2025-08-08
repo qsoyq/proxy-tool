@@ -14,7 +14,7 @@ from schemas.rss.telegram import TelegramChannalMessage
 
 URLScheme = contextvars.ContextVar("URLScheme", default=True)
 
-router = APIRouter(tags=["Utils"], prefix="/rss/telegram")
+router = APIRouter(tags=["RSS"], prefix="/rss/telegram")
 
 logger = logging.getLogger(__file__)
 

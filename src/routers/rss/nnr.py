@@ -9,7 +9,7 @@ from fastapi.responses import JSONResponse
 import feedgen.feed
 
 
-router = APIRouter(tags=["Utils"], prefix="/rss/nnr")
+router = APIRouter(tags=["RSS"], prefix="/rss/nnr")
 
 logger = logging.getLogger(__file__)
 

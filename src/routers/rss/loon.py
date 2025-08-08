@@ -8,7 +8,7 @@ from fastapi import APIRouter, Request, Response, Query
 import feedgen.feed
 
 
-router = APIRouter(tags=["Utils"], prefix="/rss/loon")
+router = APIRouter(tags=["RSS"], prefix="/rss/loon")
 
 logger = logging.getLogger(__file__)
 

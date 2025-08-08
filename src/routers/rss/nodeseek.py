@@ -8,7 +8,7 @@ from dateparser import parse
 from bs4 import BeautifulSoup as soup
 
 
-router = APIRouter(tags=["Utils"], prefix="/rss/nodeseek/category")
+router = APIRouter(tags=["RSS"], prefix="/rss/nodeseek/category")
 
 logger = logging.getLogger(__file__)
 

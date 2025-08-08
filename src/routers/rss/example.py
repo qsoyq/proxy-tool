@@ -3,7 +3,7 @@ from fastapi import APIRouter, Request
 from schemas.rss.jsonfeed import JSONFeed, JSONFeedItem
 
 
-router = APIRouter(tags=["Utils"], prefix="/rss")
+router = APIRouter(tags=["RSS"], prefix="/rss")
 
 logger = logging.getLogger(__file__)
 

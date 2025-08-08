@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 import feedgen.feed
 
 
-router = APIRouter(tags=["Utils"], prefix="/rss/1024.day")
+router = APIRouter(tags=["RSS"], prefix="/rss/1024.day")
 
 logger = logging.getLogger(__file__)
 

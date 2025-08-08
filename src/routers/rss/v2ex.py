@@ -6,7 +6,7 @@ from schemas.rss.jsonfeed import JSONFeed, JSONFeedItem
 from routers.v2ex.my import get_topics
 
 
-router = APIRouter(tags=["Utils"], prefix="/rss/jsonfeed/v2ex")
+router = APIRouter(tags=["RSS"], prefix="/rss/jsonfeed/v2ex")
 
 logger = logging.getLogger(__file__)
 

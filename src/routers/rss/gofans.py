@@ -6,7 +6,7 @@ from fastapi import APIRouter, Request, Response, Query
 from routers.apple.ics.gofans import get_gofans_app_records
 
 
-router = APIRouter(tags=["Utils"], prefix="/rss/gofans")
+router = APIRouter(tags=["RSS"], prefix="/rss/gofans")
 
 logger = logging.getLogger(__file__)
 

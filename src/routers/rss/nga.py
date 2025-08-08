@@ -9,7 +9,7 @@ from fastapi import APIRouter, Request, Response, Query, Path
 from routers.nga.thread import get_threads, Threads, Thread, OrderByEnum
 
 
-router = APIRouter(tags=["Utils"], prefix="/rss/nga")
+router = APIRouter(tags=["RSS"], prefix="/rss/nga")
 
 logger = logging.getLogger(__file__)
 
