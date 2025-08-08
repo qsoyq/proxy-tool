@@ -9,7 +9,7 @@ import pytz
 import httpx
 import yaml
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Path
 from fastapi.responses import Response, PlainTextResponse
 from settings import RegionCodeTable
 
@@ -80,7 +80,7 @@ def add_emoji_prefix(name: str) -> str:
 
 @router.head("/timeout/{timeout}", include_in_schema=False)
 @router.get("/timeout/{timeout}")
-async def timeout(timeout: float | None = Query(None, description="可控的阻塞时间")):
+async def timeout(timeout: float | None = Path(..., description="可控的阻塞时间")):
     if timeout is not None:
         await asyncio.sleep(timeout)
     return ""

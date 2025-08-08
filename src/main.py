@@ -1,7 +1,4 @@
-import gc
 import logging
-import asyncio
-
 
 import typer
 import uvicorn
@@ -10,6 +7,7 @@ from fastapi import FastAPI
 
 
 from exception import register_exception_handler
+
 import routers.basic
 import routers.tool.basic
 import routers.notifications.push
@@ -50,11 +48,12 @@ import routers.rss.loon
 import routers.rss.telegram
 import routers.rss.example
 from settings import AppSettings, version
-from schemas.ping import ping_responses, PingRes, get_default_memory
+from schemas.ping import ping_responses, PingRes
 from responses import PingResponse
+from events import lifespan
 
 cmd = typer.Typer()
-app = FastAPI(title="proxy tool", version=version)
+app = FastAPI(title="proxy tool", version=version, lifespan=lifespan)
 api_prefix = AppSettings().api_prefix
 app.include_router(routers.basic.router, prefix=api_prefix)
 app.include_router(routers.tool.basic.router, prefix=api_prefix)
@@ -99,31 +98,6 @@ app.include_router(routers.rss.example.router, prefix=api_prefix)
 register_exception_handler(app)
 
 logger = logging.getLogger(__file__)
-
-
-@app.on_event("startup")
-async def startup_event():
-    async def background_gc():
-        while True:
-            memory = get_default_memory()
-            memory_percent = float(memory.percent[:-1])
-            settings = AppSettings()
-            if memory_percent >= settings.gc_trigger_memory_percent_limit:
-                logger.debug(
-                    f"[background_gc]: trigger gc collect because memory exceeds 80, current: {memory_percent}",
-                )
-                gc.collect()
-            await asyncio.sleep(settings.gc_trigger_memory_percent_interval)
-
-    app.state.background_gc_task = asyncio.create_task(background_gc())
-
-
-@app.on_event("shutdown")
-async def shutdown():
-    task: asyncio.Task = app.state.background_gc_task
-    if not task.done:
-        task.cancel()
-        logger.info("[shutdown]: background_gc task cancelled")
 
 
 @app.get("/", response_model=PingRes, tags=["Basic"], responses=ping_responses, response_class=PingResponse)

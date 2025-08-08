@@ -6,7 +6,7 @@ authors = ["wangqs <wqs1639@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-fastapi = "^0.73.0"
+fastapi = "^0.116.0"
 uvicorn = "^0.17.0"
 httpx = { version = "^0.22.0", extras = ["http2", "socks"] }
 hypercorn = "^0.13.2"
@@ -37,6 +37,7 @@ pytest-asyncio = "^0.26.0"
 feedgen = "^1.0.0"
 pytz = "^2025.2"
 cloudscraper = "^1.2.71"
+pydantic-settings = "^2.10.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2"
@@ -148,6 +149,8 @@ module = [
     "feedgen.*",
     "cloudscraper",
     "requests.*",
+    "pydantic_settings",
+    "events.*",
 ]
 ignore_missing_imports = true
 follow_untyped_imports = true

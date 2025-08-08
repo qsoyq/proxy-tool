@@ -28,7 +28,7 @@ class BarkPushMessage(BaseModel):
         description="The number displayed next to App icon ([Apple Developer](https://developer.apple.com/documentation/usernotifications/unnotificationcontent/1649864-badge))",
     )
     automaticallyCopy: str | None = Field(None, description="Must be 1")
-    _copy: str | None = Field(None, description="The value to be copied", alias="copy")
+    copy_: str | None = Field(None, description="The value to be copied", alias="copy")
     sound: str | None = Field(None, description="Value from [here](https://github.com/Finb/Bark/tree/master/Sounds)")
     icon: str | None = Field(None, description="An url to the icon, available only on iOS 15 or later")
     group: str | None = Field(None, description="The group of the notification")

@@ -6,12 +6,12 @@ from pydantic import BaseModel
 class BilibiliRoomInfoScheme(BaseModel):
     uid: int
     room_id: int
-    title: str | None
-    description: str | None
-    live_status: int | None
-    live_time: str | None
-    user_cover: str | None
-    keyframe: str | None
+    title: str | None = None
+    description: str | None = None
+    live_status: int | None = None
+    live_time: str | None = None
+    user_cover: str | None = None
+    keyframe: str | None = None
 
     @property
     def room_link(self):
@@ -49,14 +49,14 @@ class BilibiliRoomInfoScheme(BaseModel):
 class BilibiliAnchorInRoomScheme(BaseModel):
     uid: int
     uname: str
-    face: str | None
+    face: str | None = None
 
 
 class LiveRoomResponseSchema(BaseModel):
     userInfo: BilibiliAnchorInRoomScheme
     roomInfo: BilibiliRoomInfoScheme
     isAlive: bool
-    pubDate: datetime | None
+    pubDate: datetime | None = None
     roomLink: str
 
 

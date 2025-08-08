@@ -1,23 +1,23 @@
 from pydantic import BaseModel
-import schemas.notifications.telegram as telegram
-import schemas.notifications.bark as bark
-import schemas.notifications.gmail as gmail
-import schemas.notifications.gotify as gotify
-import schemas.notifications.apple as apple
+import schemas.notifications.telegram as telegram_
+import schemas.notifications.bark as bark_
+import schemas.notifications.gmail as gmail_
+import schemas.notifications.gotify as gotify_
+import schemas.notifications.apple as apple_
 
 
 class PushMessage(BaseModel):
-    telegram: telegram.TelegramPushMessage | None
-    gmail: gmail.GmailPushMessage | None
-    bark: bark.BarkPushMessage | None
+    telegram: telegram_.TelegramPushMessage | None = None
+    gmail: gmail_.GmailPushMessage | None = None
+    bark: bark_.BarkPushMessage | None = None
 
 
 class PushMessageV3(BaseModel):
-    telegram: telegram.TelegramPushMessageV3 | None
-    gmail: gmail.GmailPushMessage | None
-    bark: bark.BarkPushMessage | None
-    gotify: gotify.GotifyPushMessage | None
-    apple: apple.ApplePushMessage | None
+    telegram: telegram_.TelegramPushMessageV3 | None = None
+    gmail: gmail_.GmailPushMessage | None = None
+    bark: bark_.BarkPushMessage | None = None
+    gotify: gotify_.GotifyPushMessage | None = None
+    apple: apple_.ApplePushMessage | None = None
 
 
 class PushMessages(BaseModel):

@@ -82,6 +82,8 @@ class PingRes(BaseModel):
     uptime: str = Field("")
     usage: Usage = Field(default_factory=Usage)
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("uptime", always=True)
     def set_uptime(cls, v, values):
         run_at_ts = values.get("run_at_ts", "")

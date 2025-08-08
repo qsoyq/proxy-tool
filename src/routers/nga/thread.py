@@ -46,8 +46,8 @@ class Threads(BaseModel):
 
 
 class ThreadsGroup(BaseModel):
-    fid: int | None
-    favor: int | None
+    fid: int | None = None
+    favor: int | None = None
     threads: list[Thread]
 
 

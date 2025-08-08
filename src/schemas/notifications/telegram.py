@@ -24,13 +24,13 @@ class TelegramPushMessageText(BaseModel):
 
 class TelegramPushMessagePhoto(BaseModel):
     photo: str
-    caption: str | None
+    caption: str | None = None
 
 
 class TelegramPushMessageMediaDetail(BaseModel):
     type: str = Field("photo")
     media: str = Field(...)
-    caption: str | None
+    caption: str | None = None
 
 
 class TelegramPushMessageV3(BaseModel):
@@ -38,9 +38,9 @@ class TelegramPushMessageV3(BaseModel):
 
     bot_id: str
     chat_id: str
-    message: TelegramPushMessageText | None
-    photo: TelegramPushMessagePhoto | None
-    media: list[TelegramPushMessageMediaDetail] | None
+    message: TelegramPushMessageText | None = None
+    photo: TelegramPushMessagePhoto | None = None
+    media: list[TelegramPushMessageMediaDetail] | None = None
 
     def push(self):
         raise NotImplementedError("TelegramPushMessageV3 不支持 push 方法")

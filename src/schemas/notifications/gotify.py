@@ -5,10 +5,10 @@ from pydantic import BaseModel, Field
 class GotifyPushMessageDetail(BaseModel):
     """https://redocly.github.io/redoc/?url=%20https://raw.githubusercontent.com/gotify/server/v2.5.0/docs/spec.json#tag/message/operation/createMessage"""
 
-    title: str | None
+    title: str | None = None
     message: str
     priority: int = Field(0, description="https://github.com/gotify/android?tab=readme-ov-file#message-priorities")
-    extra: dict | None
+    extra: dict | None = None
 
 
 class GotifyPushMessage(BaseModel):

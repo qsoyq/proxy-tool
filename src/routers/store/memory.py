@@ -6,13 +6,13 @@ from fastapi import APIRouter, Path, Body
 
 
 class MemoryState(BaseModel):
-    content: Any
+    content: Any = None
     created: int
     updated: int
 
 
 class MemoryScheme(BaseModel):
-    state: MemoryState | None
+    state: MemoryState | None = None
 
 
 router = APIRouter(tags=["Utils"], prefix="/store")

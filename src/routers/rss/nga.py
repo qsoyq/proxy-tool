@@ -17,7 +17,7 @@ logger = logging.getLogger(__file__)
 @router.get("/favor/{favorid}", summary="NGA 收藏贴回复 RSS 订阅")
 def favorite(
     req: Request,
-    favorid: int = Path(None, description="收藏夹ID"),
+    favorid: int = Path(..., description="收藏夹ID"),
     uid: str = Query(..., description="ngaPassportUid, 验签"),
     cid: str = Query(..., description="ngaPassportCid, 验签"),
 ):

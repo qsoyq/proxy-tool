@@ -21,7 +21,7 @@ class DoHResDescription:
 class DNSQuestion(BaseModel):
     name: str = Field(..., description=DNSDescription.Name)
     type: int = Field(..., description=DNSDescription.Type)
-    _class: int | None = Field(None, description=DNSDescription.Class, alias="class")
+    class_: int | None = Field(None, description=DNSDescription.Class, alias="class")
 
 
 class DNSAnswer(BaseModel):
@@ -41,6 +41,6 @@ class DoHResponse(BaseModel):
     CD: int = Field(..., description=DoHResDescription.CD)
 
     Question: list[DNSQuestion] | DNSQuestion
-    Answer: list[DNSAnswer] | DNSAnswer | None
-    Authority: list[DNSAnswer] | None
-    Additional: list | None
+    Answer: list[DNSAnswer] | DNSAnswer | None = None
+    Authority: list[DNSAnswer] | None = None
+    Additional: list | None = None

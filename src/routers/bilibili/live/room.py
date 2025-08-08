@@ -4,7 +4,7 @@ import asyncio
 import logging
 import httpx
 from typing import List
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Path
 from concurrent.futures import ThreadPoolExecutor
 
 from schemas.bilibili.live.room import (
@@ -88,5 +88,5 @@ async def room_list(rooms: List[int] = Query(..., description="直播间 id 列�
 
 
 @router.get("/{roomId}", summary="查询哔哩哔哩直播间信息", response_model=LiveRoomResponseSchema, deprecated=True)
-async def room(roomId: int = Query(..., description="直播间 id")):
+async def room(roomId: int = Path(..., description="直播间 id")):
     return await getRoomById(roomId)

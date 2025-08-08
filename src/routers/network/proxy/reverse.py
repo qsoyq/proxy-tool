@@ -19,7 +19,7 @@ logger = logging.getLogger(__file__)
 async def forwarding(
     req: Request,
     host: str = Path(..., description="请求主机地址"),
-    path: str = Path("", description="请求路径"),
+    path: str = Path(..., description="请求路径"),
 ):
     """转发请求"""
     method = req.method

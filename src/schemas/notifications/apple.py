@@ -44,9 +44,9 @@ class ApplePushLevel(str, Enum):
 
 
 class AppleAPNSAlertPayload(BaseModel):
-    title: str | None
-    subtitle: str | None
-    body: str | None
+    title: str | None = None
+    subtitle: str | None = None
+    body: str | None = None
 
 
 class AppleAPNSMessage(BaseModel):
@@ -54,7 +54,7 @@ class AppleAPNSMessage(BaseModel):
 
     alert: str | AppleAPNSAlertPayload
     thread_id: str | None = Field(None, alias="thread-id")  # type: ignore
-    category: str | None
+    category: str | None = None
     sound: str | None = Field(
         None,
         description="[unnotificationsound](https://developer.apple.com/documentation/usernotifications/unnotificationsound)",
@@ -68,8 +68,8 @@ class AppleAPNSMessage(BaseModel):
 
 
 class ApplePushExtParams(BaseModel):
-    icon: HttpUrl | None
-    url: str | None
+    icon: HttpUrl | None = None
+    url: str | None = None
     group: str = Field("Default")
 
 
