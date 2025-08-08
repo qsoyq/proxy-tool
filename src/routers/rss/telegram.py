@@ -10,6 +10,8 @@ from bs4 import BeautifulSoup as soup
 from bs4 import Tag
 import feedgen.feed
 from schemas.rss.telegram import TelegramChannalMessage
+from responses import PrettyJSONResponse
+from schemas.rss.jsonfeed import JSONFeed
 
 
 URLScheme = contextvars.ContextVar("URLScheme", default=True)
@@ -24,6 +26,7 @@ def format_telegram_message_text(tag: Tag) -> str:
 
 
 async def get_channel_messages(channelName: str) -> list[TelegramChannalMessage]:
+    # TODO: 获取消息中的图片和 html 文本
     headers = {
         "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
     }
@@ -85,7 +88,7 @@ def make_feed_entry_by_telegram_message(
     return entry
 
 
-@router.get("/channel", summary="Telegram Channel RSS Subscribe")
+@router.get("/channel/v1", summary="Telegram Channel RSS Subscribe", include_in_schema=False)
 async def channel(
     req: Request,
     channels: list[str] = Query(..., description="channel name"),
@@ -114,3 +117,50 @@ async def channel(
     finally:
         URLScheme.reset(token)
     return Response(content=rss_xml, media_type="application/xml")
+
+
+@router.get(
+    "/channel", summary="Telegram Channel RSS Subscribe", response_model=JSONFeed, response_class=PrettyJSONResponse
+)
+async def channel_jsonfeed(
+    req: Request,
+    channels: list[str] = Query(..., description="channel name"),
+    urlscheme: bool = Query(False, description="是否返回 URLScheme 直接跳转到 App"),
+):
+    """Telegram Channel RSS Subscribe"""
+    try:
+        token = URLScheme.set(urlscheme)
+        host = req.url.hostname
+        items: list = []
+        feed = {
+            "version": "https://jsonfeed.org/version/1",
+            "title": "Telegram Channel RSS Subscribe",
+            "description": "",
+            "home_page_url": "https://t.me",
+            "feed_url": f"{req.url.scheme}://{host}{req.url.path}?{req.url.query}",
+            "icon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Telegram.png",
+            "favicon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Telegram.png",
+            "items": items,
+        }
+
+        tasks = await asyncio.gather(*[get_channel_messages(channelName) for channelName in channels])
+        for message in chain(*tasks):
+            payload = {
+                "id": f"{message.msgid}",
+                "title": f"{message.title}",
+                "url": f"https://t.me/{message.channelName}/{message.msgid}",
+                "date_published": message.updated,
+                "content_text": message.text,
+                "author": {
+                    "avatar": message.head,
+                    "name": message.channelName,
+                    "url": f"https://t.me/{message.channelName}",
+                },
+            }
+            items.append(payload)
+
+    except Exception as e:
+        raise e
+    finally:
+        URLScheme.reset(token)
+    return feed
