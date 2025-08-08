@@ -122,7 +122,6 @@ def jsonfeed(req: Request):
             "url": post.shareUrl,
             "date_published": post.createdAt,
         }
-        _payload["id"] = f"t6-{_payload['id']}"
         u = users.get(item["relationships"]["user"]["data"]["id"])
         if u:
             _payload["author"] = JSONFeedAuthor(
