@@ -4,6 +4,8 @@ import pytz
 import feedgen.feed
 from fastapi import APIRouter, Request, Response, Query
 from routers.apple.ics.gofans import get_gofans_app_records
+from schemas.rss.jsonfeed import JSONFeed
+from responses import PrettyJSONResponse
 
 
 router = APIRouter(tags=["RSS"], prefix="/rss/gofans")
@@ -11,7 +13,7 @@ router = APIRouter(tags=["RSS"], prefix="/rss/gofans")
 logger = logging.getLogger(__file__)
 
 
-@router.get("/iOS", summary="AppleStore iOS 限免RSS订阅")
+@router.get("/iOS/v1", summary="AppleStore iOS 限免RSS订阅", include_in_schema=False)
 async def ios(
     req: Request,
     limit: int = Query(20),
@@ -57,7 +59,7 @@ async def ios(
     return Response(content=rss_xml, media_type="application/xml")
 
 
-@router.get("/macOS", summary="AppleStore macOS 限免RSS订阅")
+@router.get("/macOS/v1", summary="AppleStore macOS 限免RSS订阅", include_in_schema=False)
 async def macOS(
     req: Request,
     limit: int = Query(20),
@@ -101,3 +103,109 @@ async def macOS(
 
     rss_xml = fg.rss_str(pretty=True)
     return Response(content=rss_xml, media_type="application/xml")
+
+
+@router.get(
+    "/ios", response_model=JSONFeed, summary="GoFans App Store iOS 限免RSS订阅", response_class=PrettyJSONResponse
+)
+async def ios_jsonfeed(
+    req: Request,
+    limit: int = Query(20),
+    page: int = Query(1),
+):
+    """GoFans App Store iOS 限免RSS订阅"""
+
+    host = req.url.hostname
+    kind = 2
+    resp = await get_gofans_app_records(limit, page, kind)
+    data = resp.json()
+
+    items: list = []
+    feed = {
+        "version": "https://jsonfeed.org/version/1",
+        "title": "GoFans iOS 应用限免",
+        "description": "AppStore iOS 应用限免订阅",
+        "home_page_url": "https://gofans.cn/",
+        "feed_url": f"{req.url.scheme}://{host}/api/rss/gofans/iOS?{req.url.query}",
+        "icon": "https://gofans.cn/favicon.ico",
+        "favicon": "https://gofans.cn/favicon.ico",
+        "items": items,
+    }
+
+    timezone = pytz.timezone("Asia/Shanghai")
+    for item in data.get("data", []):
+        description = f"""
+            {item['original_price']} => {item['price']}
+            ✨{item['rating']}
+            {item['description']}
+        """
+        description = "\n".join([x.strip() for x in description.split("\n")])
+        updated = timezone.localize(datetime.fromtimestamp(item["updated_at"])).strftime("%Y-%m-%d %H:%M:%S%Z")
+        url = f"https://gofans.cn/app/{item['uuid']}"
+        payload = {
+            "url": url,
+            "title": f'iOS应用限免: {item["name"]}',
+            "id": f'iOS-{item["app_id"]}',
+            "date_published": updated,
+            "content_text": description or "",
+            "author": {
+                "avatar": item["icon"],
+                "url": url,
+                "name": item["name"],
+            },
+        }
+        items.append(payload)
+    return feed
+
+
+@router.get(
+    "/macos", response_model=JSONFeed, summary="GoFans App Store macOS 限免RSS订阅", response_class=PrettyJSONResponse
+)
+async def macOS_jsonfeed(
+    req: Request,
+    limit: int = Query(20),
+    page: int = Query(1),
+):
+    """GoFans App Store macOS 限免RSS订阅"""
+
+    host = req.url.hostname
+    kind = 1
+    resp = await get_gofans_app_records(limit, page, kind)
+    data = resp.json()
+
+    items: list = []
+    feed = {
+        "version": "https://jsonfeed.org/version/1",
+        "title": "GoFans macOS 应用限免",
+        "description": "AppStore macOS 应用限免订阅",
+        "home_page_url": "https://gofans.cn/",
+        "feed_url": f"{req.url.scheme}://{host}/api/rss/gofans/macOS?{req.url.query}",
+        "icon": "https://gofans.cn/favicon.ico",
+        "favicon": "https://gofans.cn/favicon.ico",
+        "items": items,
+    }
+
+    timezone = pytz.timezone("Asia/Shanghai")
+    for item in data.get("data", []):
+        description = f"""
+            {item['original_price']} => {item['price']}
+            ✨{item['rating']}
+            {item['description']}
+        """
+        description = "\n".join([x.strip() for x in description.split("\n")])
+        updated = timezone.localize(datetime.fromtimestamp(item["updated_at"])).strftime("%Y-%m-%d %H:%M:%S%Z")
+        url = f"https://gofans.cn/app/{item['uuid']}"
+        payload = {
+            "url": url,
+            "title": f'macOS应用限免: {item["name"]}',
+            "id": f'macOS-{item["app_id"]}',
+            "date_published": updated,
+            "content_text": description or "",
+            "author": {
+                "avatar": item["icon"],
+                "url": url,
+                "name": item["name"],
+            },
+        }
+        items.append(payload)
+    return feed

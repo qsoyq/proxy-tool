@@ -29,7 +29,7 @@ class JSONFeedItem(BaseModel):
     date_modified: str | None = Field(None, examples=["2010-02-07T14:04:00-05:00"])
     tags: list[str] | None = Field(None)
 
-    author: JSONFeedAuthor
+    author: JSONFeedAuthor | None = Field(None)
 
     attachments: list[JSONFeedAttachment] | None = Field(None)
 
