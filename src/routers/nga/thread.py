@@ -98,7 +98,11 @@ def get_threads(
     res = httpx.get(url, params=params, cookies=cookies, headers=headers, verify=False)
     res.raise_for_status()
     body = json.loads(res.text)
-    threads = Threads(threads=[Thread(**t) for t in body["data"].get("__T", [])])
+    t_li = [t for t in body["data"].get("__T", [])]
+    for t in t_li:
+        if t.get("icon") == 0:
+            t["icon"] = None
+    threads = Threads(threads=[Thread(**t) for t in t_li])
 
     if fid and not if_include_child_node:
         threads.threads = [t for t in threads.threads if t.fid == fid]
@@ -207,7 +211,7 @@ def get_sections() -> GetForumSectionsRes:
                         fid=detail["fid"],
                         name=detail["name"],
                         stid=detail.get("stid"),
-                        info=detail.get("info"),
+                        info=f'{detail.get("info")}',
                         icon=icon,
                     )
                 )
