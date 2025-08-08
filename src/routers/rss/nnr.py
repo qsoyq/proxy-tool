@@ -1,3 +1,4 @@
+import ssl
 import json
 import logging
 from datetime import datetime, timedelta
@@ -28,7 +29,10 @@ def traffic_used_by_day(
 
     url = "https://nnr.moe/user/traffic"
     cookies = {"ssid": ssid}
-    scraper = cloudscraper.create_scraper()
+    ssl_context = ssl.create_default_context()
+    ssl_context.check_hostname = False
+    ssl_context.verify_mode = ssl.CERT_NONE
+    scraper = cloudscraper.create_scraper(ssl_context=ssl_context)
     resp = scraper.get(url, cookies=cookies)
 
     if resp.is_redirect:

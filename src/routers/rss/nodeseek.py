@@ -1,3 +1,4 @@
+import ssl
 import logging
 import urllib.parse
 import cloudscraper
@@ -42,7 +43,10 @@ def newest(
     }
     if cookie:
         cookies = {k.strip(): v.strip() for k, v in (item.split("=") for item in cookie.strip().split("; "))}
-    scraper = cloudscraper.create_scraper()
+    ssl_context = ssl.create_default_context()
+    ssl_context.check_hostname = False
+    ssl_context.verify_mode = ssl.CERT_NONE
+    scraper = cloudscraper.create_scraper(ssl_context=ssl_context)
     resp = scraper.get(url, cookies=cookies, verify=False)
     if not resp.ok:
         return JSONResponse({"msg": resp.text}, status_code=resp.status_code)
