@@ -150,7 +150,7 @@ def traffic_used_by_day_jsonfeed(
                 "id": _id,
                 "title": f"NNR {datestr} 流量使用",
                 "url": "https://nnr.moe/user/traffic",
-                "date_published": day.strftime("%Y-%m-%d %H:%M:%S%Z"),
+                "date_published": day.strftime("%Y-%m-%dT%H:%M:%S%z"),
                 "content_text": f"共使用(GB): {used:.3f}",
             }
             items.append(payload)

@@ -140,7 +140,7 @@ async def ios_jsonfeed(
             {item['description']}
         """
         description = "\n".join([x.strip() for x in description.split("\n")])
-        updated = timezone.localize(datetime.fromtimestamp(item["updated_at"])).strftime("%Y-%m-%d %H:%M:%S%Z")
+        updated = timezone.localize(datetime.fromtimestamp(item["updated_at"])).strftime("%Y-%m-%dT%H:%M:%S%z")
         url = f"https://gofans.cn/app/{item['uuid']}"
         payload = {
             "url": url,

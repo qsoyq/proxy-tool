@@ -163,7 +163,7 @@ def favorite_jsonfeed(
             "id": f"{thread.tid}",
             "title": f"{thread.subject}",
             "url": thread.url,
-            "date_published": published.strftime("%Y-%m-%d %H:%M:%S%Z"),
+            "date_published": published.strftime("%Y-%m-%dT%H:%M:%S%z"),
             "content_text": "",
         }
         items.append(payload)
@@ -227,7 +227,7 @@ def _threads_json(
             "id": f"{thread.tid}",
             "title": f"{thread.subject}",
             "url": thread.url,
-            "date_published": published.strftime("%Y-%m-%d %H:%M:%S%Z"),
+            "date_published": published.strftime("%Y-%m-%dT%H:%M:%S%z"),
             "content_text": "",
         }
         items.append(payload)

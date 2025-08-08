@@ -112,7 +112,7 @@ async def ipx_jsonfeed(
         if isinstance(date, str):
             date = dateparser.parse(date)
             if date:
-                date = timezone.localize(date).strftime("%Y-%m-%d %H:%M:%S%Z")
+                date = timezone.localize(date).strftime("%Y-%m-%dT%H:%M:%S%z")
         payload = {
             "id": f"{name}-{homepage}-{date}",
             "title": f"{name}",

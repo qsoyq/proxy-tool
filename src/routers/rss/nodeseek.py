@@ -163,7 +163,7 @@ def newest_jsonfeed(
             "id": f"{uid}",
             "title": f"{title}",
             "url": href,
-            "date_published": _datetime.strftime("%Y-%m-%d %H:%M:%S%Z") if _datetime else "",
+            "date_published": _datetime.strftime("%Y-%m-%dT%H:%M:%S%z") if _datetime else "",
             "content_text": "",
             "author": {"url": author_link, "avatar": avatar, "name": name},
         }
