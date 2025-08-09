@@ -1,11 +1,14 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, HttpUrl
 
 
 class TelegramChannalMessage(BaseModel):
-    head: str
+    head: str | None = Field(None)
     msgid: str
     channelName: str
     username: str
     title: str
     text: str
     updated: str
+    authorName: str | None = Field(None)
+    contentHtml: str | None = Field(None)
+    photoUrls: list[HttpUrl] | None = Field(None)
