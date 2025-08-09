@@ -116,11 +116,14 @@ def newest_jsonfeed(
     }
     if cookie:
         cookies = {k.strip(): v.strip() for k, v in (item.split("=") for item in cookie.strip().split("; "))}
-    ssl_context = ssl.create_default_context()
-    ssl_context.check_hostname = False
-    ssl_context.verify_mode = ssl.CERT_NONE
-    scraper = cloudscraper.create_scraper(ssl_context=ssl_context)
-    resp = scraper.get(url, cookies=cookies, verify=False)
+    # ssl_context = ssl.create_default_context()
+    # ssl_context.check_hostname = False
+    # ssl_context.verify_mode = ssl.CERT_NONE
+    # scraper = cloudscraper.create_scraper(ssl_context=ssl_context)
+    # resp = scraper.get(url, cookies=cookies, verify=False)
+    # 关闭证书验证会导致绕过失败
+    scraper = cloudscraper.create_scraper()
+    resp = scraper.get(url, cookies=cookies)
     if not resp.ok:
         return JSONResponse({"msg": resp.text}, status_code=resp.status_code)
 

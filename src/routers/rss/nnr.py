@@ -101,11 +101,14 @@ def traffic_used_by_day_jsonfeed(
 
     url = "https://nnr.moe/user/traffic"
     cookies = {"ssid": ssid}
-    ssl_context = ssl.create_default_context()
-    ssl_context.check_hostname = False
-    ssl_context.verify_mode = ssl.CERT_NONE
-    scraper = cloudscraper.create_scraper(ssl_context=ssl_context)
-    resp = scraper.get(url, cookies=cookies, verify=False)
+    # ssl_context = ssl.create_default_context()
+    # ssl_context.check_hostname = False
+    # ssl_context.verify_mode = ssl.CERT_NONE
+    # scraper = cloudscraper.create_scraper(ssl_context=ssl_context)
+    # resp = scraper.get(url, cookies=cookies, verify=False)
+    # 关闭证书验证会导致绕过失败
+    scraper = cloudscraper.create_scraper()
+    resp = scraper.get(url, cookies=cookies)
 
     if resp.is_redirect:
         return JSONResponse({"msg": "ssid has been expired"}, status_code=400)
