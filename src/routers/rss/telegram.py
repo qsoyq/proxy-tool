@@ -254,7 +254,7 @@ async def channel_jsonfeed(
             "favicon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Telegram.png",
             "items": items,
         }
-
+        icon = None
         tasks = await asyncio.gather(*[TelegramToolkit.get_channel_messages(channelName) for channelName in channels])
         for message in chain(*tasks):
             tags = []
@@ -262,7 +262,7 @@ async def channel_jsonfeed(
                 tags = [x.strip() for x in message.text.replace("\n", " ").split(" ") if x.startswith("#")]
 
             payload = {
-                "id": f"{message.msgid}",
+                "id": f"{message.channelName}-{message.msgid}",
                 "title": f"{message.title}",
                 "url": f"https://t.me/{message.channelName}/{message.msgid}",
                 "date_published": message.updated,
@@ -274,6 +274,8 @@ async def channel_jsonfeed(
                     "url": f"https://t.me/{message.channelName}",
                 },
             }
+            if message.head and icon is None:
+                icon = message.head
 
             if message.photoUrls:
                 payload["image"] = message.photoUrls[0]
@@ -286,6 +288,10 @@ async def channel_jsonfeed(
                 payload["content_html"] = f"{photosOuterHTML}{payload['content_html']}"
 
             items.append(payload)
+
+        if icon is not None:
+            feed["icon"] = icon
+            feed["favicon"] = icon
 
     except Exception as e:
         raise e
