@@ -200,7 +200,7 @@ class TelegramToolkit:
         return entry
 
 
-@router.get("/channel/v1", summary="Telegram Channel RSS Subscribe", include_in_schema=False)
+@router.get("/channel/v1", summary="Telegram Channel RSS Subscribe", include_in_schema=False, deprecated=True)
 async def channel(
     req: Request,
     channels: list[str] = Query(..., description="channel name"),
@@ -254,7 +254,8 @@ async def channel_jsonfeed(
             "favicon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Telegram.png",
             "items": items,
         }
-        icon = None
+        feed_icon = None
+        feed_title = None
         tasks = await asyncio.gather(*[TelegramToolkit.get_channel_messages(channelName) for channelName in channels])
         for message in chain(*tasks):
             tags = []
@@ -274,8 +275,11 @@ async def channel_jsonfeed(
                     "url": f"https://t.me/{message.channelName}",
                 },
             }
-            if message.head and icon is None:
-                icon = message.head
+            if message.head and feed_icon is None:
+                feed_icon = message.head
+
+            if message.authorName and feed_title is None:
+                feed_title = message.authorName
 
             if message.photoUrls:
                 payload["image"] = message.photoUrls[0]
@@ -289,9 +293,12 @@ async def channel_jsonfeed(
 
             items.append(payload)
 
-        if icon is not None:
-            feed["icon"] = icon
-            feed["favicon"] = icon
+        if feed_title is not None:
+            feed["title"] = feed_title
+
+        if feed_icon is not None:
+            feed["icon"] = feed_icon
+            feed["favicon"] = feed_icon
 
     except Exception as e:
         raise e
