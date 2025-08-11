@@ -83,7 +83,7 @@ def jsonfeed(req: Request):
         "title": "1024.day",
         "description": "新鲜出炉",
         "home_page_url": "https://1024.day",
-        "feed_url": f"{req.url.scheme}://{host}/api/rss/1024.day/newest",
+        "feed_url": f"{req.url.scheme}://{host}{req.url.path}?{req.url.query}",
         "icon": "https://1024.day/favicon.ico",
         "favicon": "https://1024.day/favicon.ico",
         "items": items,

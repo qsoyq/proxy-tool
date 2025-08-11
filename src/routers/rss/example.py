@@ -83,7 +83,7 @@ async def jsonfeed(
         "title": "YouTube",
         "description": "YouTube",
         "home_page_url": "https://www.youtube.com",
-        "feed_url": f"{req.url.scheme}://{host}/api/rss/jsonfeed",
+        "feed_url": f"{req.url.scheme}://{host}{req.url.path}?{req.url.query}",
         "icon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/YouTube.png",
         "favicon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/YouTube.png",
         "items": items,

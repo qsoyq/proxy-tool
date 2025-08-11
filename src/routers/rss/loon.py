@@ -97,7 +97,7 @@ async def ipx_jsonfeed(
         "title": "Loon 插件更新订阅",
         "description": "",
         "home_page_url": "https://docs.19940731.xyz",
-        "feed_url": f"{req.url.scheme}://{host}/api/rss/loon/ipx?{req.url.query}",
+        "feed_url": f"{req.url.scheme}://{host}{req.url.path}?{req.url.query}",
         "icon": "https://nsloon.app/img/favicon.png",
         "favicon": "https://nsloon.app/img/favicon.png",
         "items": items,

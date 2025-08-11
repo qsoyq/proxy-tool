@@ -212,7 +212,7 @@ def _threads_json(
         "title": "NGA 分区 RSS 订阅",
         "description": "按创建时间订阅指定分区的帖子",
         "home_page_url": "https://bbs.nga.cn/",
-        "feed_url": f"{req.url.scheme}://{host}/api/rss/nga/threads?{req.url.query}",
+        "feed_url": f"{req.url.scheme}://{host}{req.url.path}?{req.url.query}",
         "icon": "https://bbs.nga.cn/favicon.ico",
         "favicon": "https://bbs.nga.cn/favicon.ico",
         "items": items,
