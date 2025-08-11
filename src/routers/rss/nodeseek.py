@@ -27,25 +27,47 @@ logger = logging.getLogger(__file__)
 
 class NodeseekToolkit:
     LOCK = asyncio.Lock()
-    Semaphore = asyncio.Semaphore(3)
+    Semaphore = asyncio.Semaphore(1)
+    NEXTWAIT = 1
+    ONCE_FETCH_ARTICLE_CACHE_MAX = 10
     ArticlePostCache: MutableMapping[str, str] = TTLCache(4096, ttl=86400 * 3)
+    LoginRequired: MutableMapping[str, bool] = TTLCache(4096, ttl=86400 * 3)
 
     @staticmethod
     async def get_or_create_article_post_content(
         url: str, scraper: cloudscraper.CloudScraper, cookies: dict
     ) -> str | None:
+        # 跳过要求登陆的 URL
+        async with NodeseekToolkit.LOCK:
+            if url in NodeseekToolkit.LoginRequired:
+                logger.debug(f"{url} skip because of login required")
+                return None
+
+        # 从缓存读取
         content_html = None
         async with NodeseekToolkit.LOCK:
             content_html = NodeseekToolkit.ArticlePostCache.get("url")
             if content_html:
+                logger.debug(f"[Nodessk RSS] read from cache for {url}")
                 return str(content_html)
 
-        async with NodeseekToolkit.Semaphore:
-            content_html = await NodeseekToolkit.fetch_post_content_by_url(url, scraper, cookies)
+        # 请求网页，限制并发量，同时记录要求登陆的 URL
+        try:
+            async with NodeseekToolkit.Semaphore:
+                content_html = await NodeseekToolkit.fetch_post_content_by_url(url, scraper, cookies)
+                await asyncio.sleep(NodeseekToolkit.NEXTWAIT)
+        except HTTPException as e:
+            if e.status_code in (404, 403):
+                async with NodeseekToolkit.LOCK:
+                    NodeseekToolkit.LoginRequired[url] = True
+                return None
+            raise e
 
+        # 根据请求结果写入缓存
         if content_html:
             async with NodeseekToolkit.LOCK:
                 NodeseekToolkit.ArticlePostCache[url] = content_html
+                logger.debug(f"[Nodessk RSS] set new cache for {url}")
         else:
             logger.warning(f"[Nodeseek RSS] can't fetch post content: {url}")
         return content_html
@@ -92,7 +114,6 @@ class NodeseekToolkit:
     async def fetch_post_content_by_url(url: str, scraper: cloudscraper.CloudScraper, cookies: dict) -> str | None:
         resp = await cloudscraper_get(scraper, url, cookies)
         if not resp.ok:
-            logger.warning(f"[Nodeseek] fetch post content failed, {resp.text}")
             raise HTTPException(resp.status_code, resp.text)
 
         document = Soup(resp.text, "lxml")
@@ -229,22 +250,27 @@ async def newest_jsonfeed(
         "items": [],
     }
     items = NodeseekToolkit.make_feeds_by_document(resp.text)
+    count = 0
     for item in items:
+        count += 1
+        if count > NodeseekToolkit.ONCE_FETCH_ARTICLE_CACHE_MAX:
+            break
         url = str(item["url"])
+
         try:
             content_html = await NodeseekToolkit.get_or_create_article_post_content(url, scraper, cookies)
         except HTTPException as e:
             if e.status_code == 429:
                 logger.warning("[Nodeseek RSS] Request has reached the limit.")
-                break
-            elif e.status_code == 403 and "本帖需要注册用户才能查看" in e.detail:
-                continue
             else:
                 logger.warning(
                     f"[Nodeseek RSS] get_or_create_article_post_content failed, {e.status_code}, {e.detail}"
                 )
+            break
+
         if content_html:
             item["content_html"] = content_html
             item["content_text"] = None
+
     feed["items"] = items
     return feed
