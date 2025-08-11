@@ -1,5 +1,4 @@
 import ssl
-import asyncio
 import requests
 import logging
 import urllib.parse
@@ -211,12 +210,9 @@ async def newest_jsonfeed(
 
         items.append(payload)
 
-    tasks = await asyncio.gather(
-        *[fetch_post_content_by_url(str(item["url"]), scraper, cookies) for item in feed["items"]]
-    )
-    url2artcile = {x[0]: x[1] for x in tasks if x}
+    global NodeseekArticlePostCache
     for item in feed["items"]:
-        article = url2artcile.get(item["url"])
+        article = NodeseekArticlePostCache.get(item["url"])
         if article:
             item["content_html"] = article
             item["content_text"] = None
