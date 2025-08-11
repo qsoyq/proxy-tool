@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 import psutil
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, model_validator
 from settings import run_at, run_at_ts, version
 
 
@@ -82,18 +82,14 @@ class PingRes(BaseModel):
     uptime: str = Field("")
     usage: Usage = Field(default_factory=Usage)
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("uptime", always=True)
-    def set_uptime(cls, v, values):
-        run_at_ts = values.get("run_at_ts", "")
-        current = values.get("timestamp", "")
-        uptime = ""
+    @model_validator(mode="after")
+    def set_uptime(cls, values):
+        run_at_ts = values.run_at_ts
+        current = values.timestamp
         if run_at_ts and current:
             delta = datetime.fromtimestamp(current) - datetime.fromtimestamp(run_at_ts)
-            uptime = format_timedelta(delta)
-
-        return uptime or "N/A"
+            values.uptime = format_timedelta(delta)
+        return values
 
 
 ping_response_example = {

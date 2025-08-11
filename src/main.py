@@ -104,7 +104,7 @@ logger = logging.getLogger(__file__)
 @app.get("/ping", response_model=PingRes, tags=["Basic"], responses=ping_responses, response_class=PingResponse)
 async def ping():
     assert getattr(app.state, "background_gc_task", None)
-    return PingRes.construct()
+    return PingRes.model_construct()
 
 
 @cmd.command()
