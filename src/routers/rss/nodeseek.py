@@ -18,6 +18,7 @@ from settings import AppSettings
 router = APIRouter(tags=["RSS"], prefix="/rss/nodeseek/category")
 
 logger = logging.getLogger(__file__)
+NodeseekArticlePostCache: dict[str, str] = {}
 
 
 async def cloudscraper_get(
@@ -39,12 +40,17 @@ async def cloudscraper_get(
 async def fetch_post_content_by_url(
     url: str, scraper: cloudscraper.CloudScraper, cookies: dict
 ) -> tuple[str, str] | None:
+    global NodeseekArticlePostCache
+    if url in NodeseekArticlePostCache:
+        return (url, NodeseekArticlePostCache[url])
+
     resp = await cloudscraper_get(scraper, url, cookies)
     if not resp.ok:
         logger.warning(f"[Nodeseek] fetch post content failed, {resp.text}")
         return None
     document = Soup(resp.text, "lxml")
     article = document.select_one("article.post-content")
+    NodeseekArticlePostCache[url] = str(article)
     return (url, str(article)) if article else None
 
 
