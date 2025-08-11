@@ -106,7 +106,7 @@ async def macOS(
 
 
 @router.get(
-    "/ios", response_model=JSONFeed, summary="GoFans App Store iOS 限免RSS订阅", response_class=PrettyJSONResponse
+    "/iOS", response_model=JSONFeed, summary="GoFans App Store iOS 限免RSS订阅", response_class=PrettyJSONResponse
 )
 async def ios_jsonfeed(
     req: Request,
@@ -159,7 +159,7 @@ async def ios_jsonfeed(
 
 
 @router.get(
-    "/macos", response_model=JSONFeed, summary="GoFans App Store macOS 限免RSS订阅", response_class=PrettyJSONResponse
+    "/macOS", response_model=JSONFeed, summary="GoFans App Store macOS 限免RSS订阅", response_class=PrettyJSONResponse
 )
 async def macOS_jsonfeed(
     req: Request,
