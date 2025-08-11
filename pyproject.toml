@@ -38,6 +38,8 @@ feedgen = "^1.0.0"
 pytz = "^2025.2"
 cloudscraper = "^1.2.71"
 pydantic-settings = "^2.10.1"
+cachetools = "^6.1.0"
+types-cachetools = "^6.1.0.20250717"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2"
@@ -151,6 +153,7 @@ module = [
     "requests.*",
     "pydantic_settings",
     "events.*",
+    "cachetools.*",
 ]
 ignore_missing_imports = true
 follow_untyped_imports = true

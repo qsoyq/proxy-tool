@@ -2484,6 +2484,18 @@ files = [
 types-html5lib = "*"
 
 [[package]]
+name = "types-cachetools"
+version = "6.1.0.20250717"
+description = "Typing stubs for cachetools"
+optional = false
+python-versions = ">=3.9"
+groups = ["main"]
+files = [
+    {file = "types_cachetools-6.1.0.20250717-py3-none-any.whl", hash = "sha256:bba4b8d42262460d24e570097d2d9040e60311934603caa642efd971f3658ed0"},
+    {file = "types_cachetools-6.1.0.20250717.tar.gz", hash = "sha256:4acc8e25de9f5f84dd176ea81dcffa7cb24393869bb2e59e692dfd0139a1e66f"},
+]
+
+[[package]]
 name = "types-dateparser"
 version = "1.2.2.20250627"
 description = "Typing stubs for dateparser"
@@ -2733,4 +2745,4 @@ dkim = ["dkimpy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.10"
-content-hash = "5e73cdf5d8f213d55edf700841dd6c300b3bcb0709e5ab383fa49b8153e49117"
+content-hash = "11a5d22ee9d198be763bb942256df91c2679526edc5413cc565cb61c4198a47b"

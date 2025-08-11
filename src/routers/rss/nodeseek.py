@@ -1,14 +1,20 @@
 import ssl
-import requests
+from typing import MutableMapping
 import logging
 import urllib.parse
+import asyncio
+
+import requests
 import cloudscraper
-from fastapi import APIRouter, Request, Response, Query, Path
+import feedgen.feed
+
+from fastapi import APIRouter, Request, Response, Query, Path, HTTPException
 from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import JSONResponse
-import feedgen.feed
 from dateparser import parse
+from cachetools import TTLCache
 from bs4 import BeautifulSoup as Soup
+
 from responses import PrettyJSONResponse
 from schemas.rss.jsonfeed import JSONFeed
 from settings import AppSettings
@@ -17,7 +23,81 @@ from settings import AppSettings
 router = APIRouter(tags=["RSS"], prefix="/rss/nodeseek/category")
 
 logger = logging.getLogger(__file__)
-NodeseekArticlePostCache: dict[str, str] = {}
+
+
+class NodeseekToolkit:
+    LOCK = asyncio.Lock()
+    Semaphore = asyncio.Semaphore(3)
+    ArticlePostCache: MutableMapping[str, str] = TTLCache(4096, ttl=86400 * 3)
+
+    @staticmethod
+    async def get_or_create_article_post_content(
+        url: str, scraper: cloudscraper.CloudScraper, cookies: dict
+    ) -> str | None:
+        content_html = None
+        async with NodeseekToolkit.LOCK:
+            content_html = NodeseekToolkit.ArticlePostCache.get("url")
+            if content_html:
+                return str(content_html)
+
+        async with NodeseekToolkit.Semaphore:
+            content_html = await NodeseekToolkit.fetch_post_content_by_url(url, scraper, cookies)
+
+        if content_html:
+            async with NodeseekToolkit.LOCK:
+                NodeseekToolkit.ArticlePostCache[url] = content_html
+        else:
+            logger.warning(f"[Nodeseek RSS] can't fetch post content: {url}")
+        return content_html
+
+    @staticmethod
+    def make_feeds_by_document(body: str) -> list[dict[str, object]]:
+        items: list[dict[str, object]] = []
+        document = Soup(body, "lxml")
+        post_list = document.select("li[class='post-list-item']")
+        for item in post_list:
+            author = item.select_one("a")
+            name = avatar = author_link = ""
+            if author:
+                img = author.select_one("img")
+                if img:
+                    name = str(img.attrs["alt"])
+                    avatar = f'https://nodeseek.com{img.attrs["src"]}'
+                    author_link = f"https://nodeseek.com{author.attrs['href']}"
+            _content = item.select_one("div[class='post-list-content']")
+            if not _content:
+                continue
+            a = _content.select_one("div > a")
+            if not a:
+                continue
+            href = f"https://www.nodeseek.com{a.attrs['href']}"  # type: ignore
+            title = a.text
+            _datetime = parse(item.select_one("a[class='info-item info-last-comment-time'] > time").attrs["datetime"])  # type: ignore
+            ret = urllib.parse.urlparse(href)
+            uid = ret.path.split("/")[-1].split("-")[1]
+
+            payload: dict[str, object] = {
+                "id": f"{uid}",
+                "title": f"{title}",
+                "url": href,
+                "date_published": _datetime.strftime("%Y-%m-%dT%H:%M:%S%z") if _datetime else "",
+                "content_text": "",
+                "author": {"url": author_link, "avatar": avatar, "name": name},
+            }
+
+            items.append(payload)
+        return items
+
+    @staticmethod
+    async def fetch_post_content_by_url(url: str, scraper: cloudscraper.CloudScraper, cookies: dict) -> str | None:
+        resp = await cloudscraper_get(scraper, url, cookies)
+        if not resp.ok:
+            logger.warning(f"[Nodeseek] fetch post content failed, {resp.text}")
+            raise HTTPException(resp.status_code, resp.text)
+
+        document = Soup(resp.text, "lxml")
+        article = document.select_one("article.post-content")
+        return str(article) if article else None
 
 
 async def cloudscraper_get(
@@ -34,23 +114,6 @@ async def cloudscraper_get(
     ssl_context.verify_mode = ssl.CERT_NONE
     scraper = cloudscraper.create_scraper(ssl_context=ssl_context)
     return await run_in_threadpool(scraper.get, url, cookies=cookies, verify=False)
-
-
-async def fetch_post_content_by_url(
-    url: str, scraper: cloudscraper.CloudScraper, cookies: dict
-) -> tuple[str, str] | None:
-    global NodeseekArticlePostCache
-    if url in NodeseekArticlePostCache:
-        return (url, NodeseekArticlePostCache[url])
-
-    resp = await cloudscraper_get(scraper, url, cookies)
-    if not resp.ok:
-        logger.warning(f"[Nodeseek] fetch post content failed, {resp.text}")
-        return None
-    document = Soup(resp.text, "lxml")
-    article = document.select_one("article.post-content")
-    NodeseekArticlePostCache[url] = str(article)
-    return (url, str(article)) if article else None
 
 
 @router.get("/{category}/v1", summary="Nodeseek 板块新贴 RSS 订阅", include_in_schema=False)
@@ -139,11 +202,6 @@ async def newest_jsonfeed(
 
     在网页控制台中输出当前域的 cookie: console.log(document.cookie);
     """
-    host = req.url.hostname
-    port = req.url.port
-    if port is None:
-        port = 80 if req.url.scheme == "http" else 443
-
     url = f"https://www.nodeseek.com/categories/{category}?sortBy={sortby}"
     cookies = {
         "colorscheme": "light",
@@ -153,68 +211,40 @@ async def newest_jsonfeed(
     }
     if cookie:
         cookies = {k.strip(): v.strip() for k, v in (item.split("=") for item in cookie.strip().split("; "))}
-    # ssl_context = ssl.create_default_context()
-    # ssl_context.check_hostname = False
-    # ssl_context.verify_mode = ssl.CERT_NONE
-    # scraper = cloudscraper.create_scraper(ssl_context=ssl_context)
-    # resp = scraper.get(url, cookies=cookies, verify=False)
-    # 关闭证书验证会导致绕过失败
+
     scraper = cloudscraper.create_scraper()
     resp = await cloudscraper_get(scraper, url, cookies)
     if not resp.ok:
         return JSONResponse({"msg": resp.text}, status_code=resp.status_code)
 
-    document = Soup(resp.text, "lxml")
-    post_list = document.select("li[class='post-list-item']")
-
-    items: list = []
-    feed = {
+    items = []
+    feed: dict[str, str | list[dict[str, object]]] = {
         "version": "https://jsonfeed.org/version/1",
         "title": "Nodeseek RSS 订阅",
         "description": f"{category}板块",
         "home_page_url": "https://nodeseek.com",
-        "feed_url": f"{req.url.scheme}://{host}{req.url.path}?{req.url.query}",
+        "feed_url": f"{req.url.scheme}://{req.url.hostname}{req.url.path}?{req.url.query}",
         "icon": "https://www.nodeseek.com/static/image/favicon/android-chrome-512x512.png",
         "favicon": "https://www.nodeseek.com/static/image/favicon/android-chrome-512x512.png",
-        "items": items,
+        "items": [],
     }
-    for item in post_list:
-        author = item.select_one("a")
-        name = avatar = author_link = ""
-        if author:
-            img = author.select_one("img")
-            if img:
-                name = str(img.attrs["alt"])
-                avatar = f'https://nodeseek.com{img.attrs["src"]}'
-                author_link = f"https://nodeseek.com{author.attrs['href']}"
-        _content = item.select_one("div[class='post-list-content']")
-        if not _content:
-            continue
-        a = _content.select_one("div > a")
-        if not a:
-            continue
-        href = f"https://www.nodeseek.com{a.attrs['href']}"  # type: ignore
-        title = a.text
-        _datetime = parse(item.select_one("a[class='info-item info-last-comment-time'] > time").attrs["datetime"])  # type: ignore
-        ret = urllib.parse.urlparse(href)
-        uid = ret.path.split("/")[-1].split("-")[1]
-
-        payload = {
-            "id": f"{uid}",
-            "title": f"{title}",
-            "url": href,
-            "date_published": _datetime.strftime("%Y-%m-%dT%H:%M:%S%z") if _datetime else "",
-            "content_text": "",
-            "author": {"url": author_link, "avatar": avatar, "name": name},
-        }
-
-        items.append(payload)
-
-    global NodeseekArticlePostCache
-    for item in feed["items"]:
-        article = NodeseekArticlePostCache.get(item["url"])
-        if article:
-            item["content_html"] = article
+    items = NodeseekToolkit.make_feeds_by_document(resp.text)
+    for item in items:
+        url = str(item["url"])
+        try:
+            content_html = await NodeseekToolkit.get_or_create_article_post_content(url, scraper, cookies)
+        except HTTPException as e:
+            if e.status_code == 429:
+                logger.warning("[Nodeseek RSS] Request has reached the limit.")
+                break
+            elif e.status_code == 403 and "本帖需要注册用户才能查看" in e.detail:
+                continue
+            else:
+                logger.warning(
+                    f"[Nodeseek RSS] get_or_create_article_post_content failed, {e.status_code}, {e.detail}"
+                )
+        if content_html:
+            item["content_html"] = content_html
             item["content_text"] = None
-
+    feed["items"] = items
     return feed
