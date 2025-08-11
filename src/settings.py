@@ -18,6 +18,8 @@ class AppSettings(BaseSettings):  # type:ignore
     gc_trigger_memory_percent_limit: float = 80
     gc_trigger_memory_percent_interval: int = 30
 
+    cloud_scraper_verify: bool = True
+
 
 # http://www.freejson.com/countrycode.html
 # 补充迪拜、尼尔利亚、台湾

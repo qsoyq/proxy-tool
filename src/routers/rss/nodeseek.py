@@ -1,19 +1,51 @@
 import ssl
+import asyncio
+import requests
 import logging
 import urllib.parse
 import cloudscraper
 from fastapi import APIRouter, Request, Response, Query, Path
+from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import JSONResponse
 import feedgen.feed
 from dateparser import parse
-from bs4 import BeautifulSoup as soup
+from bs4 import BeautifulSoup as Soup
 from responses import PrettyJSONResponse
 from schemas.rss.jsonfeed import JSONFeed
+from settings import AppSettings
 
 
 router = APIRouter(tags=["RSS"], prefix="/rss/nodeseek/category")
 
 logger = logging.getLogger(__file__)
+
+
+async def cloudscraper_get(
+    scraper: cloudscraper.CloudScraper, url: str, cookies: dict | None = None
+) -> requests.Response:
+    if cookies is None:
+        cookies = {}
+
+    if AppSettings().cloud_scraper_verify:
+        return await run_in_threadpool(scraper.get, url, cookies=cookies)
+
+    ssl_context = ssl.create_default_context()
+    ssl_context.check_hostname = False
+    ssl_context.verify_mode = ssl.CERT_NONE
+    scraper = cloudscraper.create_scraper(ssl_context=ssl_context)
+    return await run_in_threadpool(scraper.get, url, cookies=cookies, verify=False)
+
+
+async def fetch_post_content_by_url(
+    url: str, scraper: cloudscraper.CloudScraper, cookies: dict
+) -> tuple[str, str] | None:
+    resp = await cloudscraper_get(scraper, url, cookies)
+    if not resp.ok:
+        logger.warning(f"[Nodeseek] fetch post content failed, {resp.text}")
+        return None
+    document = Soup(resp.text, "lxml")
+    article = document.select_one("article.post-content")
+    return (url, str(article)) if article else None
 
 
 @router.get("/{category}/v1", summary="Nodeseek 板块新贴 RSS 订阅", include_in_schema=False)
@@ -53,7 +85,7 @@ def newest(
     if not resp.ok:
         return JSONResponse({"msg": resp.text}, status_code=resp.status_code)
 
-    document = soup(resp.text, "lxml")
+    document = Soup(resp.text, "lxml")
     post_list = document.select("div[class='post-list-content']")
 
     fg = feedgen.feed.FeedGenerator()
@@ -88,7 +120,7 @@ def newest(
 @router.get(
     "/{category}", summary="Nodeseek 板块新贴 RSS 订阅", response_model=JSONFeed, response_class=PrettyJSONResponse
 )
-def newest_jsonfeed(
+async def newest_jsonfeed(
     req: Request,
     session: str = Query(None, description="Cookie.session, 登陆可见的版块需要"),
     smac: str = Query(None, description="Cookie.smac, 登陆可见的版块需要"),
@@ -123,11 +155,11 @@ def newest_jsonfeed(
     # resp = scraper.get(url, cookies=cookies, verify=False)
     # 关闭证书验证会导致绕过失败
     scraper = cloudscraper.create_scraper()
-    resp = scraper.get(url, cookies=cookies)
+    resp = await cloudscraper_get(scraper, url, cookies)
     if not resp.ok:
         return JSONResponse({"msg": resp.text}, status_code=resp.status_code)
 
-    document = soup(resp.text, "lxml")
+    document = Soup(resp.text, "lxml")
     post_list = document.select("li[class='post-list-item']")
 
     items: list = []
@@ -172,4 +204,15 @@ def newest_jsonfeed(
         }
 
         items.append(payload)
+
+    tasks = await asyncio.gather(
+        *[fetch_post_content_by_url(str(item["url"]), scraper, cookies) for item in feed["items"]]
+    )
+    url2artcile = {x[0]: x[1] for x in tasks if x}
+    for item in feed["items"]:
+        article = url2artcile.get(item["url"])
+        if article:
+            item["content_html"] = article
+            item["content_text"] = None
+
     return feed
