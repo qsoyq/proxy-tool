@@ -10,7 +10,6 @@ import feedgen.feed
 import contextvars
 
 from fastapi import APIRouter, Request, Response, Query, Path, HTTPException
-from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import JSONResponse
 from dateparser import parse
 from cachetools import TTLCache
@@ -133,13 +132,13 @@ async def cloudscraper_get(
         cookies = {}
 
     if AppSettings().cloud_scraper_verify:
-        return await run_in_threadpool(scraper.get, url, cookies=cookies)
+        return await asyncio.to_thread(scraper.get, url, cookies=cookies)
 
     ssl_context = ssl.create_default_context()
     ssl_context.check_hostname = False
     ssl_context.verify_mode = ssl.CERT_NONE
     scraper = cloudscraper.create_scraper(ssl_context=ssl_context)
-    return await run_in_threadpool(scraper.get, url, cookies=cookies, verify=False)
+    return await asyncio.to_thread(scraper.get, url, cookies=cookies, verify=False)
 
 
 @router.get("/{category}/v1", summary="Nodeseek 板块新贴 RSS 订阅", include_in_schema=False)
@@ -238,7 +237,7 @@ async def newest_jsonfeed(
         "sortBy": sortby,
     }
     if cookie:
-        cookies = {k.strip(): v.strip() for k, v in (item.split("=") for item in cookie.strip().split("; "))}
+        cookies = {k.strip(): v.strip() for k, v in (item.split("=") for item in cookie.strip().split(";"))}
 
     scraper = cloudscraper.create_scraper()
     resp = await cloudscraper_get(scraper, url, cookies)
