@@ -7,6 +7,7 @@ import asyncio
 import requests
 import cloudscraper
 import feedgen.feed
+import contextvars
 
 from fastapi import APIRouter, Request, Response, Query, Path, HTTPException
 from fastapi.concurrency import run_in_threadpool
@@ -28,10 +29,11 @@ logger = logging.getLogger(__file__)
 class NodeseekToolkit:
     LOCK = asyncio.Lock()
     Semaphore = asyncio.Semaphore(1)
-    NEXTWAIT = 1
-    ONCE_FETCH_ARTICLE_CACHE_MAX = 10
+    NEXTWAIT = 2
+    ONCE_FETCH_ARTICLE_CACHE_MAX = 50
     ArticlePostCache: MutableMapping[str, str] = TTLCache(4096, ttl=86400 * 3)
     LoginRequired: MutableMapping[str, bool] = TTLCache(4096, ttl=86400 * 3)
+    GetOrCreate = contextvars.ContextVar("GetOrCreate", default=False)
 
     @staticmethod
     async def get_or_create_article_post_content(
@@ -50,6 +52,9 @@ class NodeseekToolkit:
             if content_html:
                 logger.debug(f"[Nodessk RSS] read from cache for {url}")
                 return str(content_html)
+
+        if not NodeseekToolkit.GetOrCreate.get():
+            return None
 
         # 请求网页，限制并发量，同时记录要求登陆的 URL
         try:
@@ -216,6 +221,7 @@ async def newest_jsonfeed(
     category: str = Path(..., description="版块名称, 如tech"),
     cookie: str = Query("", description="完整 Cookie 字符串, 存在时无视 session 和 smac"),
     sortby: str = Query("postTime", description="排序方式, postTime、replyTime"),
+    get_or_create: bool = Query(False, description="contentHTML缓存策略, 是否在未命中缓存后拉取内容"),
 ):
     """Nodeseek 分类帖子新鲜出炉
 
@@ -223,6 +229,7 @@ async def newest_jsonfeed(
 
     在网页控制台中输出当前域的 cookie: console.log(document.cookie);
     """
+    token = NodeseekToolkit.GetOrCreate.set(get_or_create)
     url = f"https://www.nodeseek.com/categories/{category}?sortBy={sortby}"
     cookies = {
         "colorscheme": "light",
@@ -273,4 +280,5 @@ async def newest_jsonfeed(
             item["content_text"] = None
 
     feed["items"] = items
+    NodeseekToolkit.GetOrCreate.reset(token)
     return feed
