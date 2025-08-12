@@ -257,9 +257,9 @@ async def newest_jsonfeed(
     items = []
     feed: dict[str, str | list[dict[str, object]]] = {
         "version": "https://jsonfeed.org/version/1",
-        "title": "Nodeseek RSS 订阅",
-        "description": f"{category}板块",
-        "home_page_url": "https://nodeseek.com",
+        "title": f"Nodeseek RSS {category}",
+        "description": f"Nodeseek RSS {category}",
+        "home_page_url": f"https://www.nodeseek.com/categories/{category}",
         "feed_url": f"{req.url.scheme}://{req.url.hostname}{req.url.path}?{req.url.query}",
         "icon": "https://www.nodeseek.com/static/image/favicon/android-chrome-512x512.png",
         "favicon": "https://www.nodeseek.com/static/image/favicon/android-chrome-512x512.png",
