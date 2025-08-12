@@ -1,14 +1,16 @@
 import ssl
-from typing import MutableMapping
+import gzip
 import logging
 import urllib.parse
 import asyncio
+import contextvars
+from typing import MutableMapping
 
 import requests
 import cloudscraper
 import feedgen.feed
-import contextvars
 
+from htmlmin import minify
 from fastapi import APIRouter, Request, Response, Query, Path, HTTPException
 from fastapi.responses import JSONResponse
 from dateparser import parse
@@ -30,9 +32,17 @@ class NodeseekToolkit:
     Semaphore = asyncio.Semaphore(1)
     NEXTWAIT = 2
     ONCE_FETCH_ARTICLE_CACHE_MAX = 50
-    ArticlePostCache: MutableMapping[str, str] = TTLCache(4096, ttl=86400 * 3)
+    ArticlePostCache: MutableMapping[str, bytes] = TTLCache(4096, ttl=86400 * 3)
     LoginRequired: MutableMapping[str, bool] = TTLCache(4096, ttl=86400 * 3)
     GetOrCreate = contextvars.ContextVar("GetOrCreate", default=False)
+
+    @staticmethod
+    def html_compresse(html_content: str) -> bytes:
+        return gzip.compress(minify(html_content).encode())
+
+    @staticmethod
+    def html_decompress(compressed: bytes) -> str:
+        return gzip.decompress(compressed).decode()
 
     @staticmethod
     async def get_or_create_article_post_content(
@@ -45,12 +55,12 @@ class NodeseekToolkit:
                 return None
 
         # 从缓存读取
-        content_html = None
+        content_html: str | bytes | None = None
         async with NodeseekToolkit.LOCK:
             content_html = NodeseekToolkit.ArticlePostCache.get(url)
             if content_html:
                 logger.debug(f"[Nodessk RSS] read from cache for {url}")
-                return str(content_html)
+                return NodeseekToolkit.html_decompress(content_html)
 
         if not NodeseekToolkit.GetOrCreate.get():
             return None
@@ -70,7 +80,7 @@ class NodeseekToolkit:
         # 根据请求结果写入缓存
         if content_html:
             async with NodeseekToolkit.LOCK:
-                NodeseekToolkit.ArticlePostCache[url] = content_html
+                NodeseekToolkit.ArticlePostCache[url] = NodeseekToolkit.html_compresse(content_html)
                 logger.debug(f"[Nodessk RSS] set new cache for {url}")
         else:
             logger.warning(f"[Nodeseek RSS] can't fetch post content: {url}")
