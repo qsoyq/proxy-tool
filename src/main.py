@@ -96,7 +96,6 @@ app.include_router(routers.rss.telegram.router, prefix=api_prefix)
 app.include_router(routers.rss.example.router, prefix=api_prefix)
 
 register_exception_handler(app)
-
 logger = logging.getLogger(__file__)
 
 
@@ -104,7 +103,11 @@ logger = logging.getLogger(__file__)
 @app.get("/ping", response_model=PingRes, tags=["Basic"], responses=ping_responses, response_class=PingResponse)
 async def ping():
     assert getattr(app.state, "background_gc_task", None)
-    return PingRes.model_construct()
+    from routers.rss.nodeseek import NodeseekToolkit
+
+    m = PingRes.model_construct()
+    m.nodeseek = {"ArticlePostCache": list(NodeseekToolkit.ArticlePostCache.keys())}
+    return m
 
 
 @cmd.command()

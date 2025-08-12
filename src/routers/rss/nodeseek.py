@@ -47,7 +47,7 @@ class NodeseekToolkit:
         # 从缓存读取
         content_html = None
         async with NodeseekToolkit.LOCK:
-            content_html = NodeseekToolkit.ArticlePostCache.get("url")
+            content_html = NodeseekToolkit.ArticlePostCache.get(url)
             if content_html:
                 logger.debug(f"[Nodessk RSS] read from cache for {url}")
                 return str(content_html)
