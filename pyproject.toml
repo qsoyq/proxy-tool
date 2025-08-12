@@ -156,6 +156,7 @@ module = [
     "events.*",
     "cachetools.*",
     "htmlmin",
+    "middlewares.*",
 ]
 ignore_missing_imports = true
 follow_untyped_imports = true
