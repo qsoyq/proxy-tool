@@ -131,8 +131,8 @@ class NodeseekToolkit:
             raise HTTPException(resp.status_code, resp.text)
 
         document = Soup(resp.text, "lxml")
-        article = document.select_one("article.post-content")
-        return str(article) if article else None
+        articleList = document.select("article.post-content")
+        return "<hr>".join([str(x) for x in document.select("article.post-content")]) if articleList else None
 
 
 async def cloudscraper_get(
