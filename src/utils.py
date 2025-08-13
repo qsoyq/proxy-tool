@@ -13,7 +13,13 @@ from functools import reduce, partial
 from typing import Callable
 import shlex
 from dataclasses import dataclass, asdict
+
+
+import httpx
+from asyncache import cached
+from cachetools import TTLCache
 from schemas.network.ssl import SSLCertSchema
+from schemas.nga.thread import OrderByEnum, Threads, Thread, GetForumSectionsRes, ForumSectionIndex
 
 
 def optional_chain(obj, keys: str):
@@ -420,3 +426,97 @@ class AsyncSSLClientContext:
     @certificate.setter
     def certificate(self, cert: x509.Certificate | None):
         self._cert = cert
+
+
+class NgaToolkit:
+    @staticmethod
+    async def get_threads(
+        uid: str | None = None,
+        cid: str | None = None,
+        order_by: OrderByEnum | None = OrderByEnum.lastpostdesc,
+        *,
+        fid: int | None = None,
+        favor: int | None = None,
+        if_include_child_node: bool | None = None,
+        page: int = 1,
+    ) -> Threads:
+        url = "https://bbs.nga.cn/thread.php"
+        UA = "Mozilla/5.0 (iPhone; CPU iPhone OS 17_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4.1 Mobile/15E148 Safari/604.1"
+        headers = {"user-agent": UA}
+        cookies = {}
+        if uid:
+            cookies["ngaPassportUid"] = uid
+        if cid:
+            cookies["ngaPassportCid"] = cid
+
+        params: dict[str, str | int] = {
+            "__output": 11,  # 返回 json 格式
+            "page": page,
+        }
+
+        if fid is not None:
+            params["fid"] = fid
+        if favor is not None:
+            params["favor"] = favor
+
+        if order_by is not None:
+            params["order_by"] = str(order_by.value)
+        async with httpx.AsyncClient(verify=False) as client:
+            res = await client.get(url, params=params, cookies=cookies, headers=headers)
+
+        res.raise_for_status()
+        body = json.loads(res.text)
+        t_li = [t for t in body["data"].get("__T", [])]
+        for t in t_li:
+            if t.get("icon") == 0:
+                t["icon"] = None
+        threads = Threads(threads=[Thread(**t) for t in t_li])
+
+        if fid and not if_include_child_node:
+            threads.threads = [t for t in threads.threads if t.fid == fid]
+
+        sections = await NgaToolkit.get_sections()
+
+        # nga 混用了 fid 和 stid 的概念, 当存在 stid 时, stid 即请求对应的 fid
+        sections_dict = {(x.stid or x.fid): x for x in sections.sections}
+
+        for t in threads.threads:
+            t.postdateStr = datetime.fromtimestamp(t.postdate).strftime(r"%Y-%m-%d %H:%M:%S")
+            t.lastpostStr = datetime.fromtimestamp(t.lastpost).strftime(r"%Y-%m-%d %H:%M:%S")
+            t.url = f"https://bbs.nga.cn/read.php?tid={t.tid}"
+            t.ios_app_scheme_url = f"nga://opentype=2?tid={t.tid}&"
+            t.ios_open_scheme_url = (
+                f"https://proxy-tool.19940731.xyz/api/network/url/redirect?url={t.ios_app_scheme_url}"
+            )
+            section = sections_dict.get(t.fid)
+            if section:
+                t.fname = section.name
+                t.icon = section.icon
+        return threads
+
+    @staticmethod
+    @cached(TTLCache(1024, 86400 * 3))
+    async def get_sections() -> GetForumSectionsRes:
+        """获取论坛分区信息"""
+        sections = []
+        url = "https://img4.nga.178.com/proxy/cache_attach/bbs_index_data.js"
+        async with httpx.AsyncClient(verify=False) as client:
+            resp = await client.get(url)
+            resp.raise_for_status()
+
+        data = json.loads(resp.text[33:])
+        for section in data["data"]["0"]["all"].values():
+            for item in section["content"].values():
+                for detail in item["content"].values():
+                    id_ = detail.get("stid") or detail["fid"]
+                    icon = f"https://img4.nga.178.com/proxy/cache_attach/ficon/{id_}u.png"
+                    sections.append(
+                        ForumSectionIndex(
+                            fid=detail["fid"],
+                            name=detail["name"],
+                            stid=detail.get("stid"),
+                            info=f'{detail.get("info")}',
+                            icon=icon,
+                        )
+                    )
+        return GetForumSectionsRes(sections=sections)

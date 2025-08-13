@@ -34,8 +34,8 @@ class FeedFilterMiddleware(BaseHTTPMiddleware):
     ) -> Response | PrettyJSONResponse:
         response = await call_next(request)
         path = request.url.path
-        ct = response.headers["content-type"]
-        if ct.startswith("application/json") and path.startswith("/api/rss/"):
+        ct = response.headers.get("content-type")
+        if ct and ct.startswith("application/json") and path.startswith("/api/rss/"):
             response_body = b""
             async for chunk in response.body_iterator:  # type: ignore
                 response_body += chunk
