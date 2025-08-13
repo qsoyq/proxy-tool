@@ -19,9 +19,9 @@ import logging
 import urllib.parse
 import dateparser
 import httpx
-from pydantic import HttpUrl
-from bs4 import BeautifulSoup as soup
-from bs4 import Tag
+from fastapi import HTTPException
+from pydantic import HttpUrl, BaseModel, Field
+from bs4 import BeautifulSoup as Soup, Tag
 import feedgen.feed
 from schemas.rss.telegram import TelegramChannalMessage
 
@@ -32,7 +32,21 @@ from cachetools import TTLCache
 from schemas.network.ssl import SSLCertSchema
 from schemas.nga.thread import OrderByEnum, Threads, Thread, GetForumSectionsRes, ForumSectionIndex
 
+
 logger = logging.getLogger(__file__)
+
+
+def select_one_by(document: Soup | Tag, selector: str):
+    try:
+        cur = document
+        for query in selector.split(">"):
+            tag = cur.select_one(query)
+            if tag is None:
+                return None
+            cur = tag
+        return cur
+    except AttributeError:
+        return None
 
 
 def optional_chain(obj, keys: str):
@@ -442,6 +456,22 @@ class AsyncSSLClientContext:
 
 
 class NgaToolkit:
+    class NgaThreadHtml(BaseModel):
+        authorHead: str | None = Field(None)
+        authorName: str | None = Field(None)
+        authorUrl: str | None = Field(None)
+        content_html: str | None = Field(None)
+
+        def as_author(self) -> dict:
+            author = {}
+            if self.authorHead:
+                author["avatar"] = self.authorHead
+            if self.authorName:
+                author["name"] = self.authorName
+            if self.authorUrl:
+                author["url"] = self.authorUrl
+            return author
+
     @staticmethod
     async def get_threads(
         uid: str | None = None,
@@ -474,10 +504,13 @@ class NgaToolkit:
 
         if order_by is not None:
             params["order_by"] = str(order_by.value)
-        async with httpx.AsyncClient(verify=False) as client:
+        async with httpx.AsyncClient(verify=False, follow_redirects=True) as client:
             res = await client.get(url, params=params, cookies=cookies, headers=headers)
 
-        res.raise_for_status()
+        if res.is_error:
+            logger.warning(f"[NgaToolkit] get threads error: {res.status_code} {res.text}")
+            raise HTTPException(status_code=res.status_code, detail=res.text)
+
         body = json.loads(res.text)
         t_li = [t for t in body["data"].get("__T", [])]
         for t in t_li:
@@ -508,7 +541,7 @@ class NgaToolkit:
         return threads
 
     @staticmethod
-    @cached(TTLCache(1024, 86400 * 3))
+    @cached(TTLCache(1024, 86400))
     async def get_sections() -> GetForumSectionsRes:
         """获取论坛分区信息"""
         sections = []
@@ -534,13 +567,68 @@ class NgaToolkit:
                     )
         return GetForumSectionsRes(sections=sections)
 
+    @staticmethod
+    @cached(TTLCache(4096, 86400))
+    async def fetch_thread_detail(url: str, cid: str, uid: str) -> NgaThreadHtml | None:
+        cookies = {
+            "ngaPassportUid": uid,
+            "ngaPassportCid": cid,
+        }
+        async with httpx.AsyncClient(cookies=cookies, verify=False, follow_redirects=True) as client:
+            res = await client.get(url)
+            if res.is_error:
+                logger.warning(f"[NgaToolkit] fetch_thread_detail error: {res.status_code} {res.text}")
+                return None
+
+        document = Soup(res.text, "lxml")
+        head = NgaToolkit.get_author_head_by_document(document)
+        name = NgaToolkit.get_author_name_by_document(document)
+        authorUrl = NgaToolkit.get_author_url_by_document(document)
+        content_html = NgaToolkit.get_content_html_by_document(document)
+        return NgaToolkit.NgaThreadHtml(
+            authorHead=head, authorName=name, authorUrl=authorUrl, content_html=content_html
+        )
+
+    @staticmethod
+    def get_author_head_by_document(document: Soup) -> str | None:
+        head = document.select_one("table.forumbox.postbox>tbody>tr>td.c1>span>img")
+        if head:
+            return str(head.attrs["src"])
+        return None
+
+    @staticmethod
+    def get_author_name_by_document(document: Soup) -> str | None:
+        a = document.select_one("table.forumbox.postbox>tbody>tr>td.c1>span>div>a")
+        if a:
+            return str(a.text)
+        return None
+
+    @staticmethod
+    def get_author_url_by_document(document: Soup) -> str | None:
+        tag = document.select_one("a#postauthor0.author")
+        if tag:
+            return f"https://bbs.nga.cn/{tag.attrs['href']}"
+        return None
+
+    @staticmethod
+    def get_content_html_by_document(document: Soup) -> str | None:
+        subject = select_one_by(document, "table>tr>p.postcontent")
+        tagComments = [tag.select_one("span.postcontent") for tag in document.select("table>tr")]
+        comments = [str(x) for x in tagComments if x]
+        content_html = []
+        if subject:
+            content_html.append(str(subject))
+
+        content_html.extend(comments)
+        return "<hr>".join(content_html)
+
 
 class TelegramToolkit:
     URLScheme = contextvars.ContextVar("URLScheme", default=True)
 
     @staticmethod
     def format_telegram_message_text(tag: Tag) -> str:
-        return soup(str(tag).replace("<br/>", "\n"), "lxml").getText()
+        return Soup(str(tag).replace("<br/>", "\n"), "lxml").getText()
 
     @staticmethod
     def generate_img_tag(url, alt_text=""):
@@ -563,13 +651,13 @@ class TelegramToolkit:
         return None
 
     @staticmethod
-    def get_head_by_document(document: soup) -> str:
+    def get_head_by_document(document: Soup) -> str:
         img_css = "body > header > div > div.tgme_header_info > a.tgme_header_link > i > img"
         head_tag = document.select_one(img_css)
         return str(head_tag.attrs["src"]) if head_tag else ""
 
     @staticmethod
-    def get_author_name_by_document(document: soup) -> str:
+    def get_author_name_by_document(document: Soup) -> str:
         channelInfoHeaderTitle = document.select_one("div[class='tgme_channel_info_header_title'] > span")
         return channelInfoHeaderTitle.text if channelInfoHeaderTitle else ""
 
@@ -663,7 +751,7 @@ class TelegramToolkit:
             return []
 
         messages = []
-        document = soup(res.text, "lxml")
+        document = Soup(res.text, "lxml")
         head = TelegramToolkit.get_head_by_document(document)
         authorName = TelegramToolkit.get_author_name_by_document(document)
 

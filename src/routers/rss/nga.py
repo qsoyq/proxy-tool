@@ -49,6 +49,7 @@ async def favorite_jsonfeed(
         "favicon": "https://bbs.nga.cn/favicon.ico",
         "items": items,
     }
+
     # 过滤权限不足/已过期的帖子
     threads.threads = [t for t in threads.threads if t.lastpost]
     for thread in threads.threads:
@@ -62,6 +63,17 @@ async def favorite_jsonfeed(
             "content_text": "",
         }
         items.append(payload)
+
+    thread_detail_list = await asyncio.gather(*[NgaToolkit.fetch_thread_detail(t["url"], cid, uid) for t in items])
+    for index, detail in enumerate(thread_detail_list):
+        if detail is None:
+            continue
+        author = detail.as_author()
+        if author:
+            items[index]["author"] = author
+        if detail.content_html:
+            items[index]["content_html"] = detail.content_html
+            items[index]["content_text"] = None
     return feed
 
 
@@ -108,4 +120,16 @@ async def threads_jsonfeed(
             "content_text": "",
         }
         items.append(payload)
+
+    thread_detail_list = await asyncio.gather(*[NgaToolkit.fetch_thread_detail(t["url"], cid, uid) for t in items])
+    print(thread_detail_list)
+    for index, detail in enumerate(thread_detail_list):
+        if detail is None:
+            continue
+        author = detail.as_author()
+        if author:
+            items[index]["author"] = author
+        if detail.content_html:
+            items[index]["content_html"] = detail.content_html
+            items[index]["content_text"] = None
     return feed

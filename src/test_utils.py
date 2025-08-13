@@ -1,4 +1,5 @@
-from utils import AsyncSSLClientContext
+import os
+from utils import AsyncSSLClientContext, NgaToolkit  # type:ignore
 
 
 import pytest
@@ -10,3 +11,15 @@ async def test_async_ssl_client_context():
         client = AsyncSSLClientContext(host, verify=False)
         cert = await client.get_peer_certificate()
         assert cert, cert
+
+
+@pytest.mark.asyncio
+@pytest.mark.nga_delay
+async def test_nga_fetch_thread_detail():
+    url = "https://bbs.nga.cn/read.php?tid=44834023"
+    cid, uid = os.getenv("ngaPassportCid"), os.getenv("ngaPassportUid")
+    assert cid and uid, "env ngaPassportCid or ngaPassportUid not exists"
+    res = await NgaToolkit.fetch_thread_detail(url, cid, uid)
+    assert res
+    assert res.authorUrl
+    assert res.content_html
