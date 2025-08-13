@@ -12,3 +12,4 @@ class TelegramChannalMessage(BaseModel):
     authorName: str | None = Field(None)
     contentHtml: str | None = Field(None)
     photoUrls: list[HttpUrl] | None = Field(None)
+    tags: list[str] = Field([])
