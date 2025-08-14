@@ -30,7 +30,7 @@ logger = logging.getLogger(__file__)
 class NodeseekToolkit:
     LOCK = asyncio.Lock()
     Semaphore = asyncio.Semaphore(1)
-    NEXTWAIT = 2
+    NEXTWAIT = 5
     ONCE_FETCH_ARTICLE_CACHE_MAX = 50
     ArticlePostCache: MutableMapping[str, bytes] = TTLCache(4096, ttl=86400 * 3)
     LoginRequired: MutableMapping[str, bool] = TTLCache(4096, ttl=86400 * 3)
