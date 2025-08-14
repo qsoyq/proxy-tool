@@ -602,10 +602,16 @@ class NgaToolkit:
             replaced_text = re.sub(pattern, r"<b>\1</b>", text)
             return replaced_text
 
+        def replace_url_tags(text: str) -> str:
+            pattern = r"\[url\](.*?)\[/url\]"
+            replaced_text = re.sub(pattern, r'<a href="\1">\1</a>', text)
+            return replaced_text
+
         if not content:
             return content
         content = replace_img_tags(content)
         content = replace_b_tags(content)
+        content = replace_url_tags(content)
         return content
 
     @staticmethod

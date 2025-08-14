@@ -34,3 +34,6 @@ def test_nga_content_html_format():
 
     content_html = "[b]Example[/b]"
     assert NgaToolkit.format_content_html(content_html) == "<b>Example</b>"
+
+    content_html = "[url]https://www.baidu.com[/url]"
+    assert NgaToolkit.format_content_html(content_html) == '<a href="https://www.baidu.com">https://www.baidu.com</a>'
