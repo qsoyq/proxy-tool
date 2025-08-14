@@ -1,3 +1,4 @@
+import re
 import time
 import ssl
 import asyncio
@@ -590,6 +591,18 @@ class NgaToolkit:
         )
 
     @staticmethod
+    def format_content_html(content: str) -> str:
+        def replace_img_tags(text: str) -> str:
+            pattern = r"\[img\]\.(.*?)\[/img\]"
+            replaced_text = re.sub(pattern, r'<img src="https://img.nga.178.com/attachments\1"></img>', text)
+            return replaced_text
+
+        if not content:
+            return content
+        content = replace_img_tags(content)
+        return content
+
+    @staticmethod
     def get_author_head_by_document(document: Soup) -> str | None:
         head = document.select_one("table.forumbox.postbox>tbody>tr>td.c1>span>img")
         if head:
@@ -615,12 +628,15 @@ class NgaToolkit:
         subject = select_one_by(document, "table>tr>p.postcontent")
         tagComments = [tag.select_one("span.postcontent") for tag in document.select("table>tr")]
         comments = [str(x) for x in tagComments if x]
-        content_html = []
+        content_li = []
         if subject:
-            content_html.append(str(subject))
+            content_li.append(str(subject))
 
-        content_html.extend(comments)
-        return "<hr>".join(content_html)
+        content_li.extend(comments)
+        content_html = "<hr>".join(content_li)
+        if content_html:
+            return NgaToolkit.format_content_html(content_html)
+        return None
 
 
 class TelegramToolkit:
