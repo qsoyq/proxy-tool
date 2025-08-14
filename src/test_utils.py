@@ -25,9 +25,12 @@ async def test_nga_fetch_thread_detail():
     assert res.content_html
 
 
-def test_nga_content_html_reformat():
+def test_nga_content_html_format():
     content_html = "[img]./mon_202508/13/-d1rcQ1ah-attnK1cT3cSp3-og.jpg[/img]<hr>[img]./mon_202508/13/-d1rcQ1ah-attnK1cT3cSp3-og.jpg[/img]"
     assert (
         NgaToolkit.format_content_html(content_html)
         == """<img src="https://img.nga.178.com/attachments/mon_202508/13/-d1rcQ1ah-attnK1cT3cSp3-og.jpg"></img><hr><img src="https://img.nga.178.com/attachments/mon_202508/13/-d1rcQ1ah-attnK1cT3cSp3-og.jpg"></img>"""
     )
+
+    content_html = "[b]Example[/b]"
+    assert NgaToolkit.format_content_html(content_html) == "<b>Example</b>"

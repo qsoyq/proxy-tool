@@ -597,9 +597,15 @@ class NgaToolkit:
             replaced_text = re.sub(pattern, r'<img src="https://img.nga.178.com/attachments\1"></img>', text)
             return replaced_text
 
+        def replace_b_tags(text: str) -> str:
+            pattern = r"\[b\](.*?)\[/b\]"
+            replaced_text = re.sub(pattern, r"<b>\1</b>", text)
+            return replaced_text
+
         if not content:
             return content
         content = replace_img_tags(content)
+        content = replace_b_tags(content)
         return content
 
     @staticmethod
