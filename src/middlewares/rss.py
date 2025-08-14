@@ -15,7 +15,11 @@ def add_middleware(app: FastAPI):
 
 class FeedFilterMiddleware(BaseHTTPMiddleware):
     BLOCK_TAG = ["#广告", "#互推"]
-    BLOCK_CONTENT = ("TG必备的搜索引擎，极搜帮你精准找到，想要的群组、频道、音乐 、视频", "https://hongxingdl.com")
+    BLOCK_CONTENT = (
+        "TG必备的搜索引擎，极搜帮你精准找到，想要的群组、频道、音乐 、视频",
+        "https://hongxingdl.com",
+        "搜 蒸蒸日上 概率有5元猫卡",
+    )
 
     def filter_by_block(self, item: dict):
         tags = item["tags"] or []
