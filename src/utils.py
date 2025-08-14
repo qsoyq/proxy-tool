@@ -608,9 +608,8 @@ class NgaToolkit:
             return replaced_text
 
         def replace_quote_tags(text: str) -> str:
-            pattern = r"\[quote\].*<b>.*</b>(.*?)\[/quote\]"
-            """[quote][pid=835413507,44807971,1]Reply[/pid] <b>Post by [uid=61543543]valaroma123[/uid] (2025-08-09 21:20):</b><br/><br/>配料表看上去还行 还有推荐的吗<br/>[/quote]"""
-            replaced_text = re.sub(pattern, r"<blockquote>\1</blockquote><br>", text)
+            pattern = r"\[quote\].*<b>.*</b>(<br/>)*(.*?)\[/quote\]"
+            replaced_text = re.sub(pattern, r"<blockquote>\2</blockquote><br>", text)
             return replaced_text
 
         if not content:
