@@ -625,6 +625,11 @@ class NgaToolkit:
         def replace_collapse_tags(text: str) -> str:
             pattern = r"\[collapse=(.*)\](.*?)\[/collapse\]"
             replaced_text = re.sub(pattern, r"<details><summary>\1</summary>\2</details>", text)
+
+            pattern = r"\[collapse\](.*?)\[/collapse\]"
+            replaced_text = re.sub(
+                pattern, r"<details><summary>点击显示隐藏的内容</summary>\1</details>", replaced_text
+            )
             return replaced_text
 
         def replace_align_tags(text: str) -> str:
