@@ -627,6 +627,11 @@ class NgaToolkit:
             replaced_text = re.sub(pattern, r"<details><summary>\1</summary>\2</details>", text)
             return replaced_text
 
+        def replace_align_tags(text: str) -> str:
+            pattern = r"\[align=(.*)\](.*?)\[/align\]"
+            replaced_text = re.sub(pattern, r"""<span style="text-align:\1">\2</span>""", text)
+            return replaced_text
+
         if not content:
             return content
         content = replace_img_tags(content)
@@ -636,6 +641,7 @@ class NgaToolkit:
         content = replace_color_tags(content)
         content = replace_size_tags(content)
         content = replace_collapse_tags(content)
+        content = replace_align_tags(content)
         return content
 
     @staticmethod

@@ -67,3 +67,15 @@ def test_nga_content_html_format():
         NgaToolkit.format_content_html(content_html)
         == """<details><summary>下载链接</summary><br/>由于目前的特殊情况，被爆破失效源文件大概率是爆掉的，所以喜欢的话，来不及下载，一定要尽快保存<br/><br/>密码：我怎能不变态<br/><br/>夸盘下载<br/><br/>链接：<a href="https://pan.quark.cn/s/8b4680220c17">https://pan.quark.cn/s/8b4680220c17</a><br/>提取码：aSE2<br/>链接：<a href="https://pan.quark.cn/s/6a094448783d">https://pan.quark.cn/s/6a094448783d</a><br/>提取码：nxpE<br/><br/><br/><br/>度盘下载<br/><br/>链接: <a href="https://pan.baidu.com/s/1Y8J-8mA-8JglgolhvHViNw">https://pan.baidu.com/s/1Y8J-8mA-8JglgolhvHViNw</a> 提取码: 575t <br/><br/><br/><br/>专用解包工具(自选网盘下载，只有是doro出击视频才需要这个，其他正常解压)<br/><br/>运行 专用解包工具，在弹窗里选择下载的视频，会自动分包出压缩包，然后再解压压缩包就行，密码照旧<br/><br/>链接: <a href="https://pan.baidu.com/s/1JmXs0LGU21VskdunSf84gg">https://pan.baidu.com/s/1JmXs0LGU21VskdunSf84gg</a> 提取码: rcc7 <br/>链接：<a href="https://pan.quark.cn/s/2807a386db46">https://pan.quark.cn/s/2807a386db46</a><br/><br/><br/></details>"""
     )
+
+    content_html = """[align=left]需要改后缀名解压，格式ZIP(不是MP4)<br/>统一密码：chuanhuo<br/><br/>由于需要加密分享，解压软件适配一般<br/>电脑(RAR、bandizip)<br/>安卓(RAR、Zarchiver)<br/>解压失败的可以用最下面提供的解压软件[/align]"""
+    assert (
+        NgaToolkit.format_content_html(content_html)
+        == """<span style="text-align:left">需要改后缀名解压，格式ZIP(不是MP4)<br/>统一密码：chuanhuo<br/><br/>由于需要加密分享，解压软件适配一般<br/>电脑(RAR、bandizip)<br/>安卓(RAR、Zarchiver)<br/>解压失败的可以用最下面提供的解压软件</span>"""
+    )
+
+    content_html = """[align=right]需要改后缀名解压，格式ZIP(不是MP4)<br/>统一密码：chuanhuo<br/><br/>由于需要加密分享，解压软件适配一般<br/>电脑(RAR、bandizip)<br/>安卓(RAR、Zarchiver)<br/>解压失败的可以用最下面提供的解压软件[/align]"""
+    assert (
+        NgaToolkit.format_content_html(content_html)
+        == """<span style="text-align:right">需要改后缀名解压，格式ZIP(不是MP4)<br/>统一密码：chuanhuo<br/><br/>由于需要加密分享，解压软件适配一般<br/>电脑(RAR、bandizip)<br/>安卓(RAR、Zarchiver)<br/>解压失败的可以用最下面提供的解压软件</span>"""
+    )
