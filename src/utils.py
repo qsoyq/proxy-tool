@@ -630,6 +630,9 @@ class NgaToolkit:
                 logger.warning(f"[NgaToolkit] fetch_thread_detail error: {res.status_code} {res.text}")
                 return None
 
+        # 手动触发进行缓存, 避免阻塞
+        await asyncio.to_thread(NgaToolkit.get_smiles)
+
         document = Soup(res.text, "lxml")
         head = NgaToolkit.get_author_head_by_document(document)
         name = NgaToolkit.get_author_name_by_document(document)
