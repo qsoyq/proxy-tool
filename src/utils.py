@@ -3,21 +3,25 @@ import time
 import ssl
 import asyncio
 import types
+import textwrap
+import json
+import shlex
+import contextvars
+import warnings
+import logging
+import urllib.parse
+
 from datetime import datetime, timezone
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.x509.oid import NameOID
-import textwrap
-import json
-from functools import reduce, partial
+from functools import reduce, partial, cache
 from typing import Callable
-import shlex
+
 from dataclasses import dataclass, asdict
-import contextvars
-import warnings
-import logging
-import urllib.parse
+
+
 import dateparser
 import httpx
 import js2py
@@ -682,6 +686,22 @@ class NgaToolkit:
             replaced_text = re.sub(pattern, r"""<span style="text-align:\1">\2</span>""", text)
             return replaced_text
 
+        def replace_emoji_tags(text: str) -> str:
+            smiles = get_smiles()
+            results = re.findall(r"\[s:.*?:.*?\]", text)
+            if not results:
+                return text
+            for code in results:
+                tag = smiles.get(code)
+                if tag:
+                    text = text.replace(code, tag)
+            return text
+
+        @cache
+        def get_smiles() -> dict:
+            data = asyncio.run(NgaToolkit.get_smiles())
+            return {s.name: s.tag for s in data}
+
         if not content:
             return content
         content = replace_img_tags(content)
@@ -692,6 +712,7 @@ class NgaToolkit:
         content = replace_size_tags(content)
         content = replace_collapse_tags(content)
         content = replace_align_tags(content)
+        content = replace_emoji_tags(content)
         return content
 
     @staticmethod

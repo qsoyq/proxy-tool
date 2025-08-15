@@ -92,3 +92,22 @@ def test_nga_content_html_format():
         NgaToolkit.format_content_html(content_html)
         == """<span style="text-align:right">需要改后缀名解压，格式ZIP(不是MP4)<br/>统一密码：chuanhuo<br/><br/>由于需要加密分享，解压软件适配一般<br/>电脑(RAR、bandizip)<br/>安卓(RAR、Zarchiver)<br/>解压失败的可以用最下面提供的解压软件</span>"""
     )
+
+    content_html = """[align=right]需要改后缀名解压，格式ZIP(不是MP4)<br/>统一密码：chuanhuo<br/><br/>由于需要加密分享，解压软件适配一般<br/>电脑(RAR、bandizip)<br/>安卓(RAR、Zarchiver)<br/>解压失败的可以用最下面提供的解压软件[/align]"""
+    assert (
+        NgaToolkit.format_content_html(content_html)
+        == """<span style="text-align:right">需要改后缀名解压，格式ZIP(不是MP4)<br/>统一密码：chuanhuo<br/><br/>由于需要加密分享，解压软件适配一般<br/>电脑(RAR、bandizip)<br/>安卓(RAR、Zarchiver)<br/>解压失败的可以用最下面提供的解压软件</span>"""
+    )
+
+    content_html = "[s:ac:goodjob]"
+    assert (
+        NgaToolkit.format_content_html(content_html)
+        == """<img src="https://img4.nga.178.com/ngabbs/post/smile/ac1.png">"""
+    )
+
+
+@pytest.mark.asyncio
+async def test_nga_emoji_replace():
+    data = await NgaToolkit.get_smiles()
+    smiles = {s.name: s.tag for s in data}
+    assert smiles
