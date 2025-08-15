@@ -622,6 +622,11 @@ class NgaToolkit:
             replaced_text = re.sub(pattern, r"\2", text)
             return replaced_text
 
+        def replace_collapse_tags(text: str) -> str:
+            pattern = r"\[collapse=(.*)\](.*?)\[/collapse\]"
+            replaced_text = re.sub(pattern, r"<details><summary>\1</summary>\2</details>", text)
+            return replaced_text
+
         if not content:
             return content
         content = replace_img_tags(content)
@@ -630,6 +635,7 @@ class NgaToolkit:
         content = replace_quote_tags(content)
         content = replace_color_tags(content)
         content = replace_size_tags(content)
+        content = replace_collapse_tags(content)
         return content
 
     @staticmethod

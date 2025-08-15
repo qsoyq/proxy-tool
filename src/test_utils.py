@@ -58,3 +58,12 @@ def test_nga_content_html_format():
         NgaToolkit.format_content_html(content_html)
         == "链接点击折叠<br/><br/>解压不懂怎么搞就看我签名,不显示就点头像进去看就行<br/><br/>如果显示是doro视频，我这改名无用，需要我写的软件(帖内有下载链接)密钥解包后有压缩包，毕竟有些力度不一样<br/>"
     )
+
+    content_html = """[collapse=下载链接]测试[/collapse]"""
+    assert NgaToolkit.format_content_html(content_html) == "<details><summary>下载链接</summary>测试</details>"
+
+    content_html = """[collapse=下载链接]<br/>[color=red]由于目前的特殊情况，被爆破失效源文件大概率是爆掉的，所以喜欢的话，来不及下载，一定要尽快保存[/color]<br/><br/>密码：我怎能不变态<br/><br/>夸盘下载<br/><br/>链接：[url]https://pan.quark.cn/s/8b4680220c17[/url]<br/>提取码：aSE2<br/>链接：[url]https://pan.quark.cn/s/6a094448783d[/url]<br/>提取码：nxpE<br/><br/><br/><br/>度盘下载<br/><br/>链接: [url]https://pan.baidu.com/s/1Y8J-8mA-8JglgolhvHViNw[/url] 提取码: 575t <br/><br/><br/><br/>专用解包工具(自选网盘下载，只有是doro出击视频才需要这个，其他正常解压)<br/><br/>运行 专用解包工具，在弹窗里选择下载的视频，会自动分包出压缩包，然后再解压压缩包就行，密码照旧<br/><br/>链接: [url]https://pan.baidu.com/s/1JmXs0LGU21VskdunSf84gg[/url] 提取码: rcc7 <br/>链接：[url]https://pan.quark.cn/s/2807a386db46[/url]<br/><br/><br/>[/collapse]"""
+    assert (
+        NgaToolkit.format_content_html(content_html)
+        == """<details><summary>下载链接</summary><br/>由于目前的特殊情况，被爆破失效源文件大概率是爆掉的，所以喜欢的话，来不及下载，一定要尽快保存<br/><br/>密码：我怎能不变态<br/><br/>夸盘下载<br/><br/>链接：<a href="https://pan.quark.cn/s/8b4680220c17">https://pan.quark.cn/s/8b4680220c17</a><br/>提取码：aSE2<br/>链接：<a href="https://pan.quark.cn/s/6a094448783d">https://pan.quark.cn/s/6a094448783d</a><br/>提取码：nxpE<br/><br/><br/><br/>度盘下载<br/><br/>链接: <a href="https://pan.baidu.com/s/1Y8J-8mA-8JglgolhvHViNw">https://pan.baidu.com/s/1Y8J-8mA-8JglgolhvHViNw</a> 提取码: 575t <br/><br/><br/><br/>专用解包工具(自选网盘下载，只有是doro出击视频才需要这个，其他正常解压)<br/><br/>运行 专用解包工具，在弹窗里选择下载的视频，会自动分包出压缩包，然后再解压压缩包就行，密码照旧<br/><br/>链接: <a href="https://pan.baidu.com/s/1JmXs0LGU21VskdunSf84gg">https://pan.baidu.com/s/1JmXs0LGU21VskdunSf84gg</a> 提取码: rcc7 <br/>链接：<a href="https://pan.quark.cn/s/2807a386db46">https://pan.quark.cn/s/2807a386db46</a><br/><br/><br/></details>"""
+    )
