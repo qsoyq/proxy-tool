@@ -51,4 +51,10 @@ def test_nga_content_html_format():
     )
 
     content_html = """[color=red]如果喜欢，尽快保存，拖延一犯，资源不在[/color]"""
-    assert NgaToolkit.format_content_html(content_html) == "<p>如果喜欢，尽快保存，拖延一犯，资源不在</p>"
+    assert NgaToolkit.format_content_html(content_html) == "如果喜欢，尽快保存，拖延一犯，资源不在"
+
+    content_html = """[color=red][size=100%]链接点击折叠<br/><br/>解压不懂怎么搞就看我签名,不显示就点头像进去看就行<br/><br/>如果显示是doro视频，我这改名无用，需要我写的软件(帖内有下载链接)密钥解包后有压缩包，毕竟有些力度不一样[/size]<br/>[/color]"""
+    assert (
+        NgaToolkit.format_content_html(content_html)
+        == "链接点击折叠<br/><br/>解压不懂怎么搞就看我签名,不显示就点头像进去看就行<br/><br/>如果显示是doro视频，我这改名无用，需要我写的软件(帖内有下载链接)密钥解包后有压缩包，毕竟有些力度不一样<br/>"
+    )

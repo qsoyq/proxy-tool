@@ -613,8 +613,13 @@ class NgaToolkit:
             return replaced_text
 
         def replace_color_tags(text: str) -> str:
-            pattern = r"\[color.*\](.*?)\[/color\]"
-            replaced_text = re.sub(pattern, r"<p>\1</p>", text)
+            pattern = r"\[color(.*?)\](.*?)\[/color\]"
+            replaced_text = re.sub(pattern, r"\2", text)
+            return replaced_text
+
+        def replace_size_tags(text: str) -> str:
+            pattern = r"\[size(.*?)\](.*?)\[/size\]"
+            replaced_text = re.sub(pattern, r"\2", text)
             return replaced_text
 
         if not content:
@@ -624,6 +629,7 @@ class NgaToolkit:
         content = replace_url_tags(content)
         content = replace_quote_tags(content)
         content = replace_color_tags(content)
+        content = replace_size_tags(content)
         return content
 
     @staticmethod
