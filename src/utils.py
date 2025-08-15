@@ -612,12 +612,18 @@ class NgaToolkit:
             replaced_text = re.sub(pattern, r"<blockquote>\2</blockquote><br>", text)
             return replaced_text
 
+        def replace_color_tags(text: str) -> str:
+            pattern = r"\[color.*\](.*?)\[/color\]"
+            replaced_text = re.sub(pattern, r"<p>\1</p>", text)
+            return replaced_text
+
         if not content:
             return content
         content = replace_img_tags(content)
         content = replace_b_tags(content)
         content = replace_url_tags(content)
         content = replace_quote_tags(content)
+        content = replace_color_tags(content)
         return content
 
     @staticmethod

@@ -49,3 +49,6 @@ def test_nga_content_html_format():
         NgaToolkit.format_content_html(content_html)
         == "<blockquote>台山，都斛海鲜街，住宿51期间200+，海鲜品种多便宜</blockquote><br>"
     )
+
+    content_html = """[color=red]如果喜欢，尽快保存，拖延一犯，资源不在[/color]"""
+    assert NgaToolkit.format_content_html(content_html) == "<p>如果喜欢，尽快保存，拖延一犯，资源不在</p>"
