@@ -109,6 +109,6 @@ def test_nga_content_html_format():
 
 @pytest.mark.asyncio
 async def test_nga_emoji_replace():
-    data = await NgaToolkit.get_smiles()
+    data = NgaToolkit.get_smiles()
     smiles = {s.name: s.tag for s in data}
     assert smiles

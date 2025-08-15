@@ -573,10 +573,10 @@ class NgaToolkit:
         return GetForumSectionsRes(sections=sections)
 
     @staticmethod
-    @cached(TTLCache(1024, 86400))
-    async def get_smiles() -> list[NGASmile]:
+    @cached(TTLCache(1024, 86400 * 1))
+    def get_smiles() -> list[NGASmile]:
         data = []
-        async with httpx.AsyncClient(verify=False) as client:
+        with httpx.Client(verify=False) as client:
             injection = r"""
             __NUKE = {
                 addCss: function(){}
@@ -593,7 +593,7 @@ class NgaToolkit:
             __GP = {}
             """
             url = "https://img4.nga.178.com/common_res/js_bbscode_core.js"
-            res = await client.get(url)
+            res = client.get(url)
             if res.is_error:
                 raise HTTPException(status_code=res.status_code, detail=res.text)
 
@@ -699,7 +699,7 @@ class NgaToolkit:
 
         @cache
         def get_smiles() -> dict:
-            data = asyncio.run(NgaToolkit.get_smiles())
+            data = NgaToolkit.get_smiles()
             return {s.name: s.tag for s in data}
 
         if not content:

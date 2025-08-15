@@ -64,6 +64,6 @@ async def sections():
 
 
 @router.get("/smiles", summary="查询NGA表情信息", response_model=GetNGASmiles)
-async def smiles():
-    smiles = await NgaToolkit.get_smiles()
+def smiles():
+    smiles = NgaToolkit.get_smiles()
     return {"data": smiles}
