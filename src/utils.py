@@ -20,18 +20,18 @@ import logging
 import urllib.parse
 import dateparser
 import httpx
+import js2py
+
 from fastapi import HTTPException
 from pydantic import HttpUrl, BaseModel, Field
 from bs4 import BeautifulSoup as Soup, Tag
-import feedgen.feed
-from schemas.rss.telegram import TelegramChannalMessage
-
-
 import feedgen
+import feedgen.feed
 from asyncache import cached
 from cachetools import TTLCache
 from schemas.network.ssl import SSLCertSchema
-from schemas.nga.thread import OrderByEnum, Threads, Thread, GetForumSectionsRes, ForumSectionIndex
+from schemas.nga.thread import OrderByEnum, Threads, Thread, GetForumSectionsRes, ForumSectionIndex, NGASmile
+from schemas.rss.telegram import TelegramChannalMessage
 
 
 logger = logging.getLogger(__file__)
@@ -567,6 +567,51 @@ class NgaToolkit:
                         )
                     )
         return GetForumSectionsRes(sections=sections)
+
+    @staticmethod
+    @cached(TTLCache(1024, 86400))
+    async def get_smiles() -> list[NGASmile]:
+        data = []
+        async with httpx.AsyncClient(verify=False) as client:
+            injection = r"""
+            __NUKE = {
+                addCss: function(){}
+            }
+            __COLOR = {}
+            commonui = {}
+            __SCRIPTS = {
+                asyncLoad: function(){}
+            }
+            _$ = {}
+            __COOKIE = {
+                getMiscCookie: function(){}
+            }
+            __GP = {}
+            """
+            url = "https://img4.nga.178.com/common_res/js_bbscode_core.js"
+            res = await client.get(url)
+            if res.is_error:
+                raise HTTPException(status_code=res.status_code, detail=res.text)
+
+            js_code = res.text
+            js_code = js_code.replace(
+                r"""ubbcode.continueCharProc.reg = /[\xb7\x7e\x40\x23\x25\x26\x2a\x2b\x7c\x2d\x3d\x60\x7e\x21\x40\x23\x24\x25\x5e\x26\x2a\x28\x29\x5f\x2b\x7b\x7d\x7c\x3a\x22\x3c\x3e\x3f\x2d\x3d\x5b\x5d\x5c\x3b\x27\x2c\x2e\x2f\uff01\uffe5\u2026\u2026\uff08\uff09\u2014\u2014\uff5b\uff5d\uff1a\u201c\uff1f\u300b\u300a\u3010\u3011\u3001\uff1b\u2018\uff0c\u3002\u3001]{24,}/g""",
+                "",
+            )
+            ctx = js2py.EvalJs()
+            ctx.execute(f"{injection}{js_code}")
+            smiles = ctx.ubbcode.smiles.to_dict()
+            for category in smiles.keys():
+                for code, detail in smiles[category].items():
+                    if code == "_______name":
+                        continue
+                    _category = "" if category == "0" else category
+                    name = f"[s:{_category}:{code}]"
+                    url = f"https://img4.nga.178.com/ngabbs/post/smile/{detail}"
+                    tag = f"""<img src="{url}">"""
+                    data.append(NGASmile(name=name, url=url, tag=tag))
+
+        return data
 
     @staticmethod
     @cached(TTLCache(4096, 86400))

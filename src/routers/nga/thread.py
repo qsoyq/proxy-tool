@@ -2,7 +2,7 @@ import logging
 import asyncio
 
 from fastapi import APIRouter, Query, Header
-from schemas.nga.thread import OrderByEnum, Threads, GetForumSectionsRes, GetThreadsV2Res
+from schemas.nga.thread import OrderByEnum, Threads, GetForumSectionsRes, GetThreadsV2Res, GetNGASmiles
 from utils import NgaToolkit  # type: ignore
 
 
@@ -61,3 +61,9 @@ async def threads_v2(
 @router.get("/sections", summary="查询NGA分区信息", response_model=GetForumSectionsRes)
 async def sections():
     return await NgaToolkit.get_sections()
+
+
+@router.get("/smiles", summary="查询NGA表情信息", response_model=GetNGASmiles)
+async def smiles():
+    smiles = await NgaToolkit.get_smiles()
+    return {"data": smiles}

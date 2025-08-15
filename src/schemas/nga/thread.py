@@ -14,6 +14,20 @@ class GetForumSectionsRes(BaseModel):
     sections: list[ForumSectionIndex] = Field([])
 
 
+class NGASmile(BaseModel):
+    name: str = Field(..., description="名称代码", examples=["[s:ac:哭笑]"])
+    url: str = Field(
+        ..., description="表情对应的图片链接", examples=["https://img4.nga.178.com/ngabbs/post/smile/ac15.png"]
+    )
+    tag: str = Field(
+        ..., description="html a标签", examples=["""<img src="https://img4.nga.178.com/ngabbs/post/smile/ac15.png">"""]
+    )
+
+
+class GetNGASmiles(BaseModel):
+    data: list[NGASmile]
+
+
 class OrderByEnum(str, Enum):
     lastpostdesc = "lastpostdesc"
     postdatedesc = "postdatedesc"

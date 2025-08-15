@@ -29,3 +29,8 @@ def test_nga_threads_v2(client: TestClient):
 def test_nga_sections(client: TestClient):
     response = client.get("/api/nga/sections")
     assert response.status_code == 200
+
+
+def test_nga_smiles(client: TestClient):
+    response = client.get("/api/nga/smiles")
+    assert response.status_code == 200
