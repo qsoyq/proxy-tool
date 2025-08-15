@@ -99,6 +99,7 @@ def test_nga_content_html_format():
         == """<span style="text-align:right">需要改后缀名解压，格式ZIP(不是MP4)<br/>统一密码：chuanhuo<br/><br/>由于需要加密分享，解压软件适配一般<br/>电脑(RAR、bandizip)<br/>安卓(RAR、Zarchiver)<br/>解压失败的可以用最下面提供的解压软件</span>"""
     )
 
+    # emoji
     content_html = "[s:ac:goodjob]"
     assert (
         NgaToolkit.format_content_html(content_html)

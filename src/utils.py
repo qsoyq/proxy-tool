@@ -657,7 +657,7 @@ class NgaToolkit:
             return replaced_text
 
         def replace_quote_tags(text: str) -> str:
-            pattern = r"\[quote\].*<b>.*</b>(<br/>)*(.*?)\[/quote\]"
+            pattern = r"\[quote\].*?<b>.*?</b>(<br/>)*(.*?)\[/quote\]"
             replaced_text = re.sub(pattern, r"<blockquote>\2</blockquote><br>", text)
             return replaced_text
 
@@ -672,7 +672,7 @@ class NgaToolkit:
             return replaced_text
 
         def replace_collapse_tags(text: str) -> str:
-            pattern = r"\[collapse=(.*)\](.*?)\[/collapse\]"
+            pattern = r"\[collapse=(.*?)\](.*?)\[/collapse\]"
             replaced_text = re.sub(pattern, r"<details><summary>\1</summary>\2</details>", text)
 
             pattern = r"\[collapse\](.*?)\[/collapse\]"
@@ -682,7 +682,7 @@ class NgaToolkit:
             return replaced_text
 
         def replace_align_tags(text: str) -> str:
-            pattern = r"\[align=(.*)\](.*?)\[/align\]"
+            pattern = r"\[align=(.*?)\](.*?)\[/align\]"
             replaced_text = re.sub(pattern, r"""<span style="text-align:\1">\2</span>""", text)
             return replaced_text
 
