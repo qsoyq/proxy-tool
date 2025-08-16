@@ -656,8 +656,11 @@ class NgaToolkit:
             return replaced_text
 
         def replace_url_tags(text: str) -> str:
+            pattern = r"\[(.*?)\] \[url\](.*?)\[/url\]"
+            replaced_text = re.sub(pattern, r'<a href="\2">\1</a>', text)
+
             pattern = r"\[url\](.*?)\[/url\]"
-            replaced_text = re.sub(pattern, r'<a href="\1">\1</a>', text)
+            replaced_text = re.sub(pattern, r'<a href="\1">\1</a>', replaced_text)
             return replaced_text
 
         def replace_quote_tags(text: str) -> str:

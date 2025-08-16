@@ -41,6 +41,12 @@ def test_nga_content_html_format():
     content_html = "[url]https://www.baidu.com[/url]"
     assert NgaToolkit.format_content_html(content_html) == '<a href="https://www.baidu.com">https://www.baidu.com</a>'
 
+    content_html = "[《古剑奇谭4》本周公布,知名爆料人再出手,宣布本周公布实机PV,并称是国产单机新的希望,腾讯倾力打造] [url]https://www.bilibili.com/video/BV1iBbtzwEB4/?share_source=copy_web&amp;vd_source=960c9e75740363e0be00644ec66610fe[/url]"
+    assert (
+        NgaToolkit.format_content_html(content_html)
+        == '<a href="https://www.bilibili.com/video/BV1iBbtzwEB4/?share_source=copy_web&vd_source=960c9e75740363e0be00644ec66610fe">《古剑奇谭4》本周公布,知名爆料人再出手,宣布本周公布实机PV,并称是国产单机新的希望,腾讯倾力打造</a>'
+    )
+
     # quote
     content_html = """[quote][pid=835413507,44807971,1]Reply[/pid] <b>Post by [uid=61543543]valaroma123[/uid] (2025-08-09 21:20):</b><br/><br/>配料表看上去还行 还有推荐的吗<br/>[/quote]"""
     assert (
