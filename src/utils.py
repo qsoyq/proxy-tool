@@ -700,6 +700,11 @@ class NgaToolkit:
                     text = text.replace(code, tag)
             return text
 
+        def replace_del_tags(text: str) -> str:
+            pattern = r"\[del\](.*?)\[/del\]"
+            replaced_text = re.sub(pattern, r"<del>\1</del>", text)
+            return replaced_text
+
         @cache
         def get_smiles() -> dict:
             data = NgaToolkit.get_smiles()
@@ -707,6 +712,7 @@ class NgaToolkit:
 
         if not content:
             return content
+
         content = replace_img_tags(content)
         content = replace_b_tags(content)
         content = replace_url_tags(content)
@@ -716,6 +722,7 @@ class NgaToolkit:
         content = replace_collapse_tags(content)
         content = replace_align_tags(content)
         content = replace_emoji_tags(content)
+        content = replace_del_tags(content)
         return content
 
     @staticmethod

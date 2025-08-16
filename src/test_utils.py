@@ -106,6 +106,10 @@ def test_nga_content_html_format():
         == """<img src="https://img4.nga.178.com/ngabbs/post/smile/ac1.png">"""
     )
 
+    # del
+    content_html = "[del]Example[/del]"
+    assert NgaToolkit.format_content_html(content_html) == """<del>Example</del>"""
+
 
 @pytest.mark.asyncio
 async def test_nga_emoji_replace():
