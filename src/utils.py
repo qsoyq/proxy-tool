@@ -709,6 +709,11 @@ class NgaToolkit:
             replaced_text = re.sub(pattern, r"<del>\1</del>", text)
             return replaced_text
 
+        def replace_video_tags(text: str) -> str:
+            pattern = r"\[flash=video\]\.(.*?)\[/flash\]"
+            replaced_text = re.sub(pattern, r'<video src="https://img.nga.178.com/attachments\1"></video>', text)
+            return replaced_text
+
         @cache
         def get_smiles() -> dict:
             data = NgaToolkit.get_smiles()
@@ -728,6 +733,8 @@ class NgaToolkit:
         content = replace_align_tags(content)
         content = replace_emoji_tags(content)
         content = replace_del_tags(content)
+        content = replace_video_tags(content)
+
         return content
 
     @staticmethod
