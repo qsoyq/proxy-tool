@@ -1,3 +1,4 @@
+import html
 import re
 import time
 import ssl
@@ -713,6 +714,7 @@ class NgaToolkit:
         if not content:
             return content
 
+        content = html.unescape(content)
         content = replace_img_tags(content)
         content = replace_b_tags(content)
         content = replace_url_tags(content)

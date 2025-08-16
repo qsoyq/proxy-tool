@@ -110,6 +110,13 @@ def test_nga_content_html_format():
     content_html = "[del]Example[/del]"
     assert NgaToolkit.format_content_html(content_html) == """<del>Example</del>"""
 
+    # del
+    content_html = r"具体不说了太可笑&#160;跟发小合伙开公司被坑了&#160;千万别当法人兄弟们&#160;"
+    assert (
+        NgaToolkit.format_content_html(content_html)
+        == "具体不说了太可笑\xa0跟发小合伙开公司被坑了\xa0千万别当法人兄弟们\xa0"
+    )
+
 
 @pytest.mark.asyncio
 async def test_nga_emoji_replace():
