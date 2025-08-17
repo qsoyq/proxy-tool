@@ -646,8 +646,11 @@ class NgaToolkit:
     @staticmethod
     def format_content_html(content: str) -> str:
         def replace_img_tags(text: str) -> str:
-            pattern = r"\[img\]\.(.*?)\[/img\]"
+            pattern = r"\[img\]\.(/mon.*?)\[/img\]"
             replaced_text = re.sub(pattern, r'<img src="https://img.nga.178.com/attachments\1"></img>', text)
+
+            pattern = r"\[img\](http.*?)\[/img\]"
+            replaced_text = re.sub(pattern, r'<img src="https://img.nga.178.com/attachments\1"></img>', replaced_text)
             return replaced_text
 
         def replace_b_tags(text: str) -> str:

@@ -27,6 +27,12 @@ async def test_nga_fetch_thread_detail():
 
 def test_nga_content_html_format():
     # img
+
+    content_html = "[img]./mon_202508/13/-d1rcQ1ah-attnK1cT3cSp3-og.jpg[/img]"
+    assert (
+        NgaToolkit.format_content_html(content_html)
+        == """<img src="https://img.nga.178.com/attachments/mon_202508/13/-d1rcQ1ah-attnK1cT3cSp3-og.jpg"></img>"""
+    )
     content_html = "[img]./mon_202508/13/-d1rcQ1ah-attnK1cT3cSp3-og.jpg[/img]<hr>[img]./mon_202508/13/-d1rcQ1ah-attnK1cT3cSp3-og.jpg[/img]"
     assert (
         NgaToolkit.format_content_html(content_html)
@@ -153,6 +159,9 @@ async def test_nga_content_html_format_bad_case():
     assert "[url]" not in thread.content_html, thread.content_html
     assert "[url=]" not in thread.content_html, thread.content_html
     assert "[/url]" not in thread.content_html, thread.content_html
+    assert "[img]" not in thread.content_html, thread.content_html
+    assert "[img=]" not in thread.content_html, thread.content_html
+    assert "[/img]" not in thread.content_html, thread.content_html
 
 
 @pytest.mark.asyncio
