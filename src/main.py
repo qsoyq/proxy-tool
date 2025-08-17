@@ -33,6 +33,7 @@ import routers.nga.thread
 import routers.v2ex.nodes
 import routers.v2ex.my
 import routers.apple.location
+import routers.apple.itunes.appstore
 import routers.apple.ics
 import routers.apple.ics.github
 import routers.apple.ics.vlrgg
@@ -81,6 +82,7 @@ app.include_router(routers.clash.config.router, prefix=api_prefix)
 app.include_router(routers.stash.stoverride.router, prefix=api_prefix)
 app.include_router(routers.stash.ruleset.router, prefix=api_prefix)
 app.include_router(routers.apple.location.router, prefix=api_prefix)
+app.include_router(routers.apple.itunes.appstore.router, prefix=api_prefix)
 app.include_router(routers.apple.ics.router, prefix=api_prefix)
 app.include_router(routers.apple.ics.github.router, prefix=api_prefix)
 app.include_router(routers.apple.ics.vlrgg.router, prefix=api_prefix)
