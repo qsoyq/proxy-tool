@@ -661,6 +661,9 @@ class NgaToolkit:
 
             pattern = r"\[url\](.*?)\[/url\]"
             replaced_text = re.sub(pattern, r'<a href="\1">\1</a>', replaced_text)
+
+            pattern = r"\[url=(.*?)\](.*?)\[/url\]"
+            replaced_text = re.sub(pattern, r'<a href="\1">\2</a>', replaced_text)
             return replaced_text
 
         def replace_quote_tags(text: str) -> str:

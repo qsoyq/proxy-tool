@@ -47,6 +47,12 @@ def test_nga_content_html_format():
         == '<a href="https://www.bilibili.com/video/BV1iBbtzwEB4/?share_source=copy_web&vd_source=960c9e75740363e0be00644ec66610fe">《古剑奇谭4》本周公布,知名爆料人再出手,宣布本周公布实机PV,并称是国产单机新的希望,腾讯倾力打造</a>'
     )
 
+    content_html = "[url=https://weibo.com/l/wblive/p/show/1022:2321325200651704992046]微博直播[/url]"
+    assert (
+        NgaToolkit.format_content_html(content_html)
+        == '<a href="https://weibo.com/l/wblive/p/show/1022:2321325200651704992046">微博直播</a>'
+    )
+
     # quote
     content_html = """[quote][pid=835413507,44807971,1]Reply[/pid] <b>Post by [uid=61543543]valaroma123[/uid] (2025-08-09 21:20):</b><br/><br/>配料表看上去还行 还有推荐的吗<br/>[/quote]"""
     assert (
@@ -129,6 +135,24 @@ def test_nga_content_html_format():
         NgaToolkit.format_content_html(content_html)
         == """<video src="https://img.nga.178.com/attachments/mon_202508/16/-ncoxtQ2w-9d78ZqT6wSf0-qo.gif.mp4"></video>"""
     )
+
+
+@pytest.mark.asyncio
+async def test_nga_content_html_format_bad_case():
+    """仅处理一些特殊的 badcase"""
+    url = ""
+    if not url:
+        return
+
+    cid, uid = os.getenv("ngaPassportCid"), os.getenv("ngaPassportUid")
+    assert cid and uid, "env ngaPassportCid or ngaPassportUid not exists"
+
+    thread = await NgaToolkit.fetch_thread_detail(url, cid, uid)
+    assert thread
+    assert thread.content_html
+    assert "[url]" not in thread.content_html, thread.content_html
+    assert "[url=]" not in thread.content_html, thread.content_html
+    assert "[/url]" not in thread.content_html, thread.content_html
 
 
 @pytest.mark.asyncio
