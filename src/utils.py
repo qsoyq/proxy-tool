@@ -675,6 +675,9 @@ class NgaToolkit:
         def replace_quote_tags(text: str) -> str:
             pattern = r"\[quote\].*?<b>.*?</b>(<br/>)*(.*?)\[/quote\]"
             replaced_text = re.sub(pattern, r"<blockquote>\2</blockquote><br>", text)
+
+            pattern = r"\[quote\](.*?)\[/quote\]"
+            replaced_text = re.sub(pattern, r"<blockquote>\1</blockquote>", replaced_text)
             return replaced_text
 
         def replace_color_tags(text: str) -> str:
