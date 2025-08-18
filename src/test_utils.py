@@ -147,7 +147,7 @@ def test_nga_content_html_format():
 @pytest.mark.nga_delay
 async def test_nga_content_html_format_bad_case():
     """仅处理一些特殊的 badcase"""
-    url = ""
+    url = "https://bbs.nga.cn/read.php?tid=44876046"
     if not url:
         return
 
@@ -163,6 +163,7 @@ async def test_nga_content_html_format_bad_case():
     assert "[img]" not in thread.content_html, thread.content_html
     assert "[img=]" not in thread.content_html, thread.content_html
     assert "[/img]" not in thread.content_html, thread.content_html
+    assert "s:ac" not in thread.content_html, thread.content_html
 
 
 @pytest.mark.asyncio

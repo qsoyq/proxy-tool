@@ -732,16 +732,16 @@ class NgaToolkit:
             return content
 
         content = html.unescape(content)
+        content = replace_emoji_tags(content)
         content = replace_img_tags(content)
         content = replace_b_tags(content)
-        content = replace_url_tags(content)
         content = replace_quote_tags(content)
         content = replace_color_tags(content)
         content = replace_size_tags(content)
         content = replace_collapse_tags(content)
         content = replace_align_tags(content)
-        content = replace_emoji_tags(content)
         content = replace_del_tags(content)
+        content = replace_url_tags(content)
         content = replace_video_tags(content)
 
         return content
