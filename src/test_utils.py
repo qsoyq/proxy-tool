@@ -144,6 +144,7 @@ def test_nga_content_html_format():
 
 
 @pytest.mark.asyncio
+@pytest.mark.nga_delay
 async def test_nga_content_html_format_bad_case():
     """仅处理一些特殊的 badcase"""
     url = ""

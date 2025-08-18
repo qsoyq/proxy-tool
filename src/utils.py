@@ -649,6 +649,9 @@ class NgaToolkit:
             pattern = r"\[img\]\.(/mon.*?)\[/img\]"
             replaced_text = re.sub(pattern, r'<img src="https://img.nga.178.com/attachments\1"></img>', text)
 
+            pattern = r"\[img\]\./\.(/mon.*?)\[/img\]"
+            replaced_text = re.sub(pattern, r'<img src="https://img.nga.178.com/attachments\1"></img>', replaced_text)
+
             pattern = r"\[img\](http.*?)\[/img\]"
             replaced_text = re.sub(pattern, r'<img src="https://img.nga.178.com/attachments\1"></img>', replaced_text)
             return replaced_text
