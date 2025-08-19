@@ -67,3 +67,14 @@ async def sections():
 def smiles():
     smiles = NgaToolkit.get_smiles()
     return {"data": smiles}
+
+
+@router.get("/detail", summary="查询NGA帖子详情")
+async def queryDetail(
+    url: str = Query(...),
+    uid: str = Header(..., description="ngaPassportUid, 验签"),
+    cid: str = Header(..., description="ngaPassportCid, 验签"),
+):
+    """调试用接口"""
+    detail = await NgaToolkit.fetch_thread_detail(url, cid, uid)
+    return {"content_html": detail.content_html if detail else None}
