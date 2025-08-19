@@ -19,6 +19,7 @@ class FeedFilterMiddleware(BaseHTTPMiddleware):
         "TG必备的搜索引擎，极搜帮你精准找到，想要的群组、频道、音乐 、视频",
         "https://hongxingdl.com",
         "搜 蒸蒸日上 概率有5元猫卡",
+        "<code>ikelee</code>",
     )
 
     def filter_by_block(self, item: dict):
