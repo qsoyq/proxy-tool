@@ -33,9 +33,9 @@ async def releases_list(
     items: list[JSONFeedItem] = []
     feed = {
         "version": "https://jsonfeed.org/version/1",
-        "title": "Github Release",
+        "title": f"{owner}/{repo}",
         "description": "",
-        "home_page_url": "https://docs.github.com/en/rest/releases/releases#list-releases",
+        "home_page_url": f"https://github.com/{owner}/{repo}",
         "feed_url": f"{req.url.scheme}://{host}{req.url.path}?{req.url.query}",
         "icon": f"https://github.com/{owner}.png",
         "favicon": f"https://github.com/{owner}.png",
