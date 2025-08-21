@@ -48,7 +48,9 @@ import routers.rss.nga
 import routers.rss.gofans
 import routers.rss.loon
 import routers.rss.telegram
+import routers.rss.github.release
 import routers.rss.example
+
 import middlewares.rss
 from settings import AppSettings, version
 from schemas.ping import ping_responses, PingRes
@@ -100,7 +102,9 @@ app.include_router(routers.rss.nga.router, prefix=api_prefix)
 app.include_router(routers.rss.gofans.router, prefix=api_prefix)
 app.include_router(routers.rss.loon.router, prefix=api_prefix)
 app.include_router(routers.rss.telegram.router, prefix=api_prefix)
+app.include_router(routers.rss.github.release.router, prefix=api_prefix)
 app.include_router(routers.rss.example.router, prefix=api_prefix)
+
 
 middlewares.rss.add_middleware(app)
 register_exception_handler(app)

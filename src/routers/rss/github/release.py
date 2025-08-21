@@ -1,0 +1,92 @@
+import logging
+from typing import Any, cast
+import httpx
+from fastapi import APIRouter, Query, Path, HTTPException, Request
+from schemas.github.releases import ReleaseSchema, AuthorSchema, AssetSchema
+from schemas.rss.jsonfeed import JSONFeed, JSONFeedItem
+from responses import PrettyJSONResponse
+
+
+router = APIRouter(tags=["RSS"], prefix="/rss/github/releases")
+
+logger = logging.getLogger(__file__)
+
+
+@router.get(
+    "/repos/{owner}/{repo}",
+    summary="Github Repo Issues To Apple Calendar",
+    response_model=JSONFeed,
+    response_class=PrettyJSONResponse,
+)
+async def releases_list(
+    req: Request,
+    token: str | None = Query(None, description="Github API Token"),
+    owner: str = Path(..., description="Github Repo Owner"),
+    repo: str = Path(..., description="Github Repo Name"),
+    per_page: int = Query(30, ge=1, le=100),
+    page: int = Query(1, ge=1),
+):
+    """
+    参数详见文档: https://docs.github.com/en/rest/releases/releases#list-releases
+    """
+    host = req.url.hostname
+    items: list[JSONFeedItem] = []
+    feed = {
+        "version": "https://jsonfeed.org/version/1",
+        "title": "Github Release",
+        "description": "",
+        "home_page_url": "https://docs.github.com/en/rest/releases/releases#list-releases",
+        "feed_url": f"{req.url.scheme}://{host}{req.url.path}?{req.url.query}",
+        "icon": "https://github.com/favicon.ico",
+        "favicon": "https://github.com/favicon.ico",
+        "items": items,
+    }
+
+    url = f"https://api.github.com/repos/{owner}/{repo}/releases"
+    headers = {
+        "Accept": "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+    }
+    if token is not None:
+        headers["Authorization"] = f"Bearer {token}"
+
+    params = {
+        "per_page": per_page,
+        "page": page,
+    }
+    async with httpx.AsyncClient(headers=headers) as client:
+        res = await client.get(url, params=params)
+        if res.is_error:
+            return HTTPException(status_code=res.status_code, detail=res.text)
+        releases_list: list[ReleaseSchema] = [ReleaseSchema.model_construct(**x) for x in res.json()]
+
+    for release in releases_list:
+        assert release.author
+        release.author = AuthorSchema(**cast(dict, release.author))
+        payload: dict[str, Any] = {
+            "id": f"github-releases-{release.id}",
+            "url": release.html_url,
+            "title": release.name,
+            "content_text": release.body or "",
+            "date_published": release.published_at,
+            "date_modified": release.updated_at,
+            "author": {
+                "url": release.author.url,
+                "name": release.author.login,
+                "avatar": release.author.avatar_url,
+            },
+            "attachments": [],
+        }
+
+        for _asset in release.assets or []:
+            asset = AssetSchema(**cast(dict, _asset))
+            attachment = {
+                "url": asset.browser_download_url,
+                "mime_type": asset.content_type,
+                "title": asset.name,
+                "size_in_bytes": asset.size,
+            }
+            payload["attachments"].append(attachment)
+        items.append(JSONFeedItem(**payload))
+
+    return feed
