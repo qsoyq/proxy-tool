@@ -10,6 +10,7 @@ from exception import register_exception_handler
 
 import routers.basic
 import routers.tool.basic
+import routers.tool.image
 import routers.notifications.push
 import routers.webhook.railway
 import routers.checkin.flyairport
@@ -52,13 +53,16 @@ import middlewares.rss
 from settings import AppSettings, version
 from schemas.ping import ping_responses, PingRes
 from responses import PingResponse
+from routers.rss.nodeseek import NodeseekToolkit
 from events import lifespan
+
 
 cmd = typer.Typer()
 app = FastAPI(title="proxy tool", version=version, lifespan=lifespan)
 api_prefix = AppSettings().api_prefix
 app.include_router(routers.basic.router, prefix=api_prefix)
 app.include_router(routers.tool.basic.router, prefix=api_prefix)
+app.include_router(routers.tool.image.router, prefix=api_prefix)
 app.include_router(routers.notifications.push.router, prefix=api_prefix)
 app.include_router(routers.webhook.railway.router, prefix=api_prefix)
 app.include_router(routers.checkin.flyairport.router, prefix=api_prefix)
@@ -108,8 +112,6 @@ logger = logging.getLogger(__file__)
 @app.get("/ping", response_model=PingRes, tags=["Basic"], responses=ping_responses, response_class=PingResponse)
 async def ping():
     assert getattr(app.state, "background_gc_task", None)
-    from routers.rss.nodeseek import NodeseekToolkit
-
     m = PingRes.model_construct()
     m.nodeseek = {"ArticlePostCache": list(NodeseekToolkit.ArticlePostCache.keys())}
     return m
