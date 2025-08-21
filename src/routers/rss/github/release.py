@@ -1,6 +1,7 @@
 import logging
 from typing import Any, cast
 import httpx
+import markdown
 from fastapi import APIRouter, Query, Path, HTTPException, Request
 from schemas.github.releases import ReleaseSchema, AuthorSchema, AssetSchema
 from schemas.rss.jsonfeed import JSONFeed, JSONFeedItem
@@ -23,7 +24,7 @@ async def releases_list(
     token: str | None = Query(None, description="Github API Token"),
     owner: str = Path(..., description="Github Repo Owner"),
     repo: str = Path(..., description="Github Repo Name"),
-    per_page: int = Query(30, ge=1, le=100),
+    per_page: int = Query(10, ge=1, le=100),
     page: int = Query(1, ge=1),
 ):
     """
@@ -77,6 +78,8 @@ async def releases_list(
             },
             "attachments": [],
         }
+        if payload["content_text"]:
+            payload["content_html"] = markdown.markdown(payload.pop("content_text"))
 
         for _asset in release.assets or []:
             asset = AssetSchema(**cast(dict, _asset))
