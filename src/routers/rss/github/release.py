@@ -37,8 +37,8 @@ async def releases_list(
         "description": "",
         "home_page_url": "https://docs.github.com/en/rest/releases/releases#list-releases",
         "feed_url": f"{req.url.scheme}://{host}{req.url.path}?{req.url.query}",
-        "icon": "https://github.com/favicon.ico",
-        "favicon": "https://github.com/favicon.ico",
+        "icon": f"https://github.com/{owner}.png",
+        "favicon": f"https://github.com/{owner}.png",
         "items": items,
     }
 
