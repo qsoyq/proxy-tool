@@ -52,7 +52,7 @@ def jsonfeed(req: Request):
     }
     res = httpx.get(url, headers=headers, verify=False)
     if res.is_error:
-        return HTTPException(res.status_code, f"fetch 1024.day error: {res.text}")
+        raise HTTPException(res.status_code, f"fetch 1024.day error: {res.text}")
 
     data = res.json()
 

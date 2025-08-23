@@ -28,6 +28,6 @@ async def app_list(
     async with httpx.AsyncClient(headers={"User-Agent": ua}) as client:
         resp = await client.get(url, params=params)
         if resp.is_error:
-            return HTTPException(status_code=resp.status_code, detail=resp.text)
+            raise HTTPException(status_code=resp.status_code, detail=resp.text)
         data = resp.json()["results"]
     return {"data": data}

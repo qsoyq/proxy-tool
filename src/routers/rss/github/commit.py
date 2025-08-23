@@ -58,7 +58,7 @@ async def commits_list(
     async with httpx.AsyncClient(headers=headers) as client:
         res = await client.get(url, params=params)
         if res.is_error:
-            return HTTPException(status_code=res.status_code, detail=res.text)
+            raise HTTPException(status_code=res.status_code, detail=res.text)
         commit_list: list[CommitItemSchema] = [CommitItemSchema.model_construct(**x) for x in res.json()]
 
     for commit in commit_list:
