@@ -1,6 +1,8 @@
 import logging
 import asyncio
 from itertools import chain
+
+import markdown
 from fastapi import APIRouter, Request, Query
 from responses import PrettyJSONResponse
 from schemas.rss.jsonfeed import JSONFeed
@@ -39,6 +41,11 @@ async def channel_jsonfeed(
         feed_title = None
         tasks = await asyncio.gather(*[TelegramToolkit.get_channel_messages(channelName) for channelName in channels])
         for message in chain(*tasks):
+            if message.contentHtml:
+                try:
+                    message.contentHtml = markdown.markdown(message.contentHtml)
+                except Exception as e:
+                    logger.warning(f"convert markdown to html failed: {e}")
             payload = {
                 "id": f"{message.channelName}-{message.msgid}",
                 "title": f"{message.title}",
@@ -61,7 +68,6 @@ async def channel_jsonfeed(
             if message.photoUrls:
                 payload["image"] = message.photoUrls[0]
                 payload["banner_image"] = message.photoUrls[0]
-
                 photosOuterHTML = ""
                 for url in message.photoUrls:
                     tag = TelegramToolkit.generate_img_tag(url)
