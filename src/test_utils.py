@@ -42,6 +42,10 @@ def test_nga_content_html_format():
     content_html = "[b]Example[/b]"
     assert NgaToolkit.format_content_html(content_html) == "<b>Example</b>"
 
+    # size
+    content_html = "[size=110%][size=140%]今天找资源苦于所有资源都是夸克网盘，所以开了个会员，结果[/size][/size]"
+    assert NgaToolkit.format_content_html(content_html) == "今天找资源苦于所有资源都是夸克网盘，所以开了个会员，结果"
+
     # url
     content_html = "[url]https://www.baidu.com[/url]"
     assert NgaToolkit.format_content_html(content_html) == '<a href="https://www.baidu.com">https://www.baidu.com</a>'
@@ -164,6 +168,8 @@ async def test_nga_content_html_format_bad_case():
     assert "[/img]" not in thread.content_html, thread.content_html
     assert "s:ac" not in thread.content_html, thread.content_html
     assert "[quote]" not in thread.content_html, thread.content_html
+    assert "[size]" not in thread.content_html, thread.content_html
+    assert "[/size]" not in thread.content_html, thread.content_html
 
 
 @pytest.mark.asyncio

@@ -686,8 +686,11 @@ class NgaToolkit:
             return replaced_text
 
         def replace_size_tags(text: str) -> str:
-            pattern = r"\[size(.*?)\](.*?)\[/size\]"
-            replaced_text = re.sub(pattern, r"\2", text)
+            pattern = r"\[size(.*?)\]"
+            replaced_text = re.sub(pattern, r"", text)
+
+            pattern = r"\[/size]"
+            replaced_text = re.sub(pattern, r"", replaced_text)
             return replaced_text
 
         def replace_collapse_tags(text: str) -> str:
