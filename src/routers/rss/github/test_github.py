@@ -13,3 +13,9 @@ def test_github_releases(client: TestClient):
     path = "/api/rss/github/releases/repos/NSRingo/WeatherKit"
     resp = client.get(path)
     assert resp.status_code == 200, resp.text
+
+
+def test_github_commits(client: TestClient):
+    path = "/api/rss/github/commits/repos/qsoyq/proxy-tool"
+    resp = client.get(path)
+    assert resp.status_code == 200, resp.text

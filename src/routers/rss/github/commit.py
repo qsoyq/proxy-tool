@@ -1,34 +1,34 @@
 import logging
 from typing import Any, cast
 import httpx
-import markdown
 from fastapi import APIRouter, Query, Path, HTTPException, Request
-from schemas.github.releases import ReleaseSchema, AuthorSchema, AssetSchema
+from schemas.github import AuthorSchema
+from schemas.github.commits import CommitItemSchema, CommitSchema
 from schemas.rss.jsonfeed import JSONFeed, JSONFeedItem
 from responses import PrettyJSONResponse
 
 
-router = APIRouter(tags=["RSS"], prefix="/rss/github/releases")
+router = APIRouter(tags=["RSS"], prefix="/rss/github/commits")
 
 logger = logging.getLogger(__file__)
 
 
 @router.get(
     "/repos/{owner}/{repo}",
-    summary="Github Repo Releases RSS",
+    summary="Github Repo Commits RSS",
     response_model=JSONFeed,
     response_class=PrettyJSONResponse,
 )
-async def releases_list(
+async def commits_list(
     req: Request,
     token: str | None = Query(None, description="Github API Token"),
     owner: str = Path(..., description="Github Repo Owner"),
     repo: str = Path(..., description="Github Repo Name"),
-    per_page: int = Query(10, ge=1, le=100),
+    per_page: int = Query(30, ge=1, le=100),
     page: int = Query(1, ge=1),
 ):
     """
-    参数详见文档: https://docs.github.com/en/rest/releases/releases#list-releases
+    参数详见文档: https://docs.github.com/en/rest/commits/commits?apiVersion=2022-11-28
     """
     host = req.url.hostname
     items: list[JSONFeedItem] = []
@@ -43,7 +43,7 @@ async def releases_list(
         "items": items,
     }
 
-    url = f"https://api.github.com/repos/{owner}/{repo}/releases"
+    url = f"https://api.github.com/repos/{owner}/{repo}/commits"
     headers = {
         "Accept": "application/vnd.github+json",
         "X-GitHub-Api-Version": "2022-11-28",
@@ -59,37 +59,26 @@ async def releases_list(
         res = await client.get(url, params=params)
         if res.is_error:
             return HTTPException(status_code=res.status_code, detail=res.text)
-        releases_list: list[ReleaseSchema] = [ReleaseSchema.model_construct(**x) for x in res.json()]
+        commit_list: list[CommitItemSchema] = [CommitItemSchema.model_construct(**x) for x in res.json()]
 
-    for release in releases_list:
-        assert release.author
-        release.author = AuthorSchema(**cast(dict, release.author))
+    for commit in commit_list:
+        commit.author = AuthorSchema(**cast(dict, commit.author))
+        commit.commit = CommitSchema(**cast(dict, commit.commit))
+        assert commit.commit.author
+        assert commit.author
         payload: dict[str, Any] = {
-            "id": f"github-releases-{owner}-{repo}-{release.id}",
-            "url": release.html_url,
-            "title": release.name,
-            "content_text": release.body or "",
-            "date_published": release.published_at,
-            "date_modified": release.updated_at,
+            "id": f"github-commits-{owner}-{repo}-{commit.sha}",
+            "url": commit.html_url,
+            "title": commit.commit.message,
+            "content_text": "",
+            "date_published": commit.commit.author.date,
+            "date_modified": commit.commit.author.date,
             "author": {
-                "url": release.author.html_url,
-                "name": release.author.login,
-                "avatar": release.author.avatar_url,
+                "url": commit.author.html_url,
+                "name": commit.author.login,
+                "avatar": commit.author.avatar_url,
             },
-            "attachments": [],
         }
-        if payload["content_text"]:
-            payload["content_html"] = markdown.markdown(payload.pop("content_text"))
-
-        for _asset in release.assets or []:
-            asset = AssetSchema(**cast(dict, _asset))
-            attachment = {
-                "url": asset.browser_download_url,
-                "mime_type": asset.content_type,
-                "title": asset.name,
-                "size_in_bytes": asset.size,
-            }
-            payload["attachments"].append(attachment)
         items.append(JSONFeedItem(**payload))
 
     return feed

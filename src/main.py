@@ -49,6 +49,7 @@ import routers.rss.gofans
 import routers.rss.loon
 import routers.rss.telegram
 import routers.rss.github.release
+import routers.rss.github.commit
 import routers.rss.example
 
 import middlewares.rss
@@ -103,6 +104,7 @@ app.include_router(routers.rss.gofans.router, prefix=api_prefix)
 app.include_router(routers.rss.loon.router, prefix=api_prefix)
 app.include_router(routers.rss.telegram.router, prefix=api_prefix)
 app.include_router(routers.rss.github.release.router, prefix=api_prefix)
+app.include_router(routers.rss.github.commit.router, prefix=api_prefix)
 app.include_router(routers.rss.example.router, prefix=api_prefix)
 
 
