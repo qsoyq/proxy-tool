@@ -82,6 +82,7 @@ class PingRes(BaseModel):
     uptime: str = Field("")
     usage: Usage = Field(default_factory=Usage)
     nodeseek: dict | None
+    sentry_cache: dict | None
 
     @model_validator(mode="after")
     def set_uptime(cls, values):

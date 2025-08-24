@@ -53,6 +53,8 @@ import routers.rss.github.commit
 import routers.rss.example
 
 import middlewares.rss
+import middlewares.errors
+
 from settings import AppSettings, version
 from schemas.ping import ping_responses, PingRes
 from responses import PingResponse
@@ -109,6 +111,7 @@ app.include_router(routers.rss.example.router, prefix=api_prefix)
 
 
 middlewares.rss.add_middleware(app)
+middlewares.errors.add_middleware(app)
 register_exception_handler(app)
 
 logger = logging.getLogger(__file__)
@@ -118,8 +121,10 @@ logger = logging.getLogger(__file__)
 @app.get("/ping", response_model=PingRes, tags=["Basic"], responses=ping_responses, response_class=PingResponse)
 async def ping():
     assert getattr(app.state, "background_gc_task", None)
+
     m = PingRes.model_construct()
     m.nodeseek = {"ArticlePostCache": list(NodeseekToolkit.ArticlePostCache.keys())}
+    m.sentry_cache = await middlewares.errors.SentryCacheMiddleware.get_errors()
     return m
 
 
