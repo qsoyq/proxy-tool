@@ -21,6 +21,10 @@ def subscribe(token: str = Query(...)) -> MikananiResSchema:
     resp.raise_for_status()
     body = xmltodict.parse(resp.text)
     body["rss"]["channel"].setdefault("item", [])
+
+    if isinstance(body["rss"]["channel"]["item"], dict):
+        body["rss"]["channel"]["item"] = [body["rss"]["channel"]["item"]]
+
     body["rss"]["channel"]["item"] = list(executor.map(add_image_url, body["rss"]["channel"]["item"]))
     pattern = re.compile(r"^\[.*?\]\s*|\s*\[.*?\]$")
     for item in body["rss"]["channel"]["item"]:
