@@ -68,13 +68,10 @@ class SentryCacheMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
         try:
-            print(111)
             response = await call_next(request)
         except Exception as e:
             route = request.scope.get("route")
             if route:
                 await SentryCacheMiddleware.add_error(route, e)
-            print(222)
-            print(e)
             raise e
         return response
