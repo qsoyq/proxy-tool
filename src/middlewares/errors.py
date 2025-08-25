@@ -31,7 +31,7 @@ def add_middleware(app: FastAPI):
 
 
 class SentryCacheMiddleware(BaseHTTPMiddleware):
-    TTL = 1800
+    TTL = 3600 * 12
     LOCK = Lock()
     collections: dict[str, list[CachedItem]] = defaultdict(list)
 
