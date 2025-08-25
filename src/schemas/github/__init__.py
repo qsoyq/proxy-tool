@@ -1,4 +1,5 @@
-from pydantic import BaseModel, HttpUrl, Field
+from pydantic import BaseModel, Field
+from schemas.adapter import HttpUrl
 
 
 class AuthorSchema(BaseModel):

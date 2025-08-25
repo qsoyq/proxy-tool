@@ -5,9 +5,9 @@ import logging
 from fastapi.responses import PlainTextResponse
 import httpx
 from fastapi import APIRouter, Query
-from pydantic import HttpUrl
 import inspect
 import yaml
+from schemas.adapter import HttpUrl
 
 router = APIRouter(tags=["Proxy"], prefix="/stash/stoverride")
 

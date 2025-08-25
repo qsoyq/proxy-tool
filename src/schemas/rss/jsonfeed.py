@@ -1,4 +1,5 @@
-from pydantic import BaseModel, Field, model_validator, HttpUrl
+from pydantic import BaseModel, Field, model_validator
+from schemas.adapter import HttpUrl
 
 
 class JSONFeedAuthor(BaseModel):

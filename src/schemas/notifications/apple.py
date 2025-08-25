@@ -2,9 +2,10 @@ from enum import Enum
 from typing import Dict, Any
 from functools import lru_cache
 import httpx
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import BaseModel, Field
 import time
 import jwt
+from schemas.adapter import HttpUrl
 
 APNS_HOST_NAME = "api.push.apple.com"
 
@@ -110,8 +111,8 @@ class ApplePushMessage(ApplePushExtParams, ApplePushAuthParams):
             "authorization": f"bearer {jwt.token}",
         }
 
-        ext = ApplePushExtParams(**self.dict()).dict(exclude_none=True)
-        payload: Dict[str, Any] = {"aps": dict(self.aps.dict(exclude_none=True, by_alias=True))}
+        ext = ApplePushExtParams(**self.model_dump()).model_dump(exclude_none=True)
+        payload: Dict[str, Any] = {"aps": dict(self.aps.model_dump(exclude_none=True, by_alias=True))}
         payload.update(ext)
         resp = httpx.Client(http2=True).post(url, json=payload, headers=headers)
         resp.raise_for_status()

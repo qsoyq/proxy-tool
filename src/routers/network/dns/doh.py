@@ -1,9 +1,10 @@
 import logging
 
-from pydantic import HttpUrl
 import httpx
-from schemas.network.dns.doh import DoHResponse
 from fastapi import APIRouter, Query
+from schemas.network.dns.doh import DoHResponse
+from schemas.adapter import HttpUrl
+
 
 router = APIRouter(tags=["Utils"], prefix="/network/dns")
 

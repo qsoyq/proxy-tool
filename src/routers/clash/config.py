@@ -1,10 +1,11 @@
 import logging
 from enum import Enum
-from fastapi.responses import PlainTextResponse
+
 import httpx
-from fastapi import APIRouter, Query
-from pydantic import HttpUrl
 import yaml
+from fastapi import APIRouter, Query
+from fastapi.responses import PlainTextResponse
+from schemas.adapter import HttpUrl
 
 
 class QxBehaviourEnum(str, Enum):

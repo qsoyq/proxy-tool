@@ -1,9 +1,10 @@
 import yaml
 import logging
-from fastapi.responses import PlainTextResponse
 import httpx
+
 from fastapi import APIRouter, Query
-from pydantic import HttpUrl
+from fastapi.responses import PlainTextResponse
+from schemas.adapter import HttpUrl
 
 
 router = APIRouter(tags=["Proxy"], prefix="/stash/ruleset")

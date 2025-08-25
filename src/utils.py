@@ -28,7 +28,7 @@ import httpx
 import js2py
 
 from fastapi import HTTPException
-from pydantic import HttpUrl, BaseModel, Field
+from pydantic import BaseModel, Field
 from bs4 import BeautifulSoup as Soup, Tag
 import feedgen
 import feedgen.feed
@@ -37,6 +37,7 @@ from cachetools import TTLCache
 from schemas.network.ssl import SSLCertSchema
 from schemas.nga.thread import OrderByEnum, Threads, Thread, GetForumSectionsRes, ForumSectionIndex, NGASmile
 from schemas.rss.telegram import TelegramChannalMessage
+from schemas.adapter import HttpUrl
 
 
 logger = logging.getLogger(__file__)
@@ -603,7 +604,7 @@ class NgaToolkit:
                 r"""ubbcode.continueCharProc.reg = /[\xb7\x7e\x40\x23\x25\x26\x2a\x2b\x7c\x2d\x3d\x60\x7e\x21\x40\x23\x24\x25\x5e\x26\x2a\x28\x29\x5f\x2b\x7b\x7d\x7c\x3a\x22\x3c\x3e\x3f\x2d\x3d\x5b\x5d\x5c\x3b\x27\x2c\x2e\x2f\uff01\uffe5\u2026\u2026\uff08\uff09\u2014\u2014\uff5b\uff5d\uff1a\u201c\uff1f\u300b\u300a\u3010\u3011\u3001\uff1b\u2018\uff0c\u3002\u3001]{24,}/g""",
                 "",
             )
-            ctx = js2py.EvalJs()
+            ctx = js2py.EvalJs()  # type: ignore
             ctx.execute(f"{injection}{js_code}")
             smiles = ctx.ubbcode.smiles.to_dict()
             for category in smiles.keys():
@@ -891,7 +892,7 @@ class TelegramToolkit:
             )
             if backgroundImage:
                 backgroundImage = backgroundImage[5:-2]
-                photoUrls.append(HttpUrl(backgroundImage))
+                photoUrls.append(str(backgroundImage))
         return photoUrls
 
     @staticmethod

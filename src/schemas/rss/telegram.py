@@ -1,4 +1,5 @@
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import BaseModel, Field
+from schemas.adapter import HttpUrl
 
 
 class TelegramChannalMessage(BaseModel):
