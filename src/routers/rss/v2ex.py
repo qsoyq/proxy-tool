@@ -32,10 +32,6 @@ async def aggregation(req: Request, topics: list[str] = Query([], description="è
     https://www.v2ex.com/feed/{topic}.json
     """
     host = req.url.hostname
-    port = req.url.port
-    if port is None:
-        port = 80 if req.url.scheme == "http" else 443
-
     items: list[JSONFeedItem] = []
     feed = {
         "version": "https://jsonfeed.org/version/1",
@@ -65,9 +61,6 @@ async def favorite(
     https://www.v2ex.com/feed/{topic}.json
     """
     host = req.url.hostname
-    port = req.url.port
-    if port is None:
-        port = 80 if req.url.scheme == "http" else 443
 
     items: list[JSONFeedItem] = []
     feed = {
@@ -88,6 +81,7 @@ async def favorite(
             "title": f"{topic.title}",
             "id": topic.id,
             "date_published": topic.lastTouchedStr,
+            "content_html": "",
         }
         items.append(JSONFeedItem(**payload))
     return feed
