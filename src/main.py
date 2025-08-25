@@ -51,6 +51,7 @@ import routers.rss.telegram
 import routers.rss.github.release
 import routers.rss.github.commit
 import routers.rss.example
+import routers.dandanplay.bilibili
 
 import middlewares.rss
 import middlewares.errors
@@ -108,6 +109,7 @@ app.include_router(routers.rss.telegram.router, prefix=api_prefix)
 app.include_router(routers.rss.github.release.router, prefix=api_prefix)
 app.include_router(routers.rss.github.commit.router, prefix=api_prefix)
 app.include_router(routers.rss.example.router, prefix=api_prefix)
+app.include_router(routers.dandanplay.bilibili.router, prefix=api_prefix)
 
 
 middlewares.rss.add_middleware(app)
