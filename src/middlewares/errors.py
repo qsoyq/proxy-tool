@@ -1,5 +1,6 @@
 import time
 import logging
+import traceback
 from typing import Any, Awaitable, Callable
 from asyncio import Lock
 from collections import defaultdict
@@ -62,11 +63,12 @@ class SentryCacheMiddleware(BaseHTTPMiddleware):
     @staticmethod
     async def add_error(route: APIRoute, exc: Exception):
         async with SentryCacheMiddleware.LOCK:
+            error = traceback.format_exception(exc)
             payload: dict[str, Any] = {
                 "name": route.name,
                 "path": route.path,
                 "methods": route.methods,
-                "error": f"{type(exc)} - {str(exc)}",
+                "error": f"{type(exc)} - {error}",
             }
             item = CachedItem(**payload)
             SentryCacheMiddleware.collections[route.name].append(item)
