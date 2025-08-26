@@ -1,7 +1,10 @@
 import time
+import logging
 from typing import Any, Awaitable, Callable
 from asyncio import Lock
 from collections import defaultdict
+
+import httpx
 from fastapi import FastAPI, Request
 from fastapi.routing import APIRoute
 from pydantic import BaseModel, model_validator, Field
@@ -9,6 +12,8 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 
 app = FastAPI()
+
+logger = logging.getLogger(__file__)
 
 
 class CachedItem(BaseModel):
@@ -69,6 +74,9 @@ class SentryCacheMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
         try:
             response = await call_next(request)
+        except httpx.HTTPStatusError as e:
+            logging.warning(f"[httpx.HTTPStatusError]: {e}")
+            return Response(content=e.response.text, status_code=e.response.status_code)
         except Exception as e:
             route = request.scope.get("route")
             if route:

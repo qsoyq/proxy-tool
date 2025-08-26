@@ -88,7 +88,7 @@ async def timeout(timeout: float | None = Path(..., description="可控的阻塞
 
 @router.get("/subscribe", summary="Clash订阅转换")
 @router.head("/subscribe", include_in_schema=False)
-def subscribe(
+async def subscribe(
     user_agent: str = Query("clash.meta"),
     url: str = Query(..., description="订阅链接"),
     proxy_provider: bool = Query(False, description="是否只返回节点", alias="proxy-provider"),
@@ -111,8 +111,12 @@ def subscribe(
     headers = {}
     if user_agent is not None:
         headers["user-agent"] = user_agent
-    resp = httpx.get(url, headers=headers)
-    resp.raise_for_status()
+    async with httpx.AsyncClient(headers=headers) as client:
+        resp = await client.get(url)
+        resp.raise_for_status()
+        # if resp.is_error:
+        #     raise HTTPException(status_code=resp.status_code, detail=resp.text)
+
     # 订阅信息字段
     headers = {}
     for field in (
