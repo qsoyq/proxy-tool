@@ -71,7 +71,7 @@ class SentryCacheMiddleware(BaseHTTPMiddleware):
                 "error": f"{type(exc)} - {error}",
             }
             item = CachedItem(**payload)
-            SentryCacheMiddleware.collections[route.name].append(item)
+            SentryCacheMiddleware.collections[route.name].insert(0, item)
 
     async def dispatch(self, request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
         try:
