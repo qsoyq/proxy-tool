@@ -1,17 +1,55 @@
 import uuid
 import json
-import urllib.parse
-import logging
-from fastapi.responses import PlainTextResponse
-import httpx
-from fastapi import APIRouter, Query
-import inspect
 import yaml
+import inspect
+import logging
+import urllib.parse
+from typing import cast
+
+import httpx
+from fastapi import APIRouter, Query, HTTPException
+from fastapi.responses import PlainTextResponse
+from cachetools import TTLCache
+from asyncache import cached
+
 from schemas.adapter import HttpUrl
+from schemas.github.releases import ReleaseSchema
+
 
 router = APIRouter(tags=["Proxy"], prefix="/stash/stoverride")
 
 logger = logging.getLogger(__file__)
+
+
+@cached(TTLCache(32, 86400))
+async def get_weather_kit_tag_name() -> str:
+    url = "https://api.github.com/repos/NSRingo/WeatherKit/releases"
+    headers = {
+        "Accept": "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+    }
+    params = {
+        "per_page": 5,
+        "page": 1,
+    }
+    async with httpx.AsyncClient(headers=headers, follow_redirects=True) as client:
+        res = await client.get(url, params=params)
+        if res.is_error:
+            raise HTTPException(status_code=res.status_code, detail=res.text)
+        releases_list: list[ReleaseSchema] = [ReleaseSchema.model_construct(**x) for x in res.json()]
+        if not releases_list:
+            raise HTTPException(status_code=404, detail="release not found")
+        return cast(str, releases_list[0].tag_name)
+
+
+@cached(TTLCache(32, 3600))
+async def get_weather_kit_override_content(tag_name: str) -> str:
+    async with httpx.AsyncClient(follow_redirects=True) as client:
+        url = f"https://github.com/NSRingo/WeatherKit/releases/download/{tag_name}/iRingo.WeatherKit.stoverride"
+        res = await client.get(url)
+        if res.is_error:
+            raise HTTPException(status_code=res.status_code, detail=res.text)
+        return res.text
 
 
 @router.get("/rules/random", summary="stash随机规则覆写生成")
@@ -179,3 +217,10 @@ def http_header_override(
         "Content-Disposition": f"inline;filename*=UTF-8''{urllib.parse.quote(name)}.stoverride",
     }
     return PlainTextResponse(inspect.cleandoc(content), headers=r_headers)
+
+
+@router.get("/NSRingo/WeatherKit", summary="NSRingo/WeatherKit 最新覆写")
+async def weather_kit():
+    tag_name = await get_weather_kit_tag_name()
+    content = await get_weather_kit_override_content(tag_name)
+    return PlainTextResponse(content, media_type="application/x-yaml;charset=utf-8")

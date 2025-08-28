@@ -12,3 +12,8 @@ def client():
 def test_github_rate_limit(client: TestClient):
     response = client.get("/api/stash/stoverride/tiles/github/rate-limit")
     assert response.status_code == 200
+
+
+def test_override_NSRingo_WeatherKit(client: TestClient):
+    response = client.get("/api/stash/stoverride/NSRingo/WeatherKit")
+    assert response.status_code == 200
