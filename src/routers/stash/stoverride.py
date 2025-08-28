@@ -22,8 +22,8 @@ logger = logging.getLogger(__file__)
 
 
 @cached(TTLCache(32, 86400))
-async def get_weather_kit_tag_name() -> str:
-    url = "https://api.github.com/repos/NSRingo/WeatherKit/releases"
+async def get_weather_kit_tag_name(owner: str, repo: str) -> str:
+    url = f"https://api.github.com/repos/{owner}/{repo}/releases"
     headers = {
         "Accept": "application/vnd.github+json",
         "X-GitHub-Api-Version": "2022-11-28",
@@ -43,7 +43,7 @@ async def get_weather_kit_tag_name() -> str:
 
 
 @cached(TTLCache(32, 3600))
-async def get_weather_kit_override_content(tag_name: str) -> str:
+async def get_weather_kit_override_content(owner: str, repo: str, tag_name: str) -> str:
     async with httpx.AsyncClient(follow_redirects=True) as client:
         url = f"https://github.com/NSRingo/WeatherKit/releases/download/{tag_name}/iRingo.WeatherKit.stoverride"
         res = await client.get(url)
@@ -221,6 +221,7 @@ def http_header_override(
 
 @router.get("/NSRingo/WeatherKit", summary="NSRingo/WeatherKit 最新覆写")
 async def weather_kit():
-    tag_name = await get_weather_kit_tag_name()
-    content = await get_weather_kit_override_content(tag_name)
+    owner, repo = "NSRingo", "WeatherKit"
+    tag_name = await get_weather_kit_tag_name(owner, repo)
+    content = await get_weather_kit_override_content(owner, repo, tag_name)
     return PlainTextResponse(content, media_type="application/x-yaml;charset=utf-8")
