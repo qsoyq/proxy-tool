@@ -266,7 +266,7 @@ async def loon(
     url_rewrites: list[str] = []
     header_rewrites: list[str] = []
     scripts: list[dict] = []
-    script_providers: list[dict] = []
+    script_providers = {}
 
     for line in resp.text.splitlines():
         line = line.strip()
@@ -365,7 +365,7 @@ async def loon(
                     "url": kwargs.pop("script-path"),
                     "interval": 86400,
                 }
-                script_providers.append({payload["name"]: _script})
+                script_providers[payload["name"]] = _script
             case "Argument":
                 ...
             case _:
