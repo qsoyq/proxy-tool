@@ -131,18 +131,25 @@ def test_nga_content_html_format():
     content_html = "[del]Example[/del]"
     assert NgaToolkit.format_content_html(content_html) == """<del>Example</del>"""
 
-    # del
+    # html entity unescape
     content_html = "具体不说了太可笑&#160;跟发小合伙开公司被坑了&#160;千万别当法人兄弟们&#160;"
     assert (
         NgaToolkit.format_content_html(content_html)
         == "具体不说了太可笑\xa0跟发小合伙开公司被坑了\xa0千万别当法人兄弟们\xa0"
     )
 
-    # del
+    # flash video
     content_html = "[flash=video]./mon_202508/16/-ncoxtQ2w-9d78ZqT6wSf0-qo.gif.mp4[/flash]"
     assert (
         NgaToolkit.format_content_html(content_html)
         == """<video src="https://img.nga.178.com/attachments/mon_202508/16/-ncoxtQ2w-9d78ZqT6wSf0-qo.gif.mp4"></video>"""
+    )
+
+    # flash audio
+    content_html = "[flash=audio]./mon_202508/28/-7Q2w-ikt3Zf.mp3?duration=39″[/flash]"
+    assert (
+        NgaToolkit.format_content_html(content_html)
+        == """<audio controls><source src="https://img.nga.178.com/attachments/mon_202508/28/-7Q2w-ikt3Zf.mp3?duration=39″" type="audio/mp3" /></audio>"""
     )
 
 
@@ -170,6 +177,9 @@ async def test_nga_content_html_format_bad_case():
     assert "[quote]" not in thread.content_html, thread.content_html
     assert "[size]" not in thread.content_html, thread.content_html
     assert "[/size]" not in thread.content_html, thread.content_html
+    assert "[/size]" not in thread.content_html, thread.content_html
+    assert "[flash=audio]" not in thread.content_html, thread.content_html
+    assert "[/flash]" not in thread.content_html, thread.content_html
 
 
 @pytest.mark.asyncio

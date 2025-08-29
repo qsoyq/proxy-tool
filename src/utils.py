@@ -730,6 +730,17 @@ class NgaToolkit:
             replaced_text = re.sub(pattern, r'<video src="https://img.nga.178.com/attachments\1"></video>', text)
             return replaced_text
 
+        def replace_audio_tags(text: str) -> str:
+            pattern = r"\[flash=audio\]\.(.*?)\[/flash\]"
+            # replaced_text = re.sub(pattern, r'<video src="https://img.nga.178.com/attachments\1"></video>', text)
+            replaced_text = re.sub(
+                pattern,
+                r'<audio controls><source src="https://img.nga.178.com/attachments\1" type="audio/mp3" /></audio>',
+                text,
+            )
+
+            return replaced_text
+
         @cache
         def get_smiles() -> dict:
             data = NgaToolkit.get_smiles()
@@ -750,6 +761,7 @@ class NgaToolkit:
         content = replace_del_tags(content)
         content = replace_url_tags(content)
         content = replace_video_tags(content)
+        content = replace_audio_tags(content)
 
         return content
 
