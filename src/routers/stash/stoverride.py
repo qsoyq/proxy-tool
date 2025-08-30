@@ -351,12 +351,13 @@ async def loon(
                 type_ = type_.replace("http-", "")
                 p3 = cast(str, p3)
                 kwargs = {k: v for item in p3.split(", ") for k, v in [item.split("=")]}
+                # TODO: 兼容 Argument
                 payload = {
                     "match": match_,
                     "name": kwargs.pop("tag", uuid.uuid4().hex),
                     "type": type_,
                     "require-body": kwargs.pop("requires-body", "false").strip() == "true",
-                    "argument": kwargs.pop("argument", ""),
+                    # "argument": kwargs.pop("argument", ""),
                     "binary-mode": kwargs.pop("binary-body-mode", "false").strip() == "true",
                     "timeout": 20,
                 }
