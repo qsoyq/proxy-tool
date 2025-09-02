@@ -311,6 +311,52 @@ async def loon(
             continue
 
         match section:
+            # 优先处理 Argument, 便于后续 Script 填充参数
+            case "Argument":
+                _values: list[Any] = line.rsplit(",", 2)
+                assert len(_values) == 3, _values
+                _payload = {}
+                name = None
+                for k, v in {k: v for item in _values for k, v in [item.split("=")]}.items():
+                    k = k.strip()
+                    v = v.strip()
+
+                    if k in ("desc", "tag"):
+                        _payload[k] = v.strip()
+                        continue
+
+                    name = k
+                    type_, parameters = v.split(",", 1)
+
+                    _payload["type"] = type_
+                    if type_ == ArgumentTypeEnum.intput:
+                        _payload["default"] = parameters
+                        _payload["values"] = [parameters]
+                    else:
+                        _values = [x.strip().strip('"') for x in parameters.split(",") if x.strip()]
+                        if type_ == ArgumentTypeEnum.switch:
+                            _values = [TypeAdapter(bool).validate_python(v) for v in _values]
+                        _payload["default"] = _values[0]
+                        _payload["values"] = _values
+
+                assert name is not None, _values
+                _payload["name"] = name
+                arguments[name] = LoonArgument(**_payload)
+
+    for line in resp.text.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+
+        matched = re.match(r"^\[(.*)?\]", line)
+        if matched:
+            section = matched.group(1)
+            continue
+
+        if section is None:
+            continue
+
+        match section:
             case "MitM":
                 if line.startswith("hostname"):
                     for item in line.split("=", 1)[1].split(","):
@@ -364,6 +410,7 @@ async def loon(
 
                 # request body
                 # response body
+
             case "Script":
                 matched = re.match(r"(http-request|http-response) (.*?http.*?) (.*)", line)
                 if not matched:
@@ -373,13 +420,12 @@ async def loon(
                 type_ = type_.replace("http-", "")
                 p3 = cast(str, p3)
                 kwargs = {k: v for item in p3.split(", ") for k, v in [item.split("=")]}
-                # TODO: 兼容 Argument
                 _payload = {
                     "match": match_,
                     "name": kwargs.pop("tag", uuid.uuid4().hex),
                     "type": type_,
                     "require-body": kwargs.pop("requires-body", "false").strip() == "true",
-                    # "argument": kwargs.pop("argument", ""),
+                    "argument": rewrite_loon_argument(kwargs.pop("argument", ""), arguments),
                     "binary-mode": kwargs.pop("binary-body-mode", "false").strip() == "true",
                     "timeout": 20,
                 }
@@ -390,35 +436,7 @@ async def loon(
                 }
                 script_providers[_payload["name"]] = _script
             case "Argument":
-                _values: list[Any] = line.rsplit(",", 2)
-                assert len(_values) == 3, _values
-                _payload = {}
-                name = None
-                for k, v in {k: v for item in _values for k, v in [item.split("=")]}.items():
-                    k = k.strip()
-                    v = v.strip()
-
-                    if k in ("desc", "tag"):
-                        _payload[k] = v.strip()
-                        continue
-
-                    name = k
-                    type_, parameters = v.split(",", 1)
-
-                    _payload["type"] = type_
-                    if type_ == ArgumentTypeEnum.intput:
-                        _payload["default"] = parameters
-                        _payload["values"] = [parameters]
-                    else:
-                        _values = [x.strip().strip('"') for x in parameters.split(",") if x.strip()]
-                        if type_ == ArgumentTypeEnum.switch:
-                            _values = [TypeAdapter(bool).validate_python(v) for v in _values]
-                        _payload["default"] = _values[0]
-                        _payload["values"] = _values
-
-                assert name is not None, _values
-                _payload["name"] = name
-                arguments[name] = LoonArgument(**_payload)
+                ...
             case _:
                 logger.warning(f"[Loon] Unkown section: {section}")
 
@@ -438,8 +456,33 @@ async def loon(
         override.setdefault("http", {})
         override["http"]["script"] = scripts
         override["script-providers"] = script_providers
+
     text = yaml.safe_dump(override, sort_keys=False, allow_unicode=True)
     headers = {
         "Content-Disposition": "inline",
     }
     return PlainTextResponse(text, media_type="text/plain;charset=utf-8", headers=headers)
+
+
+def rewrite_loon_argument(argument: str, loon_arguments: dict[str, LoonArgument]) -> str | None:
+    """将 Loon 脚本参数重写为 Stash 可用的脚本参数，填充 Argument 默认值"""
+
+    def replace_placeholder(match):
+        key = match.group(1).strip()
+        assert key in loon_arguments, key
+        value = loon_arguments[key].default
+
+        if isinstance(value, bool):
+            return "true" if value else "false"
+        elif isinstance(value, (int, float)):
+            return str(value)
+        elif isinstance(value, str):
+            return json.dumps(value)  # 自动加引号
+        else:
+            return json.dumps(value)
+
+    if not argument:
+        return ""
+
+    result_str = re.sub(r"\{([^}]+)\}", replace_placeholder, argument)
+    return result_str
