@@ -10,11 +10,13 @@ from typing import Any, cast
 import httpx
 from fastapi import APIRouter, Query, HTTPException
 from fastapi.responses import PlainTextResponse
+from pydantic import TypeAdapter
 from cachetools import TTLCache
 from asyncache import cached
 
 from schemas.adapter import HttpUrl
 from schemas.github.releases import ReleaseSchema
+from schemas.loon import LoonArgument, ArgumentTypeEnum
 
 
 router = APIRouter(tags=["Proxy"], prefix="/stash/stoverride")
@@ -241,6 +243,10 @@ async def loon(
     icon: str | None = Query(None, description="强制覆盖 icon"),
 ):
     """
+    Argument
+    https://nsloon.app/docs/Plugin/
+
+
     支持以下参数的转写
     - MitM
     - Script
@@ -259,7 +265,21 @@ async def loon(
         resp = await client.get(url)
         if resp.is_error:
             raise HTTPException(status_code=resp.status_code, detail=resp.text)
+
     override: dict[str, Any] = {}
+
+    if name is not None:
+        override["name"] = name
+
+    if category is not None:
+        override["category"] = category
+
+    if icon is not None:
+        override["icon"] = icon
+
+    if desc is not None:
+        override["desc"] = desc
+
     section = None
     mitms: list[str] = []
     rules: list[str] = []
@@ -267,6 +287,8 @@ async def loon(
     header_rewrites: list[str] = []
     scripts: list[dict] = []
     script_providers = {}
+    arguments: dict[str, LoonArgument] = {}
+    _payload: dict[str, Any] = {}
 
     for line in resp.text.splitlines():
         line = line.strip()
@@ -352,7 +374,7 @@ async def loon(
                 p3 = cast(str, p3)
                 kwargs = {k: v for item in p3.split(", ") for k, v in [item.split("=")]}
                 # TODO: 兼容 Argument
-                payload = {
+                _payload = {
                     "match": match_,
                     "name": kwargs.pop("tag", uuid.uuid4().hex),
                     "type": type_,
@@ -361,14 +383,42 @@ async def loon(
                     "binary-mode": kwargs.pop("binary-body-mode", "false").strip() == "true",
                     "timeout": 20,
                 }
-                scripts.append(payload)
+                scripts.append(_payload)
                 _script = {
                     "url": kwargs.pop("script-path"),
                     "interval": 86400,
                 }
-                script_providers[payload["name"]] = _script
+                script_providers[_payload["name"]] = _script
             case "Argument":
-                ...
+                _values: list[Any] = line.rsplit(",", 2)
+                assert len(_values) == 3, _values
+                _payload = {}
+                name = None
+                for k, v in {k: v for item in _values for k, v in [item.split("=")]}.items():
+                    k = k.strip()
+                    v = v.strip()
+
+                    if k in ("desc", "tag"):
+                        _payload[k] = v.strip()
+                        continue
+
+                    name = k
+                    type_, parameters = v.split(",", 1)
+
+                    _payload["type"] = type_
+                    if type_ == ArgumentTypeEnum.intput:
+                        _payload["default"] = parameters
+                        _payload["values"] = [parameters]
+                    else:
+                        _values = [x.strip().strip('"') for x in parameters.split(",") if x.strip()]
+                        if type_ == ArgumentTypeEnum.switch:
+                            _values = [TypeAdapter(bool).validate_python(v) for v in _values]
+                        _payload["default"] = _values[0]
+                        _payload["values"] = _values
+
+                assert name is not None, _values
+                _payload["name"] = name
+                arguments[name] = LoonArgument(**_payload)
             case _:
                 logger.warning(f"[Loon] Unkown section: {section}")
 
@@ -388,19 +438,6 @@ async def loon(
         override.setdefault("http", {})
         override["http"]["script"] = scripts
         override["script-providers"] = script_providers
-
-    if name is not None:
-        override["name"] = name
-
-    if category is not None:
-        override["category"] = category
-
-    if icon is not None:
-        override["icon"] = icon
-
-    if desc is not None:
-        override["desc"] = desc
-
     text = yaml.safe_dump(override, sort_keys=False, allow_unicode=True)
     headers = {
         "Content-Disposition": "inline",
