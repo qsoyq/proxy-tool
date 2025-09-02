@@ -272,19 +272,6 @@ async def loon(
             raise HTTPException(status_code=resp.status_code, detail=resp.text)
 
     override: dict[str, Any] = {}
-
-    if name is not None:
-        override["name"] = name
-
-    if category is not None:
-        override["category"] = category
-
-    if icon is not None:
-        override["icon"] = icon
-
-    if desc is not None:
-        override["desc"] = desc
-
     section = None
     mitms: list[str] = []
     rules: list[str] = []
@@ -301,6 +288,18 @@ async def loon(
             k, v = line[2:].split("=")
             override[k.strip()] = v.strip()
             continue
+
+    if name is not None:
+        override["name"] = name
+
+    if category is not None:
+        override["category"] = category
+
+    if icon is not None:
+        override["icon"] = icon
+
+    if desc is not None:
+        override["desc"] = desc
 
     for line in resp.text.splitlines():
         line = line.strip()
