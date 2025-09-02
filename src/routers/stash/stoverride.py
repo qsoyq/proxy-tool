@@ -14,7 +14,7 @@ from pydantic import TypeAdapter
 from cachetools import TTLCache
 from asyncache import cached
 
-from schemas.adapter import HttpUrl
+from schemas.adapter import HttpUrl, KeyValuePairStr
 from schemas.github.releases import ReleaseSchema
 from schemas.loon import LoonArgument, ArgumentTypeEnum
 
@@ -241,6 +241,9 @@ async def loon(
     desc: str | None = Query(None, description="强制覆盖 desc"),
     category: str | None = Query(None, description="强制覆盖 category"),
     icon: str | None = Query(None, description="强制覆盖 icon"),
+    scriptArguments: list[KeyValuePairStr] = Query(
+        [], description="强制覆写脚本参数", examples=["debug=ture", "text=loon"]
+    ),
 ):
     """
     Argument
@@ -254,13 +257,15 @@ async def loon(
         - Header Rewrite
         - URL Rewrite
     - Rule
+    - Argument
 
     已知未支持参数
-    - Argument
     - Rewrite
         - Body Rewrite
         - Mock
     """
+    overrideScriptArguments = {k: v for item in scriptArguments for k, v in [item.split("=", 1)]}
+
     async with httpx.AsyncClient(headers={"User-Agent": user_agent}, verify=False) as client:
         resp = await client.get(url)
         if resp.is_error:
@@ -425,7 +430,7 @@ async def loon(
                     "name": kwargs.pop("tag", uuid.uuid4().hex),
                     "type": type_,
                     "require-body": kwargs.pop("requires-body", "false").strip() == "true",
-                    "argument": rewrite_loon_argument(kwargs.pop("argument", ""), arguments),
+                    "argument": rewrite_loon_argument(kwargs.pop("argument", ""), arguments, overrideScriptArguments),
                     "binary-mode": kwargs.pop("binary-body-mode", "false").strip() == "true",
                     "timeout": 20,
                 }
@@ -464,20 +469,26 @@ async def loon(
     return PlainTextResponse(text, media_type="text/plain;charset=utf-8", headers=headers)
 
 
-def rewrite_loon_argument(argument: str, loon_arguments: dict[str, LoonArgument]) -> str | None:
+def rewrite_loon_argument(
+    argument: str, loon_arguments: dict[str, LoonArgument], overrideScriptArguments: dict | None
+) -> str | None:
     """将 Loon 脚本参数重写为 Stash 可用的脚本参数，填充 Argument 默认值"""
+    if overrideScriptArguments is None:
+        overrideScriptArguments = {}
 
     def replace_placeholder(match):
         key = match.group(1).strip()
         assert key in loon_arguments, key
-        value = loon_arguments[key].default
 
+        value = overrideScriptArguments.get(key) or loon_arguments[key].default
         if isinstance(value, bool):
             return "true" if value else "false"
         elif isinstance(value, (int, float)):
             return str(value)
         elif isinstance(value, str):
-            return json.dumps(value)  # 自动加引号
+            if value in ("true", "false"):
+                return value
+            return json.dumps(value)
         else:
             return json.dumps(value)
 

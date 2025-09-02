@@ -24,3 +24,18 @@ def test_override_loon(client: TestClient):
         "/api/stash/stoverride/loon", params={"url": "https://kelee.one/Tool/Loon/Lpx/YouTube_remove_ads.lpx"}
     )
     assert response.status_code == 200
+
+    response = client.get(
+        "/api/stash/stoverride/loon",
+        params={"url": "https://kelee.one/Tool/Loon/Lpx/YouTube_remove_ads.lpx", "scriptArguments": ["badcase"]},
+    )
+    assert response.status_code == 422, response.text
+
+    response = client.get(
+        "/api/stash/stoverride/loon",
+        params={
+            "url": "https://kelee.one/Tool/Loon/Lpx/YouTube_remove_ads.lpx",
+            "scriptArguments": ["a1=tt", "a2=text"],
+        },
+    )
+    assert response.status_code == 200, response.text
