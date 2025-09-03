@@ -152,11 +152,18 @@ def test_nga_content_html_format():
         == """<audio controls><source src="https://img.nga.178.com/attachments/mon_202508/28/-7Q2w-ikt3Zf.mp3?duration=39″" type="audio/mp3" /></audio>"""
     )
 
+    # album
+    content_html = "[album=查看全部附件]<br>./mon_202508/30/-d1rcQ2w-b5p0K2kT1kSg0-sg.jpg<br>./mon_202508/30/-d1rcQ2w-6m9qZfT3cSlc-sg.jpg[/album]"
+    assert (
+        NgaToolkit.format_content_html(content_html)
+        == """<details><summary>查看全部附件</summary><br><img src="https://img.nga.178.com/attachments/mon_202508/30/-d1rcQ2w-b5p0K2kT1kSg0-sg.jpg"></img><br><img src="https://img.nga.178.com/attachments/mon_202508/30/-d1rcQ2w-6m9qZfT3cSlc-sg.jpg"></img></details>"""
+    )
+
 
 @pytest.mark.asyncio
 @pytest.mark.nga_delay
 async def test_nga_content_html_format_bad_case():
-    """仅处理一些特殊的 badcase"""
+    """仅处理一些殊的 badcase"""
     url = ""
     if not url:
         return
@@ -165,6 +172,7 @@ async def test_nga_content_html_format_bad_case():
     assert cid and uid, "env ngaPassportCid or ngaPassportUid not exists"
 
     thread = await NgaToolkit.fetch_thread_detail(url, cid, uid)
+
     assert thread
     assert thread.content_html
     assert "[url]" not in thread.content_html, thread.content_html
@@ -180,6 +188,8 @@ async def test_nga_content_html_format_bad_case():
     assert "[/size]" not in thread.content_html, thread.content_html
     assert "[flash=audio]" not in thread.content_html, thread.content_html
     assert "[/flash]" not in thread.content_html, thread.content_html
+    assert "[/album]" not in thread.content_html, thread.content_html
+    assert "[album=]" not in thread.content_html, thread.content_html
 
 
 @pytest.mark.asyncio

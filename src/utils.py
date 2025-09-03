@@ -464,6 +464,7 @@ class AsyncSSLClientContext:
 
 class NgaToolkit:
     class NgaThreadHtml(BaseModel):
+        raw: str | None = Field(None)
         authorHead: str | None = Field(None)
         authorName: str | None = Field(None)
         authorUrl: str | None = Field(None)
@@ -641,7 +642,7 @@ class NgaToolkit:
         authorUrl = NgaToolkit.get_author_url_by_document(document)
         content_html = NgaToolkit.get_content_html_by_document(document)
         return NgaToolkit.NgaThreadHtml(
-            authorHead=head, authorName=name, authorUrl=authorUrl, content_html=content_html
+            authorHead=head, authorName=name, authorUrl=authorUrl, content_html=content_html, raw=res.text
         )
 
     @staticmethod
@@ -732,13 +733,27 @@ class NgaToolkit:
 
         def replace_audio_tags(text: str) -> str:
             pattern = r"\[flash=audio\]\.(.*?)\[/flash\]"
-            # replaced_text = re.sub(pattern, r'<video src="https://img.nga.178.com/attachments\1"></video>', text)
             replaced_text = re.sub(
                 pattern,
                 r'<audio controls><source src="https://img.nga.178.com/attachments\1" type="audio/mp3" /></audio>',
                 text,
             )
+            return replaced_text
 
+        def replace_album_tags(text: str) -> str:
+            def _replace_album(match) -> str:
+                summary = match.group(1)
+                content = match.group(2)
+                content = re.sub(
+                    r"\.(/mon.*?)\.(jpg|png|jpeg)",
+                    r'<img src="https://img.nga.178.com/attachments\1.\2"></img>',
+                    content,
+                )
+                text = f"""<details><summary>{summary}</summary>{content}</details>"""
+                return text
+
+            pattern = r"\[album=(.*?)\](.*?)\[/album\]"
+            replaced_text = re.sub(pattern, _replace_album, text)
             return replaced_text
 
         @cache
@@ -748,7 +763,6 @@ class NgaToolkit:
 
         if not content:
             return content
-
         content = html.unescape(content)
         content = replace_emoji_tags(content)
         content = replace_img_tags(content)
@@ -762,6 +776,7 @@ class NgaToolkit:
         content = replace_url_tags(content)
         content = replace_video_tags(content)
         content = replace_audio_tags(content)
+        content = replace_album_tags(content)
 
         return content
 
@@ -790,6 +805,9 @@ class NgaToolkit:
     def get_content_html_by_document(document: Soup) -> str | None:
         subject = select_one_by(document, "table>tr>p.postcontent")
         tagComments = [tag.select_one("span.postcontent") for tag in document.select("table>tr")]
+        if not tagComments:
+            # 好像存在两种情况? 都写上试试
+            tagComments = [tag.select_one("span.postcontent") for tag in document.select("table>tbody>tr")]
         comments = [str(x) for x in tagComments if x]
         content_li = []
         if subject:
