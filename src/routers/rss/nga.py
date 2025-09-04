@@ -111,7 +111,7 @@ async def threads_jsonfeed(
 
     for thread in threads:
         timezone = pytz.timezone("Asia/Shanghai")
-        published = timezone.localize(datetime.fromtimestamp(thread.lastpost))
+        published = timezone.localize(datetime.fromtimestamp(thread.postdate))
         payload = {
             "id": f"{thread.tid}",
             "title": f"{thread.subject}",
@@ -122,7 +122,6 @@ async def threads_jsonfeed(
         items.append(payload)
 
     thread_detail_list = await asyncio.gather(*[NgaToolkit.fetch_thread_detail(t["url"], cid, uid) for t in items])
-    print(thread_detail_list)
     for index, detail in enumerate(thread_detail_list):
         if detail is None:
             continue
