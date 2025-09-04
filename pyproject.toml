@@ -44,6 +44,7 @@ asyncache = "^0.3.1"
 types-cachetools = "^6.1.0.20250717"
 js2py = "^0.74"
 markdown = "^3.8.2"
+curl-cffi = "^0.13.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2"
@@ -163,7 +164,8 @@ module = [
     "asyncache.*",
     "js2py",
     "markdown",
-    "psutil"
+    "psutil",
+    "curl_cffi",
 ]
 ignore_missing_imports = true
 follow_untyped_imports = true
