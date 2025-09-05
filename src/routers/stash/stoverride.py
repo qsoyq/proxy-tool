@@ -19,7 +19,7 @@ from schemas.github.releases import ReleaseSchema
 from schemas.loon import LoonArgument, ArgumentTypeEnum
 
 
-router = APIRouter(tags=["Proxy"], prefix="/stash/stoverride")
+router = APIRouter(tags=["Stash"], prefix="/stash/stoverride")
 
 logger = logging.getLogger(__file__)
 

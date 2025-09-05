@@ -7,7 +7,7 @@ from fastapi.responses import PlainTextResponse
 from schemas.adapter import HttpUrl
 
 
-router = APIRouter(tags=["Proxy"], prefix="/stash/ruleset")
+router = APIRouter(tags=["Stash"], prefix="/stash/ruleset")
 
 logger = logging.getLogger(__file__)
 
