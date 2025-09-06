@@ -276,6 +276,7 @@ async def loon(
     mitms: list[str] = []
     rules: list[str] = []
     url_rewrites: list[str] = []
+    body_rewrites: list[str] = []
     header_rewrites: list[str] = []
     scripts: list[dict] = []
     script_providers = {}
@@ -413,7 +414,50 @@ async def loon(
                     continue
 
                 # request body
+                matched = re.match(
+                    r"(.*?http.*?) (request-body-replace-regex|request-body-json-add|request-body-json-replace|request-body-json-del|request-body-json-jq) (.*)",
+                    line,
+                )
+                if matched:
+                    url, rewrite_type, content = matched.groups()
+                    rewrite_type = rewrite_type.replace("request-body", "request").replace("json-jq", "jq")
+                    if rewrite_type == "request-jq":
+                        jq_path_pattern = r'jq-path="(http.*)"'
+                        jq_path_matched = re.match(jq_path_pattern, content)
+                        if jq_path_matched:
+                            url = jq_path_matched.group(1)
+                            content = await get_jq_path_content(url, user_agent)
+
+                        content = content.strip('"').strip("'").strip('"')
+                    body_rewrites.append(f"{url} {rewrite_type} {content}")
+                    continue
+
                 # response body
+                matched = re.match(
+                    r"(.*?http.*?) (response-body-replace-regex|response-body-json-add|response-body-json-replace|response-body-json-del|response-body-json-jq) (.*)",
+                    line,
+                )
+                if matched:
+                    url, rewrite_type, content = matched.groups()
+                    rewrite_type = rewrite_type.replace("response-body", "response").replace("json-jq", "jq")
+
+                    if rewrite_type == "response-jq":
+                        jq_path_pattern = r'jq-path="(http.*)"'
+                        jq_path_matched = re.match(jq_path_pattern, content)
+                        if jq_path_matched:
+                            url = jq_path_matched.group(1)
+                            content = await get_jq_path_content(url, user_agent)
+
+                        content = content.strip('"').strip("'").strip('"')
+
+                    body_rewrites.append(f"{url} {rewrite_type} {content}")
+                    continue
+
+                # Mock
+                if "mock-request-body" in line or "mock-response-body" in line:
+                    continue
+
+                raise NotImplementedError(line)
 
             case "Script":
                 matched = re.match(r"(http-request|http-response) (.*?http.*?) (.*)", line)
@@ -453,6 +497,9 @@ async def loon(
     if url_rewrites:
         override.setdefault("http", {})
         override["http"]["url-rewrite"] = url_rewrites
+    if body_rewrites:
+        override.setdefault("http", {})
+        override["http"]["body-rewrite"] = body_rewrites
     if header_rewrites:
         override.setdefault("http", {})
         override["http"]["header-rewrite"] = header_rewrites
@@ -496,3 +543,15 @@ def rewrite_loon_argument(
 
     result_str = re.sub(r"\{([^}]+)\}", replace_placeholder, argument)
     return result_str
+
+
+@cached(TTLCache(32, 600))
+async def get_jq_path_content(url: str, user_agent: str) -> str:
+    async with httpx.AsyncClient(headers={"User-Agent": user_agent}, verify=False) as client:
+        resp = await client.get(url)
+        if resp.is_error:
+            raise HTTPException(status_code=resp.status_code, detail=resp.text)
+        text = resp.text
+
+    lines = [line for line in text.splitlines() if not line.strip().startswith("#")]
+    return re.sub(r"\s+", " ", " ".join(lines))
