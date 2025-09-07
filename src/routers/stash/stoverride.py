@@ -10,13 +10,12 @@ from typing import Any, cast
 import httpx
 from fastapi import APIRouter, Query, HTTPException
 from fastapi.responses import PlainTextResponse
-from pydantic import TypeAdapter
 from cachetools import TTLCache
 from asyncache import cached
 
 from schemas.adapter import HttpUrl, KeyValuePairStr
 from schemas.github.releases import ReleaseSchema
-from schemas.loon import LoonArgument, ArgumentTypeEnum
+from schemas.loon import LoonArgument
 
 
 router = APIRouter(tags=["Stash"], prefix="/stash/stoverride")
@@ -307,6 +306,9 @@ async def loon(
         if not line:
             continue
 
+        if line.startswith("#"):
+            continue
+
         matched = re.match(r"^\[(.*)?\]", line)
         if matched:
             section = matched.group(1)
@@ -315,37 +317,32 @@ async def loon(
         if section is None:
             continue
 
+        section = section.lower()
         match section:
             # 优先处理 Argument, 便于后续 Script 填充参数
-            case "Argument":
-                _values: list[Any] = line.rsplit(",", 2)
-                assert len(_values) == 3, _values
-                _payload = {}
+            case "argument":
+                # blockUpload=switch, false, true, tag=隐藏上传按钮, desc=用于隐藏YouTube底栏的上传按钮
                 name = None
-                for k, v in {k: v for item in _values for k, v in [item.split("=")]}.items():
-                    k = k.strip()
-                    v = v.strip()
-
-                    if k in ("desc", "tag"):
-                        _payload[k] = v.strip()
-                        continue
-
-                    name = k
-                    type_, parameters = v.split(",", 1)
-
-                    _payload["type"] = type_
-                    if type_ == ArgumentTypeEnum.intput:
-                        _payload["default"] = parameters
-                        _payload["values"] = [parameters]
+                result: dict[str, Any] = {}
+                for part in line.split(","):
+                    part = part.strip()
+                    if "=" in part:
+                        key, value = part.split("=", 1)
+                        if name is None and key not in ("tag", "desc"):
+                            name = key
+                        result[key] = value
                     else:
-                        _values = [x.strip().strip('"') for x in parameters.split(",") if x.strip()]
-                        if type_ == ArgumentTypeEnum.switch:
-                            _values = [TypeAdapter(bool).validate_python(v) for v in _values]
-                        _payload["default"] = _values[0]
-                        _payload["values"] = _values
+                        result.setdefault("_values", []).append(part)
 
-                assert name is not None, _values
-                _payload["name"] = name
+                assert name, (line, result)
+                _payload = {
+                    "name": name,
+                    "type": result[name],
+                    "desc": result.get("desc", ""),
+                    "tag": result.get("tag", ""),
+                    "default": result["_values"][0],
+                    "values": result["_values"],
+                }
                 arguments[name] = LoonArgument(**_payload)
 
     for line in resp.text.splitlines():
@@ -353,6 +350,8 @@ async def loon(
         if not line:
             continue
 
+        if line.startswith("#"):
+            continue
         matched = re.match(r"^\[(.*)?\]", line)
         if matched:
             section = matched.group(1)
@@ -361,14 +360,24 @@ async def loon(
         if section is None:
             continue
 
+        section = section.lower()
+        # Mock
+        if "mock-request-body" in line or "mock-response-body" in line:
+            logger.debug(f"skip by mock: {line}")
+            continue
+
         match section:
-            case "MitM":
+            case "mitm":
                 if line.startswith("hostname"):
                     for item in line.split("=", 1)[1].split(","):
                         mitms.append(item.strip())
-            case "Rule":
-                rules.append(line.replace(" ", ""))
-            case "Rewrite":
+            case "rule":
+                content = line.replace(" ", "")
+                if len(content.split(",")) <= 2:
+                    logger.warning(f"[Loon Rules]invalid rule: {line}")
+                else:
+                    rules.append(content)
+            case "rewrite":
                 # URL 类型复写
                 # https://nsloon.app/docs/Rewrite/#url-%E7%B1%BB%E5%9E%8B%E5%A4%8D%E5%86%99
                 matched = re.match(r"(.*?http.*?) header (.*?http.*)", line)
@@ -428,7 +437,7 @@ async def loon(
                             url = jq_path_matched.group(1)
                             content = await get_jq_path_content(url, user_agent)
 
-                        content = content.strip('"').strip("'").strip('"')
+                        content = content.strip("'")
                     body_rewrites.append(f"{url} {rewrite_type} {content}")
                     continue
 
@@ -448,18 +457,27 @@ async def loon(
                             url = jq_path_matched.group(1)
                             content = await get_jq_path_content(url, user_agent)
 
-                        content = content.strip('"').strip("'").strip('"')
+                        content = content.strip("'")
 
                     body_rewrites.append(f"{url} {rewrite_type} {content}")
                     continue
 
-                # Mock
-                if "mock-request-body" in line or "mock-response-body" in line:
+                # header ?
+                matched = re.match(r"(.*?http.*?) (header) (.*)", line)
+                if matched:
+                    logger.warning(f"[Bad Header Rewrite] {line}")
                     continue
 
+                # redirect ?
+                matched = re.match(r"(.*?http.*?) (.*?) (\d{3})", line)
+                if matched:
+                    logger.warning(f"[Bad Redirect Rewrite] {line}")
+                    continue
+
+                logger.warning(f"[NotImplementedError] {line}")
                 raise NotImplementedError(line)
 
-            case "Script":
+            case "script":
                 matched = re.match(r"(http-request|http-response) (.*?http.*?) (.*)", line)
                 if not matched:
                     raise ValueError(f"invalid script line: {line}")
@@ -467,23 +485,38 @@ async def loon(
                 type_, match_, p3 = matched.groups()
                 type_ = type_.replace("http-", "")
                 p3 = cast(str, p3)
-                kwargs = {k: v for item in p3.split(", ") for k, v in [item.split("=")]}
-                _payload = {
-                    "match": match_,
-                    "name": kwargs.pop("tag", uuid.uuid4().hex),
-                    "type": type_,
-                    "require-body": kwargs.pop("requires-body", "false").strip() == "true",
-                    "argument": rewrite_loon_argument(kwargs.pop("argument", ""), arguments, overrideScriptArguments),
-                    "binary-mode": kwargs.pop("binary-body-mode", "false").strip() == "true",
-                    "timeout": 20,
-                }
-                scripts.append(_payload)
-                _script = {
-                    "url": kwargs.pop("script-path"),
-                    "interval": 86400,
-                }
-                script_providers[_payload["name"]] = _script
-            case "Argument":
+
+                # bad case
+                if match_ == r"^https:\/\/j1\.pupuapi\.com\/client\/a朴朴超市,":
+                    continue
+                try:
+                    kwargs = kv_pair_parse(p3)
+                except Exception as e:
+                    logger.error(f"[Loon Script] get kwargs by script\n{match_}\n{p3}\n{kwargs}\n{line}")
+                    raise e
+
+                try:
+                    _payload = {
+                        "match": match_,
+                        "name": kwargs.pop("tag", uuid.uuid4().hex),
+                        "type": type_,
+                        "require-body": kwargs.pop("requires-body", "false").strip() == "true",
+                        "argument": rewrite_loon_argument(
+                            kwargs.pop("argument", ""), arguments, overrideScriptArguments
+                        ),
+                        "binary-mode": kwargs.pop("binary-body-mode", "false").strip() == "true",
+                        "timeout": int(kwargs.pop("timeout", 20)),
+                    }
+                    scripts.append(_payload)
+                    _script = {
+                        "url": kwargs.pop("script-path"),
+                        "interval": 86400,
+                    }
+                    script_providers[_payload["name"]] = _script
+                except Exception as e:
+                    logger.warning(f"[Loon Script] add script failed: {e}\n{match_}\n{type_}\n{p3}")
+                    raise e
+            case "argument":
                 ...
             case _:
                 logger.warning(f"[Loon] Unkown section: {section}")
@@ -524,7 +557,6 @@ def rewrite_loon_argument(
 
     def replace_placeholder(match):
         key = match.group(1).strip()
-        assert key in loon_arguments, key
 
         value = overrideScriptArguments.get(key) or loon_arguments[key].default
         if isinstance(value, bool):
@@ -540,8 +572,11 @@ def rewrite_loon_argument(
 
     if not argument:
         return ""
-
-    result_str = re.sub(r"\{([^}]+)\}", replace_placeholder, argument)
+    try:
+        result_str = re.sub(r"\{([^}]+)\}", replace_placeholder, argument)
+    except KeyError as e:
+        logger.warning(f"[rewrite_loon_argument] {e}")
+        return ""
     return result_str
 
 
@@ -555,3 +590,62 @@ async def get_jq_path_content(url: str, user_agent: str) -> str:
 
     lines = [line for line in text.splitlines() if not line.strip().startswith("#")]
     return re.sub(r"\s+", " ", " ".join(lines))
+
+
+def kv_pair_parse(content: str) -> dict:
+    data = {}
+    key = ""
+    index = 0
+    stop = len(content)
+    while index < stop:
+        char = content[index]
+        if char == " ":
+            index += 1
+            continue
+
+        # get key name
+        if char == "=":
+            index += 1
+
+            # parse value
+            prefix: list[str] = []
+            value = ""
+            while index < stop:
+                char = content[index]
+                if char == "," and len(prefix) == 0:
+                    index += 1
+                    break
+
+                value += char
+                if key.lower() == "argument":
+                    if char in "[(":
+                        prefix.append(char)
+                        index += 1
+                        continue
+
+                    if char == ")":
+                        if not prefix or prefix[-1] != "(":
+                            raise ValueError(f"bad character at index of: {index}\ncontent:{content}")
+                        prefix.pop()
+                        index += 1
+                        continue
+
+                    if char == "]":
+                        if not prefix or prefix[-1] != "[":
+                            raise ValueError(f"bad character at index of: {index}\ncontent:{content}")
+                        prefix.pop()
+                        index += 1
+                        continue
+
+                index += 1
+
+            if prefix:
+                raise ValueError(f"invalid value: {key} - {value} - {prefix}")
+
+            data[key] = value
+            key = ""
+        else:
+            key += char
+            index += 1
+
+    return data
