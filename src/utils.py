@@ -838,7 +838,7 @@ class TelegramToolkit:
         }
 
         try:
-            async with httpx.AsyncClient(headers=headers) as client:
+            async with httpx.AsyncClient(headers=headers, verify=False) as client:
                 url = f"https://t.me/s/{channelName}"
                 res = await client.get(url)
                 res.raise_for_status()
