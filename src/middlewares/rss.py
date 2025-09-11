@@ -78,6 +78,8 @@ class FeedFilterMiddleware(BaseHTTPMiddleware):
         "<code>ikelee</code>",
     )
 
+    BLOCK_REGEX_CONTENT = (r"(?i)HostDZire",)
+
     def filter_by_block(self, item: dict):
         tags = item["tags"] or []
         for block in FeedFilterMiddleware.BLOCK_TAG:
@@ -87,6 +89,10 @@ class FeedFilterMiddleware(BaseHTTPMiddleware):
             if item["content_html"] and block in item["content_html"]:
                 return False
             if item["content_text"] and block in item["content_text"]:
+                return False
+
+        for pattern in FeedFilterMiddleware.BLOCK_REGEX_CONTENT:
+            if re.match(pattern, item["content_html"]):
                 return False
         return True
 
