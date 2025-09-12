@@ -78,9 +78,9 @@ class FeedFilterMiddleware(BaseHTTPMiddleware):
         "<code>ikelee</code>",
     )
 
-    BLOCK_REGEX_CONTENT = (r"(?i)HostDZire",)
+    BLOCK_REGEX_CONTENT = (r"(?i)HostDZire", "预制菜")
 
-    BLOCK_REGEX_TITLE = (r"(?i)HostDZire",)
+    BLOCK_REGEX_TITLE = (r"(?i)HostDZire", "预制菜")
 
     def filter_by_block(self, item: dict):
         tags = item["tags"] or []
