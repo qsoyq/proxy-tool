@@ -844,7 +844,7 @@ class TelegramToolkit:
                 res.raise_for_status()
                 return res
         except Exception as e:
-            logger.warning(f"[Telegarm Channel RSS] get_channel_messages error: {e}")
+            logger.error(f"[Telegarm Channel RSS] get_channel_messages error: {e}")
         return None
 
     @staticmethod

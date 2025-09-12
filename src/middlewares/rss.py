@@ -84,24 +84,30 @@ class FeedFilterMiddleware(BaseHTTPMiddleware):
 
     def filter_by_block(self, item: dict):
         tags = item["tags"] or []
-        for block in FeedFilterMiddleware.BLOCK_TAG:
-            if block in tags:
+        for tag in FeedFilterMiddleware.BLOCK_TAG:
+            if tag in tags:
+                logger.debug(f"[FeedFilterMiddleware] skip by block tag matched: {tag}")
                 return False
 
         for block in FeedFilterMiddleware.BLOCK_CONTENT:
             if item["content_html"] and block in item["content_html"]:
+                logger.debug(f"[FeedFilterMiddleware] skip by block content matched: {block}")
                 return False
             if item["content_text"] and block in item["content_text"]:
+                logger.debug(f"[FeedFilterMiddleware] skip by block content matched: {block}")
                 return False
 
         for pattern in FeedFilterMiddleware.BLOCK_REGEX_CONTENT:
             if item["content_html"] and re.match(pattern, item["content_html"]):
+                logger.debug(f"[FeedFilterMiddleware] skip by regex content matched: {pattern}")
                 return False
             if item["content_text"] and re.match(pattern, item["content_text"]):
+                logger.debug(f"[FeedFilterMiddleware] skip by regex content matched: {pattern}")
                 return False
 
         for pattern in FeedFilterMiddleware.BLOCK_REGEX_TITLE:
             if item["title"] and re.match(pattern, item["title"]):
+                logger.debug(f"[FeedFilterMiddleware] skip by regex title matched: {pattern}")
                 return False
         return True
 
