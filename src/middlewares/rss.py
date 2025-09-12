@@ -92,12 +92,10 @@ class FeedFilterMiddleware(BaseHTTPMiddleware):
                 return False
 
         for pattern in FeedFilterMiddleware.BLOCK_REGEX_CONTENT:
-            if item["content_html"]:
-                if re.match(pattern, item["content_html"]):
-                    return False
-            else:
-                if re.match(pattern, item["content_text"]):
-                    return False
+            if item["content_html"] and re.match(pattern, item["content_html"]):
+                return False
+            if item["content_text"] and re.match(pattern, item["content_text"]):
+                return False
         return True
 
     async def dispatch(
