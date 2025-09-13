@@ -63,7 +63,7 @@ class SentryCacheMiddleware(BaseHTTPMiddleware):
     @staticmethod
     async def add_error(route: APIRoute, exc: Exception):
         async with SentryCacheMiddleware.LOCK:
-            error = traceback.format_exception(exc)
+            error = "".join(traceback.format_exception(exc))
             payload: dict[str, Any] = {
                 "name": route.name,
                 "path": route.path,
