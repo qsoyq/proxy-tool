@@ -98,15 +98,15 @@ class FeedFilterMiddleware(BaseHTTPMiddleware):
                 return False
 
         for pattern in FeedFilterMiddleware.BLOCK_REGEX_CONTENT:
-            if item["content_html"] and re.match(pattern, item["content_html"]):
+            if item["content_html"] and re.search(pattern, item["content_html"]):
                 logger.debug(f"[FeedFilterMiddleware] skip by regex content matched: {pattern}")
                 return False
-            if item["content_text"] and re.match(pattern, item["content_text"]):
+            if item["content_text"] and re.search(pattern, item["content_text"]):
                 logger.debug(f"[FeedFilterMiddleware] skip by regex content matched: {pattern}")
                 return False
 
         for pattern in FeedFilterMiddleware.BLOCK_REGEX_TITLE:
-            if item["title"] and re.match(pattern, item["title"]):
+            if item["title"] and re.search(pattern, item["title"]):
                 logger.debug(f"[FeedFilterMiddleware] skip by regex title matched: {pattern}")
                 return False
         return True
