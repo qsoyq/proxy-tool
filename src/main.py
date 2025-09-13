@@ -12,6 +12,7 @@ import routers.basic
 import routers.tool.basic
 import routers.tool.image
 import routers.tool.fingerprint
+import routers.tool.browser
 import routers.notifications.push
 import routers.webhook.railway
 import routers.checkin.flyairport
@@ -71,6 +72,7 @@ app.include_router(routers.basic.router, prefix=api_prefix)
 app.include_router(routers.tool.basic.router, prefix=api_prefix)
 app.include_router(routers.tool.image.router, prefix=api_prefix)
 app.include_router(routers.tool.fingerprint.router, prefix=api_prefix)
+app.include_router(routers.tool.browser.router, prefix=api_prefix)
 app.include_router(routers.notifications.push.router, prefix=api_prefix)
 app.include_router(routers.webhook.railway.router, prefix=api_prefix)
 app.include_router(routers.checkin.flyairport.router, prefix=api_prefix)
