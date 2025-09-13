@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from schemas.ping import get_default_memory
 from settings import AppSettings
+from utils import NgaToolkit  # type:ignore
 
 logger = logging.getLogger(__file__)
 
@@ -30,6 +31,7 @@ async def startup_event(app: FastAPI):
             await asyncio.sleep(settings.gc_trigger_memory_percent_interval)
 
     app.state.background_gc_task = asyncio.create_task(background_gc())
+    asyncio.create_task(asyncio.to_thread(NgaToolkit.get_smiles))
 
 
 async def shutdown(app: FastAPI):

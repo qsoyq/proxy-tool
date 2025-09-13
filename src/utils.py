@@ -576,7 +576,7 @@ class NgaToolkit:
         return GetForumSectionsRes(sections=sections)
 
     @staticmethod
-    @cached(TTLCache(1024, 86400 * 1))
+    @cached(TTLCache(1024, 86400 * 3))
     def get_smiles() -> list[NGASmile]:
         data = []
         with httpx.Client(verify=False) as client:
@@ -598,8 +598,8 @@ class NgaToolkit:
             url = "https://img4.nga.178.com/common_res/js_bbscode_core.js"
             res = client.get(url)
             if res.is_error:
+                logger.warning(f"can't fetch nga smiles: {res.text}")
                 raise HTTPException(status_code=res.status_code, detail=res.text)
-
             js_code = res.text
             js_code = js_code.replace(
                 r"""ubbcode.continueCharProc.reg = /[\xb7\x7e\x40\x23\x25\x26\x2a\x2b\x7c\x2d\x3d\x60\x7e\x21\x40\x23\x24\x25\x5e\x26\x2a\x28\x29\x5f\x2b\x7b\x7d\x7c\x3a\x22\x3c\x3e\x3f\x2d\x3d\x5b\x5d\x5c\x3b\x27\x2c\x2e\x2f\uff01\uffe5\u2026\u2026\uff08\uff09\u2014\u2014\uff5b\uff5d\uff1a\u201c\uff1f\u300b\u300a\u3010\u3011\u3001\uff1b\u2018\uff0c\u3002\u3001]{24,}/g""",
@@ -617,7 +617,7 @@ class NgaToolkit:
                     url = f"https://img4.nga.178.com/ngabbs/post/smile/{detail}"
                     tag = f"""<img src="{url}">"""
                     data.append(NGASmile(name=name, url=url, tag=tag))
-
+            logger.info("get nga smiles done.")
         return data
 
     @staticmethod
@@ -632,9 +632,6 @@ class NgaToolkit:
             if res.is_error:
                 logger.warning(f"[NgaToolkit] fetch_thread_detail error: {res.status_code} {res.text}")
                 return None
-
-        # 手动触发进行缓存, 避免阻塞
-        await asyncio.to_thread(NgaToolkit.get_smiles)
 
         document = Soup(res.text, "lxml")
         head = NgaToolkit.get_author_head_by_document(document)
