@@ -638,8 +638,14 @@ class NgaToolkit:
         name = NgaToolkit.get_author_name_by_document(document)
         authorUrl = NgaToolkit.get_author_url_by_document(document)
         content_html = NgaToolkit.get_content_html_by_document(document)
+        if content_html:
+            content_html = NgaToolkit.format_content_html(content_html)
         return NgaToolkit.NgaThreadHtml(
-            authorHead=head, authorName=name, authorUrl=authorUrl, content_html=content_html, raw=res.text
+            authorHead=head,
+            authorName=name,
+            authorUrl=authorUrl,
+            content_html=content_html,
+            raw=res.text,
         )
 
     @staticmethod
@@ -661,14 +667,18 @@ class NgaToolkit:
             return replaced_text
 
         def replace_url_tags(text: str) -> str:
-            pattern = r"\[(.*?)\] \[url\](.*?)\[/url\]"
-            replaced_text = re.sub(pattern, r'<a href="\2">\1</a>', text)
+            replaced_text = text
 
-            pattern = r"\[url\](.*?)\[/url\]"
-            replaced_text = re.sub(pattern, r'<a href="\1">\1</a>', replaced_text)
+            # [《古剑奇谭4》本周公布,知名爆料人再出手,宣布本周公布实机PV,并称是国产单机新的希望,腾讯倾力打造] [url]https://www.bilibili.com/video/BV1iBbtzwEB4/?share_source=copy_web&amp;vd_source=960c9e75740363e0be00644ec66610fe[/url]
+            # pattern = r"\[(.+?)\]\s\[url\](.*?)\[/url\]"
+            pattern = r"\[(?!url\])(?!/url\])(.*?)\] \[url\](.*?)\[/url\]"
+            replaced_text = re.sub(pattern, r'<a href="\2">\1</a>', replaced_text)
 
             pattern = r"\[url=(.*?)\](.*?)\[/url\]"
             replaced_text = re.sub(pattern, r'<a href="\1">\2</a>', replaced_text)
+
+            pattern = r"\[url\](.*?)\[/url\]"
+            replaced_text = re.sub(pattern, r'<a href="\1">\1</a>', replaced_text)
             return replaced_text
 
         def replace_quote_tags(text: str) -> str:
@@ -812,9 +822,7 @@ class NgaToolkit:
 
         content_li.extend(comments)
         content_html = "<hr>".join(content_li)
-        if content_html:
-            return NgaToolkit.format_content_html(content_html)
-        return None
+        return content_html
 
 
 class TelegramToolkit:

@@ -56,6 +56,12 @@ def test_nga_content_html_format():
         == '<a href="https://www.bilibili.com/video/BV1iBbtzwEB4/?share_source=copy_web&vd_source=960c9e75740363e0be00644ec66610fe">《古剑奇谭4》本周公布,知名爆料人再出手,宣布本周公布实机PV,并称是国产单机新的希望,腾讯倾力打造</a>'
     )
 
+    content_html = "[[BBC]测试：在超市里购买新鲜蔬菜/冷冻蔬菜 ，哪种营养更高？-哔哩哔哩] [url]https://b23.tv/HmUpOe3[/url]<br><br>[速冻蔬菜也有营养优势？-哔哩哔哩] [url]https://b23.tv/MANPSTs[/url]"
+    assert (
+        NgaToolkit.format_content_html(content_html)
+        == '<a href="https://b23.tv/HmUpOe3">[BBC]测试：在超市里购买新鲜蔬菜/冷冻蔬菜 ，哪种营养更高？-哔哩哔哩</a><br><br><a href="https://b23.tv/MANPSTs">速冻蔬菜也有营养优势？-哔哩哔哩</a>'
+    )
+
     content_html = "[url=https://weibo.com/l/wblive/p/show/1022:2321325200651704992046]微博直播[/url]"
     assert (
         NgaToolkit.format_content_html(content_html)
@@ -172,7 +178,6 @@ async def test_nga_content_html_format_bad_case():
     assert cid and uid, "env ngaPassportCid or ngaPassportUid not exists"
 
     thread = await NgaToolkit.fetch_thread_detail(url, cid, uid)
-
     assert thread
     assert thread.content_html
     assert "[url]" not in thread.content_html, thread.content_html
