@@ -15,6 +15,8 @@ RUN poetry config virtualenvs.create true
 
 RUN poetry install --no-root
 
+RUN poetry run playwright install --with-deps
+
 COPY src /app/
 
 RUN mkdir -p /logs
