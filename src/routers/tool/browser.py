@@ -1,5 +1,5 @@
 import logging
-from typing import cast
+from typing import Any, cast
 import curl_cffi
 import cloudscraper
 from fastapi import APIRouter, Query
@@ -64,12 +64,16 @@ async def _curl_cffi(
 def cloudscraper_broswer(
     url: HttpUrl = Query(...),
     cookie: str = Query(None),
+    interpreter: str | None = Query(None, examples=["js2py", "nodejs", "native"]),
+    delay: int | None = Query(5),
 ):
     cookies = {}
     if cookie is not None:
         cookies = dict([x.strip().split("=") for x in cookie.split(";") if x != ""])
-
-    scraper = cloudscraper.create_scraper()
+    kwargs: dict[str, Any] = {"delay": delay}
+    if interpreter is not None:
+        kwargs["interpreter"] = interpreter
+    scraper = cloudscraper.create_scraper(**kwargs)
     res = scraper.get(url, cookies=cookies)
 
     return {"text": res.text, "status": res.status_code}
