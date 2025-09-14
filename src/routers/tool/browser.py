@@ -1,4 +1,6 @@
 import logging
+from typing import cast
+import curl_cffi
 from fastapi import APIRouter, Query
 from schemas.adapter import HttpUrl
 from responses import PrettyJSONResponse
@@ -38,3 +40,20 @@ async def playwright(
         status = res.status if res else None
         await browser.close()
     return {"text": text, "status": status}
+
+
+@router.get("/curl_cffi", summary="curl_cffi", response_class=PrettyJSONResponse)
+async def _curl_cffi(
+    url: HttpUrl = Query(...),
+    cookie: str = Query(None),
+):
+    cookies = {}
+    if cookie is not None:
+        cookies = dict([x.strip().split("=") for x in cookie.split(";") if x != ""])
+
+    res = curl_cffi.requests.get(
+        url,
+        cookies=cookies,
+        impersonate=cast(curl_cffi.BrowserTypeLiteral, curl_cffi.requests.impersonate.DEFAULT_CHROME),
+    )
+    return {"text": res.text, "status": res.status_code}
