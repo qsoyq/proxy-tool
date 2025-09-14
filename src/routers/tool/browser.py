@@ -1,6 +1,7 @@
 import logging
 from typing import cast
 import curl_cffi
+import cloudscraper
 from fastapi import APIRouter, Query
 from schemas.adapter import HttpUrl
 from responses import PrettyJSONResponse
@@ -56,4 +57,19 @@ async def _curl_cffi(
         cookies=cookies,
         impersonate=cast(curl_cffi.BrowserTypeLiteral, curl_cffi.requests.impersonate.DEFAULT_CHROME),
     )
+    return {"text": res.text, "status": res.status_code}
+
+
+@router.get("/cloudscraper", summary="cloudscraper", response_class=PrettyJSONResponse)
+def cloudscraper_broswer(
+    url: HttpUrl = Query(...),
+    cookie: str = Query(None),
+):
+    cookies = {}
+    if cookie is not None:
+        cookies = dict([x.strip().split("=") for x in cookie.split(";") if x != ""])
+
+    scraper = cloudscraper.create_scraper()
+    res = scraper.get(url, cookies=cookies)
+
     return {"text": res.text, "status": res.status_code}
