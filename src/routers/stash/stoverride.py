@@ -325,7 +325,7 @@ async def loon(
                 name = None
                 result: dict[str, Any] = {}
                 for part in line.split(","):
-                    part = part.strip()
+                    part = part.strip().strip('"')
                     if "=" in part:
                         key, value = part.split("=", 1)
                         if name is None and key not in ("tag", "desc"):
@@ -343,6 +343,7 @@ async def loon(
                     "default": result["_values"][0],
                     "values": result["_values"],
                 }
+
                 arguments[name] = LoonArgument(**_payload)
 
     for line in resp.text.splitlines():
@@ -540,8 +541,8 @@ async def loon(
         override.setdefault("http", {})
         override["http"]["script"] = scripts
         override["script-providers"] = script_providers
-
-    text = yaml.safe_dump(override, sort_keys=False, allow_unicode=True)
+    # 设置 width 避免默认的单行内容过长导致的换行
+    text = yaml.safe_dump(override, sort_keys=False, allow_unicode=True, width=2000)
     headers = {
         "Content-Disposition": "inline",
     }
@@ -555,29 +556,20 @@ def rewrite_loon_argument(
     if overrideScriptArguments is None:
         overrideScriptArguments = {}
 
-    def replace_placeholder(match):
-        key = match.group(1).strip()
-
-        value = overrideScriptArguments.get(key) or loon_arguments[key].default
-        if isinstance(value, bool):
-            return "true" if value else "false"
-        elif isinstance(value, (int, float)):
-            return str(value)
-        elif isinstance(value, str):
-            if value in ("true", "false"):
-                return value
-            return json.dumps(value)
-        else:
-            return json.dumps(value)
-
     if not argument:
         return ""
-    try:
-        result_str = re.sub(r"\{([^}]+)\}", replace_placeholder, argument)
-    except KeyError as e:
-        logger.warning(f"[rewrite_loon_argument] {e}")
-        return ""
-    return result_str
+
+    argument = r"argument=[{blockUpload},{blockShorts},{blockImmersive},{captionLang},{lyricLang},{debug}]"
+    fields = re.findall(r"\{([^}]+)\}", argument)
+    body = {}
+    for field in fields:
+        value = overrideScriptArguments.get(field) or loon_arguments[field].default
+        if value == "true":
+            value = True
+        if value == "false":
+            value = False
+        body[field] = value
+    return json.dumps(body, ensure_ascii=False)
 
 
 @cached(TTLCache(32, 600))
