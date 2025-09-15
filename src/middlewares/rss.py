@@ -20,6 +20,7 @@ logger = logging.getLogger(__file__)
 def add_middleware(app: FastAPI):
     app.add_middleware(FeedFilterMiddleware)
     app.add_middleware(AddTwitterHTMLFeedMiddleware)
+    app.add_middleware(UpdateTelegraphHTMLFeedMiddleware)
 
 
 class AddTwitterHTMLFeedMiddleware(BaseHTTPMiddleware):
@@ -48,6 +49,46 @@ class AddTwitterHTMLFeedMiddleware(BaseHTTPMiddleware):
                 contents = self.make_html_by_url(result.group(1))
                 feed.content_html = f"{feed.content_html}<br>{contents}"
 
+        return feed.model_dump()
+
+    async def dispatch(
+        self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
+    ) -> Response | PrettyJSONResponse:
+        response = await call_next(request)
+        path = request.url.path
+        ct = response.headers.get("content-type")
+        if ct and ct.startswith("application/json") and path.startswith("/api/rss/"):
+            response_body = b""
+            async for chunk in response.body_iterator:  # type: ignore
+                response_body += chunk
+            body = json.loads(response_body)
+            headers = dict(response.headers)
+            headers.pop("content-length", None)
+            if body.get("version") == "https://jsonfeed.org/version/1":
+                body["items"] = list(map(self.fixupx_match, body["items"]))
+            return PrettyJSONResponse(body, status_code=response.status_code, headers=headers)
+        return response
+
+
+class UpdateTelegraphHTMLFeedMiddleware(BaseHTTPMiddleware):
+    @cached(FIFOCache(maxsize=1024))
+    def make_html_by_url(self, url: str) -> str:
+        res = httpx.get(url)
+        doc = Soup(res.text)
+        return "<br/>".join([str(img) for img in doc.find_all("img")])
+
+    def fixupx_match(self, item: dict):
+        feed = JSONFeedItem(**item)
+
+        if feed.content_html:
+            document = Soup(feed.content_html, "lxml")
+            for tag in document.find_all("a"):
+                tag = cast(Tag, tag)
+                href = (tag and tag.attrs and tag.attrs["href"]) or None
+                if isinstance(href, str) and href.startswith("https://telegra.ph"):
+                    extend_img_content = self.make_html_by_url(href)
+                    feed.content_html = f"{feed.content_html}{extend_img_content}"
+                    logger.debug(f"[UpdateTelegraphHTMLFeedMiddleware] Added img for {href}")
         return feed.model_dump()
 
     async def dispatch(
