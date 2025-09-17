@@ -52,6 +52,7 @@ import routers.rss.loon
 import routers.rss.telegram
 import routers.rss.github.release
 import routers.rss.github.commit
+import routers.rss.readhub
 import routers.rss.example
 import routers.dandanplay.bilibili
 
@@ -112,6 +113,7 @@ app.include_router(routers.rss.loon.router, prefix=api_prefix)
 app.include_router(routers.rss.telegram.router, prefix=api_prefix)
 app.include_router(routers.rss.github.release.router, prefix=api_prefix)
 app.include_router(routers.rss.github.commit.router, prefix=api_prefix)
+app.include_router(routers.rss.readhub.router, prefix=api_prefix)
 app.include_router(routers.rss.example.router, prefix=api_prefix)
 app.include_router(routers.dandanplay.bilibili.router, prefix=api_prefix)
 
