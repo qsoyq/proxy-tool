@@ -59,7 +59,7 @@ def daily(req: Request):
     assert dateTag, document
     date_published = dateTag.getText()
     if re.match(r"\d{4}.\d{2}.\d{2}", date_published):
-        date_published = f"{date_published} 00:00:00+0800"
+        date_published = f"{date_published.replace('.', '-')}T00:00:00+08:00"
 
     items = [JSONFeedItem(**(parseArticle(article, date_published))) for article in document.select("article")]
     feed["items"] = items
