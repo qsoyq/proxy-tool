@@ -1,4 +1,5 @@
 import logging
+import httpx
 from fastapi import APIRouter
 from fastapi.responses import RedirectResponse
 
@@ -13,4 +14,8 @@ async def random_image():
 
     https://www.nodeseek.com/post-428917-1
     """
-    return RedirectResponse("https://random.img.ibytebox.com/")
+    url = "https://random.img.ibytebox.com/?format=json&image_format=webp"
+    async with httpx.AsyncClient() as client:
+        res = await client.get(url)
+        body = res.json()
+        return RedirectResponse(body["image"]["original_url"])
