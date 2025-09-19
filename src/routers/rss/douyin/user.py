@@ -151,7 +151,7 @@ class DouyinPlaywright:
         return feeds
 
 
-@cached(TTLCache(4096, 600))
+@cached(TTLCache(4096, AppSettings().rss_douyin_user_feeds_cache_time))
 async def get_feeds_by_cache(username: str, cookie: str | None, timeout: float) -> list[JSONFeedItem]:
     return await get_feeds(username, cookie, timeout)
 
