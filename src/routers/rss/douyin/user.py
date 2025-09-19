@@ -99,11 +99,11 @@ class DouyinPlaywright:
         }
 
         for post in body["aweme_list"]:
-            video = post.get("video")
-            play_video = None
-            bit_rate = video and video.get("bit_rate")
-            if bit_rate and "url_list" in bit_rate[-1]:
-                play_video = bit_rate[-1]["url_list"][-1]
+            video = post.get("video", {})
+            bit_rate = video.get("bit_rate", [])
+            video_url = None
+            if bit_rate:
+                video_url = bit_rate[0]["play_addr"]["url_list"][-1]
 
             duration = post.get("duration")
             if duration:
@@ -125,9 +125,9 @@ class DouyinPlaywright:
                 img = URLToolkit.make_img_tag_by_url(img)
                 content_html = f"{content_html} {img}"
 
-            if play_video:
-                video = URLToolkit.make_video_tag_by_url(play_video)
-                content_html = f"{content_html} {video}"
+            if video_url:
+                video_url = URLToolkit.make_video_tag_by_url(video_url)
+                content_html = f"{content_html} {video_url}"
 
             date_published = (
                 pytz.timezone("Asia/Shanghai")
