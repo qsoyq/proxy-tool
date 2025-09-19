@@ -1012,3 +1012,21 @@ class TelegramToolkit:
         else:
             entry.link(href=f"https://t.me/{message.channelName}/{message.msgid}")
         return entry
+
+
+class URLToolkit:
+    @staticmethod
+    def make_img_tag_by_url(url: str) -> str:
+        return f'<img src="{url}">'
+
+    @staticmethod
+    def make_video_tag_by_url(url: str) -> str:
+        return f'<video src="{url}"></video>'
+
+    @staticmethod
+    def resolve_url(url: str) -> str:
+        if not url:
+            return ""
+        if url.startswith("//"):
+            return f"https:{url}"
+        return url

@@ -5,8 +5,8 @@ from pydantic_settings import BaseSettings
 
 
 run_at_ts = int(time.time())
-run_at = pytz.timezone("Asia/Shanghai").localize(datetime.fromtimestamp(run_at_ts)).strftime("%Y-%m-%d %H:%M:%S%Z")
-version = "0.1.180"
+run_at = pytz.timezone("Asia/Shanghai").localize(datetime.fromtimestamp(run_at_ts)).strftime("%Y-%m-%dT%H:%M:%S%z")
+version = "0.1.181"
 
 
 class AppSettings(BaseSettings):  # type:ignore
