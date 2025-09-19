@@ -150,10 +150,8 @@ class DouyinPlaywright:
                 .localize(datetime.fromtimestamp(feed["date_published"]))
                 .strftime("%Y-%m-%dT%H:%M:%S%z")
             )
-        feeds = [JSONFeedItem(**x) for x in feeds]
-
         logger.info(f"[DouyinPlaywright] [to_feeds] user: {nickname}")
-        return feeds
+        return [JSONFeedItem(**x) for x in feeds]
 
 
 @cached(TTLCache(4096, AppSettings().rss_douyin_user_feeds_cache_time))
