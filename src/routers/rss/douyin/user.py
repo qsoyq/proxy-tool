@@ -14,13 +14,14 @@ from cachetools import TTLCache
 from schemas.rss.jsonfeed import JSONFeed, JSONFeedItem
 from responses import PrettyJSONResponse
 from utils import URLToolkit  # type: ignore
+from settings import AppSettings
 
 
 router = APIRouter(tags=["RSS"], prefix="/rss/douyin/user")
 
 logger = logging.getLogger(__file__)
 
-lock = asyncio.Lock()
+lock = asyncio.locks.Semaphore(AppSettings().rss_douyin_user_concurrency)
 
 
 class DouyinPlaywright:

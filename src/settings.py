@@ -6,7 +6,7 @@ from pydantic_settings import BaseSettings
 
 run_at_ts = int(time.time())
 run_at = pytz.timezone("Asia/Shanghai").localize(datetime.fromtimestamp(run_at_ts)).strftime("%Y-%m-%dT%H:%M:%S%z")
-version = "0.1.182"
+version = "0.1.183"
 
 
 class AppSettings(BaseSettings):  # type:ignore
@@ -19,6 +19,8 @@ class AppSettings(BaseSettings):  # type:ignore
     gc_trigger_memory_percent_interval: int = 30
 
     cloud_scraper_verify: bool = True
+
+    rss_douyin_user_concurrency: int = 5
 
 
 # http://www.freejson.com/countrycode.html
