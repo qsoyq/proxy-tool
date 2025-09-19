@@ -2,6 +2,7 @@ import re
 import asyncio
 import logging
 from datetime import datetime
+from typing import Any
 
 
 import pytz
@@ -89,7 +90,7 @@ class DouyinPlaywright:
         body = await response.json()
         if not body["aweme_list"]:
             return []
-        feeds = []
+        feeds: list[dict[str, Any]] = []
         author = body["aweme_list"][0]["author"]
         nickname = author["nickname"]
         user_avatar = author["avatar_thumb"]["url_list"][-1]
@@ -130,12 +131,7 @@ class DouyinPlaywright:
                 video_url = URLToolkit.make_video_tag_by_url(video_url)
                 content_html = f"{content_html} {video_url}"
 
-            date_published = (
-                pytz.timezone("Asia/Shanghai")
-                .localize(datetime.fromtimestamp(int(post["create_time"])))
-                .strftime("%Y-%m-%dT%H:%M:%S%z")
-            )
-
+            date_published = int(post["create_time"])
             payload = {
                 "id": f"douyin.user.{self.username}.{aweme_id}",
                 "title": title,
@@ -145,7 +141,16 @@ class DouyinPlaywright:
                 "tags": tags,
                 "author": feed_author,
             }
-            feeds.append(JSONFeedItem(**payload))
+            feeds.append(payload)
+
+        feeds.sort(key=lambda x: -x["date_published"])
+        for feed in feeds:
+            feed["date_published"] = date_published = (
+                pytz.timezone("Asia/Shanghai")
+                .localize(datetime.fromtimestamp(feed["date_published"]))
+                .strftime("%Y-%m-%dT%H:%M:%S%z")
+            )
+        feeds = [JSONFeedItem(**x) for x in feeds]
 
         logger.info(f"[DouyinPlaywright] [to_feeds] user: {nickname}")
         return feeds
