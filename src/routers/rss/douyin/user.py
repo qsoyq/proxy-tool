@@ -2,6 +2,7 @@ import re
 import asyncio
 import logging
 from datetime import datetime
+from dataclasses import dataclass
 from typing import Any
 
 
@@ -25,7 +26,15 @@ logger = logging.getLogger(__file__)
 lock = asyncio.locks.Semaphore(AppSettings().rss_douyin_user_concurrency)
 
 
+@dataclass(frozen=True)
+class DouyinPlaywrightTask:
+    username: str
+    cookie: str
+
+
 class DouyinPlaywright:
+    HISTORY: set[DouyinPlaywrightTask] = set()
+
     def __init__(
         self,
         username: str,
@@ -155,11 +164,13 @@ class DouyinPlaywright:
 
 
 @cached(TTLCache(4096, AppSettings().rss_douyin_user_feeds_cache_time))
-async def get_feeds_by_cache(username: str, cookie: str | None, timeout: float) -> list[JSONFeedItem]:
+async def get_feeds_by_cache(username: str, cookie: str | None, timeout: float = 10) -> list[JSONFeedItem]:
     return await get_feeds(username, cookie, timeout)
 
 
 async def get_feeds(username: str, cookie: str | None, timeout: float) -> list[JSONFeedItem]:
+    if cookie:
+        DouyinPlaywright.HISTORY.add(DouyinPlaywrightTask(username, cookie))
     play = DouyinPlaywright(username=username, cookie=cookie, timeout=timeout)
     items = await play.run()
     return items
