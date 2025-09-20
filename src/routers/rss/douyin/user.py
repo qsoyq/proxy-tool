@@ -89,6 +89,7 @@ class DouyinPlaywright:
                 feeds = await asyncio.wait_for(self.fut, self.timeout)
                 return feeds
             except asyncio.TimeoutError:
+                logger.warning(f"[DouyinPlaywright] [run] 等待数据超时, 请检查用户 id: {self.username}")
                 raise HTTPException(status_code=500, detail="等待数据超时, 请检查用户 id")
             finally:
                 await browser.close()

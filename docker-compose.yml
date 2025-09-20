@@ -5,6 +5,8 @@ services:
       dockerfile: ./Dockerfile
     restart: unless-stopped
     mem_limit: 2G
+    volumes:
+      - $PWD/.proxy-tool:/root/.proxy-tool
     labels:
       - traefik.enable=true
       - traefik.http.routers.proxy-tool.entrypoints=web

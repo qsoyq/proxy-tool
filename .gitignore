@@ -144,3 +144,5 @@ sftp-config.json
 *.db
 *.DS_Store
 .vscode
+
+.proxy-tool
