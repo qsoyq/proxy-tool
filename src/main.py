@@ -65,6 +65,7 @@ from schemas.ping import ping_responses, PingRes
 from responses import PingResponse
 from routers.rss.nodeseek import NodeseekToolkit
 from events import lifespan
+from utils import init_logger  # type:ignore
 
 
 cmd = typer.Typer()
@@ -146,7 +147,7 @@ def http(
     log_level: int = typer.Option(logging.DEBUG, "--log_level", envvar="log_level"),
 ):
     """启动 http 服务"""
-    logging.basicConfig(level=log_level)
+    init_logger(log_level)
     logging.info(f"http server listening on {host}:{port}")
     uvicorn.run("main:app", host=host, port=port, reload=reload)
 
