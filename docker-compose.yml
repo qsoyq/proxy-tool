@@ -9,3 +9,9 @@ services:
       - traefik.enable=true
       - traefik.http.routers.proxy-tool.entrypoints=web
       - traefik.http.routers.proxy-tool.rule=Host(`p.docker.localhost`)
+
+      # 临时屏蔽
+      - traefik.http.routers.proxy-tool-nodeseek.entrypoints=web
+      - traefik.http.routers.proxy-tool-nodeseek.rule=Host(`p.docker.localhost`) && PathPrefix(`/api/rss/nodeseek`)
+      - traefik.http.middlewares.test-ipallowlist.ipallowlist.sourcerange=127.0.0.1/32
+      - traefik.http.routers.proxy-tool-nodeseek.middlewares=test-ipallowlist

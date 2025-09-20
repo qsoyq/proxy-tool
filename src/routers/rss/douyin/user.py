@@ -6,7 +6,7 @@ from typing import Any
 
 
 import pytz
-from fastapi import APIRouter, Query, Path, Request, Header
+from fastapi import APIRouter, Query, Path, Request, HTTPException
 from playwright.async_api import async_playwright, Response
 from playwright._impl._errors import TargetClosedError
 from asyncache import cached
@@ -63,8 +63,8 @@ class DouyinPlaywright:
             try:
                 feeds = await asyncio.wait_for(self.fut, self.timeout)
                 return feeds
-            except asyncio.TimeoutError as e:
-                raise e
+            except asyncio.TimeoutError:
+                raise HTTPException(status_code=500, detail="等待数据超时, 请检查用户 id")
             finally:
                 await browser.close()
 
@@ -177,12 +177,6 @@ async def user(
         ..., description="用户主页 id", examples=["MS4wLjABAAAAv4fFOLeoSQ9g8Mnc0mfPq0P6Gm14KBm2-p5sNVsdXhM"]
     ),
     timeout: float = Query(10, description="执行抖音内容抓取的超时时间"),
-    cookie_query: str | None = Query(
-        None, description="用户 Cookie 字符串, 未登录用户仅能观看 7 天内的内容", alias="cookie"
-    ),
-    cookie_header: str | None = Header(
-        None, description="用户 Cookie 字符串, 未登录用户仅能观看 7 天内的内容", alias="X-User-Cookie"
-    ),
     use_cache: bool | None = Query(True, description="是否从缓存返回"),
 ):
     items: list[JSONFeedItem] = []
@@ -196,7 +190,48 @@ async def user(
         "favicon": "https://www.douyin.com/favicon.ico",
         "items": items,
     }
-    cookie = cookie_query or cookie_header or None
+    cookie = None
+    global lock
+    async with lock:
+        items = (
+            await get_feeds_by_cache(username, cookie, timeout)
+            if use_cache
+            else await get_feeds(username, cookie, timeout)
+        )
+        if items:
+            feed["title"] = items[0].author and items[0].author.name
+        feed["items"] = items
+
+    return feed
+
+
+@router.get(
+    "/{username:str}/{sessionid_ss:str}",
+    summary="抖音用户作品订阅",
+    response_model=JSONFeed,
+    response_class=PrettyJSONResponse,
+)
+async def user_with_cookie(
+    req: Request,
+    username: str = Path(
+        ..., description="用户主页 id", examples=["MS4wLjABAAAAv4fFOLeoSQ9g8Mnc0mfPq0P6Gm14KBm2-p5sNVsdXhM"]
+    ),
+    sessionid_ss: str = Path(..., description="用户 Cookie"),
+    timeout: float = Query(10, description="执行抖音内容抓取的超时时间"),
+    use_cache: bool | None = Query(True, description="是否从缓存返回"),
+):
+    items: list[JSONFeedItem] = []
+    feed = {
+        "version": "https://jsonfeed.org/version/1",
+        "title": "抖音用户作品RSS订阅",
+        "description": "",
+        "home_page_url": f"https://www.douyin.com/user/{username}",
+        "feed_url": f"{req.url.scheme}://{req.url.hostname}{req.url.path}?{req.url.query}",
+        "icon": "https://www.douyin.com/favicon.ico",
+        "favicon": "https://www.douyin.com/favicon.ico",
+        "items": items,
+    }
+    cookie = f"sessionid_ss={sessionid_ss}"
     global lock
     async with lock:
         items = (
