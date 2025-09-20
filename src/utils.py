@@ -1,3 +1,4 @@
+import shelve
 import html
 import re
 import time
@@ -12,6 +13,9 @@ import warnings
 import logging
 import urllib.parse
 
+from pathlib import Path
+from threading import Lock
+from _thread import LockType
 from datetime import datetime, timezone
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
@@ -1079,3 +1083,52 @@ def init_logger(log_level: int):
     root_logger.setLevel(logging.DEBUG)
     root_logger.addHandler(handler)
     logging.basicConfig(level=log_level, format="%(asctime)s %(levelname)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+
+    logger = logging.getLogger("uvicorn.access")
+    handler = logging.StreamHandler()
+    handler.setFormatter(color_formatter)
+    logger.addHandler(handler)
+
+
+class ShelveStorage:
+    def __init__(self, path: str | Path, lock: LockType | None = None):
+        self._lock = lock or Lock()
+        if isinstance(path, str):
+            path = Path(path).expanduser()
+        self.path = path
+
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        if not self.path.exists():
+            with self._lock:
+                with shelve.open(str(self.path), "c") as _:
+                    pass
+
+    def _get(self, key):
+        with shelve.open(str(self.path), "r") as shl:
+            return shl.get(key)
+
+    def _set(self, key, value):
+        with shelve.open(str(self.path), "c") as shl:
+            shl[key] = value
+
+    def __setitem__(self, key, value):
+        with self._lock:
+            return self._set(key, value)
+
+    def __getitem__(self, key):
+        with self._lock:
+            return self._get(key)
+
+    def keys(self):
+        with self._lock:
+            with shelve.open(str(self.path), "r") as shl:
+                for key in shl:
+                    yield key
+
+    def iterall(self):
+        with self._lock:
+            if not self.path.exists():
+                return
+            with shelve.open(str(self.path), "r") as shl:
+                for key in shl:
+                    yield (key, shl[key])

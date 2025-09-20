@@ -15,7 +15,7 @@ from cachetools import TTLCache
 
 from schemas.rss.jsonfeed import JSONFeed, JSONFeedItem
 from responses import PrettyJSONResponse
-from utils import URLToolkit  # type: ignore
+from utils import URLToolkit, ShelveStorage  # type: ignore
 from settings import AppSettings
 
 
@@ -23,13 +23,29 @@ router = APIRouter(tags=["RSS"], prefix="/rss/douyin/user")
 
 logger = logging.getLogger(__file__)
 
-lock = asyncio.locks.Semaphore(AppSettings().rss_douyin_user_concurrency)
+semaphore = asyncio.locks.Semaphore(AppSettings().rss_douyin_user_concurrency)
 
 
 @dataclass(frozen=True)
 class DouyinPlaywrightTask:
     username: str
     cookie: str
+
+
+class AccessHistory:
+    storage = ShelveStorage("~/.proxy-tool/rss.douyin.user.history")
+    lock = asyncio.locks.Lock()
+
+    @staticmethod
+    async def get_history() -> list[DouyinPlaywrightTask]:
+        async with AccessHistory.lock:
+            items = await asyncio.to_thread(AccessHistory.storage.iterall)
+        return [DouyinPlaywrightTask(*item) for item in items]
+
+    @staticmethod
+    async def append(username: str, cookie: str):
+        async with AccessHistory.lock:
+            await asyncio.to_thread(AccessHistory.storage.__setitem__, username, cookie)
 
 
 class DouyinPlaywright:
@@ -170,9 +186,12 @@ async def get_feeds_by_cache(username: str, cookie: str | None, timeout: float =
 
 async def get_feeds(username: str, cookie: str | None, timeout: float) -> list[JSONFeedItem]:
     if cookie:
-        DouyinPlaywright.HISTORY.add(DouyinPlaywrightTask(username, cookie))
-    play = DouyinPlaywright(username=username, cookie=cookie, timeout=timeout)
-    items = await play.run()
+        await AccessHistory.append(username, cookie)
+
+    global semaphore
+    async with semaphore:
+        play = DouyinPlaywright(username=username, cookie=cookie, timeout=timeout)
+        items = await play.run()
     return items
 
 
@@ -202,16 +221,14 @@ async def user(
         "items": items,
     }
     cookie = None
-    global lock
-    async with lock:
-        items = (
-            await get_feeds_by_cache(username, cookie, timeout)
-            if use_cache
-            else await get_feeds(username, cookie, timeout)
-        )
-        if items:
-            feed["title"] = items[0].author and items[0].author.name
-        feed["items"] = items
+    items = (
+        await get_feeds_by_cache(username, cookie, timeout)
+        if use_cache
+        else await get_feeds(username, cookie, timeout)
+    )
+    if items:
+        feed["title"] = items[0].author and items[0].author.name
+    feed["items"] = items
 
     return feed
 
@@ -243,15 +260,13 @@ async def user_with_cookie(
         "items": items,
     }
     cookie = f"sessionid_ss={sessionid_ss}"
-    global lock
-    async with lock:
-        items = (
-            await get_feeds_by_cache(username, cookie, timeout)
-            if use_cache
-            else await get_feeds(username, cookie, timeout)
-        )
-        if items:
-            feed["title"] = items[0].author and items[0].author.name
-        feed["items"] = items
+    items = (
+        await get_feeds_by_cache(username, cookie, timeout)
+        if use_cache
+        else await get_feeds(username, cookie, timeout)
+    )
+    if items:
+        feed["title"] = items[0].author and items[0].author.name
+    feed["items"] = items
 
     return feed

@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from schemas.ping import get_default_memory
 from settings import AppSettings
 from utils import NgaToolkit  # type:ignore
-from routers.rss.douyin.user import get_feeds_by_cache, DouyinPlaywright
+from routers.rss.douyin.user import get_feeds_by_cache, AccessHistory
 
 logger = logging.getLogger(__file__)
 
@@ -39,8 +39,15 @@ async def startup_event(app: FastAPI):
         如果每次访问数据过慢，会导致每次更新订阅仅刷新少数订阅源
         """
         logger.info("[rss_douyin_user_auto_fetch] Start")
+        history = await AccessHistory.get_history()
+        for task in history:
+            logger.debug(f"[rss_douyin_user_auto_fetch] [user] {task.username}")
+
+        # 启动 60s 后开始拉取, 避免异常频繁重启导致的资源浪费
+        await asyncio.sleep(60)
         while True:
-            for task in DouyinPlaywright.HISTORY.copy():
+            history = await AccessHistory.get_history()
+            for task in history:
                 try:
                     await get_feeds_by_cache(task.username, task.cookie)
                 except Exception as e:
