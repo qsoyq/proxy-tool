@@ -192,7 +192,11 @@ async def get_feeds(username: str, cookie: str | None, timeout: float) -> list[J
     global semaphore
     async with semaphore:
         play = DouyinPlaywright(username=username, cookie=cookie, timeout=timeout)
-        items = await play.run()
+        try:
+            items = await asyncio.wait_for(play.run(), timeout * 2)
+        except asyncio.TimeoutError as e:
+            logger.warning("[rss.douyin.user] [get_feeds] timeout")
+            raise e
     return items
 
 
