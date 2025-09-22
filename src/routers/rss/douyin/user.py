@@ -193,21 +193,21 @@ class DouyinPlaywright:
 
 @cached(TTLCache(4096, AppSettings().rss_douyin_user_feeds_cache_time))
 async def get_feeds_by_cache(username: str, cookie: str | None, timeout: float = 10) -> list[JSONFeedItem]:
-    return await get_feeds(username, cookie, timeout)
+    global semaphore
+    async with semaphore:
+        try:
+            return await asyncio.wait_for(get_feeds(username, cookie, timeout), timeout)
+        except asyncio.TimeoutError as e:
+            logger.warning("[rss.douyin.user] [get_feeds] timeout")
+            raise e
 
 
 async def get_feeds(username: str, cookie: str | None, timeout: float) -> list[JSONFeedItem]:
     if cookie:
         await AccessHistory.append(username, cookie)
 
-    global semaphore
-    async with semaphore:
-        play = DouyinPlaywright(username=username, cookie=cookie, timeout=timeout)
-        try:
-            items = await asyncio.wait_for(play.run(), timeout * 2)
-        except asyncio.TimeoutError as e:
-            logger.warning("[rss.douyin.user] [get_feeds] timeout")
-            raise e
+    play = DouyinPlaywright(username=username, cookie=cookie, timeout=timeout)
+    items = await asyncio.wait_for(play.run(), timeout * 2)
     return items
 
 
