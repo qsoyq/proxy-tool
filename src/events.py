@@ -50,6 +50,7 @@ async def startup_event(app: FastAPI):
             for task in history:
                 try:
                     await get_feeds_by_cache(task.username, task.cookie)
+                    await asyncio.sleep(AppSettings().rss_douyin_user_auto_fetch_once_wait)
                 except Exception as e:
                     logger.warning(
                         f"[rss_douyin_user_auto_fetch start] [get_feeds_by_cache] failed, {task.username}, {e}"

@@ -23,6 +23,7 @@ class AppSettings(BaseSettings):  # type:ignore
     rss_douyin_user_concurrency: int = 5
     rss_douyin_user_feeds_cache_time: int = 1800
     rss_douyin_user_auto_fetch_wait: int = 600
+    rss_douyin_user_auto_fetch_once_wait: int = 10
 
 
 # http://www.freejson.com/countrycode.html
