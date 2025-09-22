@@ -143,7 +143,10 @@ class DouyinPlaywright:
             img = img and URLToolkit.resolve_url(img)
 
             # 图文模式
-            images: list[str] | str = [img["url_list"][0] for img in post.get("images", [])]
+            if post.get("iamges"):
+                images: list[str] | str = [img["url_list"][0] for img in post.get("images", [])]
+            else:
+                images = []
 
             aweme_id = post["aweme_id"]
             title = post["item_title"] or re.sub(r"#\w+", "", post["desc"]).strip() or post["desc"]
