@@ -142,6 +142,9 @@ class DouyinPlaywright:
             )
             img = img and URLToolkit.resolve_url(img)
 
+            # 图文模式
+            images: list[str] | str = [img["url_list"][0] for img in post.get("images", [])]
+
             aweme_id = post["aweme_id"]
             title = post["item_title"] or re.sub(r"#\w+", "", post["desc"]).strip() or post["desc"]
             url = f"https://www.douyin.com/video/{aweme_id}"
@@ -151,11 +154,16 @@ class DouyinPlaywright:
             content_html = ""
             if img:
                 img = URLToolkit.make_img_tag_by_url(img)
-                content_html = f"{content_html} {img}"
+                content_html = f"{content_html} {img}<br>"
+
+            if images:
+                images = [URLToolkit.make_img_tag_by_url(img) for img in images]
+                images = "<br>".join(images)
+                content_html = f"{content_html}{images}<br>"
 
             if video_url:
                 video_url = URLToolkit.make_video_tag_by_url(video_url)
-                content_html = f"{content_html} {video_url}"
+                content_html = f"{content_html} {video_url}<br>"
 
             date_published = int(post["create_time"])
             payload = {
