@@ -156,8 +156,7 @@ class DouyinPlaywright:
             tags = list(video_tags | desc_tags)
             content_html = ""
             if img:
-                img = URLToolkit.make_img_tag_by_url(img)
-                content_html = f"{content_html} {img}<br>"
+                content_html = f"{content_html} {URLToolkit.make_img_tag_by_url(img)}<br>"
 
             if images:
                 images = [URLToolkit.make_img_tag_by_url(img) for img in images]
@@ -178,6 +177,10 @@ class DouyinPlaywright:
                 "tags": tags,
                 "author": feed_author,
             }
+
+            if img:
+                payload["image"] = img
+
             feeds.append(payload)
 
         feeds.sort(key=lambda x: -x["date_published"])
@@ -242,9 +245,7 @@ async def user(
         if use_cache
         else await get_feeds(username, cookie, timeout)
     )
-    if items:
-        feed["title"] = items[0].author and items[0].author.name
-    feed["items"] = items
+    douyin_user_feeds_handler(feed, items)
 
     return feed
 
@@ -281,8 +282,19 @@ async def user_with_cookie(
         if use_cache
         else await get_feeds(username, cookie, timeout)
     )
-    if items:
-        feed["title"] = items[0].author and items[0].author.name
-    feed["items"] = items
-
+    douyin_user_feeds_handler(feed, items)
     return feed
+
+
+def douyin_user_feeds_handler(feed: dict, items: list[JSONFeedItem]):
+    if items and items[0].author:
+        feed["title"] = items[0].author.name
+        feed["author"] = items[0].author
+
+    if items and items[0].author and items[0].author.avatar:
+        feed["icon"] = feed["favicon"] = items[0].author.avatar
+
+    for item in items:
+        if item.image and item.author:
+            item.author.avatar = item.image
+    feed["items"] = items
