@@ -60,6 +60,7 @@ import routers.dandanplay.bilibili
 
 import middlewares.rss
 import middlewares.errors
+import middlewares.json_response
 
 from settings import AppSettings, version
 from schemas.ping import ping_responses, PingRes
@@ -125,6 +126,7 @@ app.include_router(routers.dandanplay.bilibili.router, prefix=api_prefix)
 
 middlewares.rss.add_middleware(app)
 middlewares.errors.add_middleware(app)
+middlewares.json_response.add_middleware(app)
 register_exception_handler(app)
 
 logger = logging.getLogger(__file__)
