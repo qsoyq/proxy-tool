@@ -1,4 +1,5 @@
 import gc
+import traceback
 import logging
 import asyncio
 from contextlib import asynccontextmanager
@@ -41,7 +42,7 @@ async def startup_event(app: FastAPI):
         logger.info("[rss_douyin_user_auto_fetch] Start")
         history = await AccessHistory.get_history()
         for task in history:
-            logger.debug(f"[rss_douyin_user_auto_fetch] [user] {task.username}")
+            logger.info(f"[rss_douyin_user_auto_fetch] [user] {task.username}")
 
         # 启动 60s 后开始拉取, 避免异常频繁重启导致的资源浪费
         await asyncio.sleep(60)
@@ -51,12 +52,12 @@ async def startup_event(app: FastAPI):
                 try:
                     await get_feeds_by_cache(task.username, task.cookie)
                     await asyncio.sleep(AppSettings().rss_douyin_user_auto_fetch_once_wait)
-                except Exception as e:
-                    logger.warning(
-                        f"[rss_douyin_user_auto_fetch start] [get_feeds_by_cache] failed, {task.username}, {e}"
-                    )
+                except Exception:
+                    msg = traceback.format_exc()
+                    logger.warning(f"[rss_douyin_user_auto_fetch] [get_feeds_by_cache] failed, {task.username}\n{msg}")
             await asyncio.sleep(AppSettings().rss_douyin_user_auto_fetch_wait)
 
+    logger.info(f"settings: {AppSettings().model_dump()}")
     app.state.background_gc_task = asyncio.create_task(background_gc())
     asyncio.create_task(asyncio.to_thread(NgaToolkit.get_smiles))
     asyncio.create_task(rss_douyin_user_auto_fetch())

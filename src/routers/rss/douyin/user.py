@@ -210,7 +210,7 @@ async def get_feeds(username: str, cookie: str | None, timeout: float) -> list[J
         await AccessHistory.append(username, cookie)
 
     play = DouyinPlaywright(username=username, cookie=cookie, timeout=timeout)
-    items = await asyncio.wait_for(play.run(), timeout * 2)
+    items = await play.run()
     return items
 
 
