@@ -11,12 +11,12 @@ from fastapi import APIRouter, Query, Path, Request, HTTPException
 from playwright.async_api import async_playwright, Response
 from playwright._impl._errors import TargetClosedError
 from asyncache import cached
-from cachetools import TTLCache
 
 from schemas.rss.jsonfeed import JSONFeed, JSONFeedItem
 from responses import PrettyJSONResponse
 from utils import URLToolkit, ShelveStorage  # type: ignore
 from settings import AppSettings
+from utils.cache import RandomTTLCache
 
 
 router = APIRouter(tags=["RSS"], prefix="/rss/douyin/user")
@@ -191,7 +191,7 @@ class DouyinPlaywright:
         return [JSONFeedItem(**x) for x in feeds]
 
 
-@cached(TTLCache(4096, AppSettings().rss_douyin_user_feeds_cache_time))
+@cached(RandomTTLCache(4096, AppSettings().rss_douyin_user_feeds_cache_time))
 async def get_feeds_by_cache(username: str, cookie: str | None, timeout: float = 10) -> list[JSONFeedItem]:
     global semaphore
     async with semaphore:
