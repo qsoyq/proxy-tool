@@ -28,7 +28,7 @@ class RandomTTLCache(_TimedCache):
         _TimedCache.__init__(self, maxsize, timer, getsizeof)
         self.__root = root = RandomTTLCache._Link()
         root.prev = root.next = root  # type:ignore
-        self.__links: dict[Any, Any] = collections.OrderedDict()
+        self.__links: collections.OrderedDict[Any, Any] = collections.OrderedDict()
         self.__ttl = ttl
         self.__min_ttl = int(self.__ttl * min_)
         self.__max_ttl = int(self.__ttl * max_)
