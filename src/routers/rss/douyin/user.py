@@ -88,9 +88,9 @@ class DouyinPlaywright:
             try:
                 feeds = await asyncio.wait_for(self.fut, self.timeout)
                 return feeds
-            except asyncio.TimeoutError:
+            except asyncio.TimeoutError as e:
                 logger.warning(f"[DouyinPlaywright] [run] 等待数据超时, 请检查用户 id: {self.username}")
-                raise HTTPException(status_code=500, detail="等待数据超时, 请检查用户 id")
+                raise e
             finally:
                 await browser.close()
 
@@ -155,17 +155,17 @@ class DouyinPlaywright:
             video_tags = {x["tag_name"] for x in post["video_tag"] if x["tag_name"]}
             tags = list(video_tags | desc_tags)
             content_html = ""
-            if img:
+            if video_url:
+                video_url = URLToolkit.make_video_tag_by_url(video_url)
+                content_html = f"{content_html} {video_url}<br>"
+
+            if not video_url and img:
                 content_html = f"{content_html} {URLToolkit.make_img_tag_by_url(img)}<br>"
 
             if images:
                 images = [URLToolkit.make_img_tag_by_url(img) for img in images]
                 images = "<br>".join(images)
-                content_html = f"{content_html}{images}<br>"
-
-            if video_url:
-                video_url = URLToolkit.make_video_tag_by_url(video_url)
-                content_html = f"{content_html} {video_url}<br>"
+                content_html = f"{content_html} {images}<br>"
 
             date_published = int(post["create_time"])
             payload = {
@@ -228,6 +228,25 @@ async def user(
     timeout: float = Query(10, description="执行抖音内容抓取的超时时间"),
     use_cache: bool | None = Query(True, description="是否从缓存返回"),
 ):
+    """
+    <pre class="mermaid">
+        flowchart TB
+            A[请求抖音用户作品数据开始] --> B{是否存在未过期的缓存?}
+            B -->|YES| C[返回缓存结果]
+            B -->|NO| D[超时检测上下文]
+            D -->|超时| E[返回 504 超时响应]
+            D -->|未超时| D2[无头浏览器Playwright]
+            subgraph 无头浏览器获取用户作品
+                direction LR
+                D2-->F[打开用户主页]
+                F -->|监听/web/aweme/post| G[获取用户作品数据]
+                G --> H[生成 Feeds 数据]
+                H --> I[写入缓存结果]
+                H --> J[构造 JSONFeed]
+            end
+            J --> K[返回200]
+    </pre>
+    """
     items: list[JSONFeedItem] = []
     feed = {
         "version": "https://jsonfeed.org/version/1",
@@ -240,11 +259,14 @@ async def user(
         "items": items,
     }
     cookie = None
-    items = (
-        await get_feeds_by_cache(username, cookie, timeout)
-        if use_cache
-        else await get_feeds(username, cookie, timeout)
-    )
+    try:
+        items = (
+            await get_feeds_by_cache(username, cookie, timeout)
+            if use_cache
+            else await get_feeds(username, cookie, timeout)
+        )
+    except asyncio.TimeoutError:
+        raise HTTPException(status_code=504, detail="获取数据超时")
     douyin_user_feeds_handler(feed, items)
 
     return feed
@@ -265,6 +287,25 @@ async def user_with_cookie(
     timeout: float = Query(10, description="执行抖音内容抓取的超时时间"),
     use_cache: bool | None = Query(True, description="是否从缓存返回"),
 ):
+    """
+    <pre class="mermaid">
+        flowchart TB
+            A[请求抖音用户作品数据开始] --> B{是否存在未过期的缓存?}
+            B -->|YES| C[返回缓存结果]
+            B -->|NO| D[超时检测上下文]
+            D -->|超时| E[返回 504 超时响应]
+            D -->|未超时| D2[无头浏览器Playwright]
+            subgraph 无头浏览器获取用户作品
+                direction LR
+                D2-->F[打开用户主页]
+                F -->|监听/web/aweme/post| G[获取用户作品数据]
+                G --> H[生成 Feeds 数据]
+                H --> I[写入缓存结果]
+                H --> J[构造 JSONFeed]
+            end
+            J --> K[返回200]
+    </pre>
+    """
     items: list[JSONFeedItem] = []
     feed = {
         "version": "https://jsonfeed.org/version/1",

@@ -68,6 +68,7 @@ from responses import PingResponse
 from routers.rss.nodeseek import NodeseekToolkit
 from events import lifespan
 from utils import init_logger  # type:ignore
+from utils.mermaid import load_mermaid_plugin
 
 
 cmd = typer.Typer()
@@ -128,7 +129,7 @@ middlewares.rss.add_middleware(app)
 middlewares.errors.add_middleware(app)
 middlewares.json_response.add_middleware(app)
 register_exception_handler(app)
-
+load_mermaid_plugin()
 logger = logging.getLogger(__file__)
 
 
