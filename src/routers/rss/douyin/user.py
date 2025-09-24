@@ -67,7 +67,7 @@ class DouyinPlaywright:
         self.timeout = timeout
 
     async def run(self) -> list[JSONFeedItem]:
-        logger.debug("[rss.douyin.user] run")
+        logger.debug(f"[rss.douyin.user] run {self.username}")
         url = f"https://www.douyin.com/user/{self.username}"
         cookies = None
         if self.cookie:
@@ -98,6 +98,7 @@ class DouyinPlaywright:
         try:
             if "/web/aweme/post" in response.url:
                 try:
+                    logger.debug(f"[rss.douyin.user] [on_response] {self.username} {response.request.method}")
                     feeds = await self.to_feeds(response)
                     if not feeds:
                         logger.warning(f"not found feeds, username: {self.username}")
@@ -196,21 +197,20 @@ class DouyinPlaywright:
 
 @cached(RandomTTLCache(4096, AppSettings().rss_douyin_user_feeds_cache_time))
 async def get_feeds_by_cache(username: str, cookie: str | None, timeout: float = 10) -> list[JSONFeedItem]:
-    global semaphore
-    async with semaphore:
-        try:
-            return await asyncio.wait_for(get_feeds(username, cookie, timeout), timeout)
-        except asyncio.TimeoutError as e:
-            logger.warning("[rss.douyin.user] [get_feeds] timeout")
-            raise e
+    return await get_feeds(username, cookie, timeout)
 
 
 async def get_feeds(username: str, cookie: str | None, timeout: float) -> list[JSONFeedItem]:
     if cookie:
         await AccessHistory.append(username, cookie)
 
-    play = DouyinPlaywright(username=username, cookie=cookie, timeout=timeout)
-    items = await play.run()
+    global semaphore
+    async with semaphore:
+        try:
+            play = DouyinPlaywright(username=username, cookie=cookie, timeout=timeout)
+            items = await asyncio.wait_for(play.run(), timeout)
+        except asyncio.TimeoutError:
+            raise HTTPException(status_code=504, detail="timeout")
     return items
 
 
@@ -318,11 +318,15 @@ async def user_with_cookie(
         "items": items,
     }
     cookie = f"sessionid_ss={sessionid_ss}"
-    items = (
-        await get_feeds_by_cache(username, cookie, timeout)
-        if use_cache
-        else await get_feeds(username, cookie, timeout)
-    )
+    try:
+        items = (
+            await get_feeds_by_cache(username, cookie, timeout)
+            if use_cache
+            else await get_feeds(username, cookie, timeout)
+        )
+    except asyncio.TimeoutError:
+        raise HTTPException(status_code=504, detail="获取数据超时")
+
     douyin_user_feeds_handler(feed, items)
     return feed
 
