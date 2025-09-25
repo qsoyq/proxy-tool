@@ -4,13 +4,15 @@ import httpx
 from fastapi import APIRouter, Request, Query
 from schemas.rss.jsonfeed import JSONFeed, JSONFeedItem
 from routers.v2ex.my import get_topics
-
+from asyncache import cached
+from utils.cache import RandomTTLCache
 
 router = APIRouter(tags=["RSS"], prefix="/rss/jsonfeed/v2ex")
 
 logger = logging.getLogger(__file__)
 
 
+@cached(RandomTTLCache(4096, 600))
 async def fetch_jsonfeed_items(topic: str) -> list[JSONFeedItem]:
     url = f"https://www.v2ex.com/feed/{topic}.json"
     try:
@@ -51,7 +53,7 @@ async def aggregation(req: Request, topics: list[str] = Query([], description="�
 
 
 @router.get("/favorite", response_model=JSONFeed, summary="V2ex 收藏帖回复 RSS 订阅")
-async def favorite(
+def favorite(
     req: Request,
     session_key: str = Query(..., description="V2ex 登录态,Cookie.A2"),
     page: int = Query(1, description="收藏页，默认为 1"),

@@ -1,12 +1,12 @@
 import time
 import pytz
 from datetime import datetime
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 run_at_ts = int(time.time())
 run_at = pytz.timezone("Asia/Shanghai").localize(datetime.fromtimestamp(run_at_ts)).strftime("%Y-%m-%dT%H:%M:%S%z")
-version = "0.1.195"
+version = "0.1.196"
 
 
 class AppSettings(BaseSettings):  # type:ignore
@@ -22,8 +22,14 @@ class AppSettings(BaseSettings):  # type:ignore
 
     rss_douyin_user_concurrency: int = 5
     rss_douyin_user_feeds_cache_time: int = 1800
+
+    rss_douyin_user_auto_fetch_enable: bool = False
     rss_douyin_user_auto_fetch_wait: int = 600
     rss_douyin_user_auto_fetch_once_wait: int = 10
+    rss_douyin_user_history_storage: str = "~/.proxy-tool/rss.douyin.user.history"
+    rss_douyin_user_headless: bool = True
+
+    model_config = SettingsConfigDict(env_file=".env")
 
 
 # http://www.freejson.com/countrycode.html

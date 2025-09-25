@@ -5,6 +5,8 @@ from fastapi import APIRouter, Request, HTTPException
 from pydantic import BaseModel, Field
 from schemas.rss.jsonfeed import JSONFeed, JSONFeedItem, JSONFeedAuthor
 from responses import PrettyJSONResponse
+from asyncache import cached
+from utils.cache import RandomTTLCache
 
 
 router = APIRouter(tags=["RSS"], prefix="/rss/1024.day")
@@ -28,13 +30,10 @@ class Post(BaseModel):
 
 
 @router.get("/newest", summary="1024.day 新贴 RSS 订阅", response_model=JSONFeed, response_class=PrettyJSONResponse)
-def jsonfeed(req: Request):
-    """1024.day 新鲜出炉 rss 订阅
-
-    jsonfeed 格式
-    """
+async def jsonfeed(req: Request):
+    """1024.day 新鲜出炉 rss 订阅"""
     host = req.url.hostname
-    items: list[JSONFeedItem] = []
+    items: list[JSONFeedItem] = await fetch_feeds()
     feed = {
         "version": "https://jsonfeed.org/version/1",
         "title": "1024.day",
@@ -46,15 +45,21 @@ def jsonfeed(req: Request):
         "items": items,
     }
 
+    return feed
+
+
+@cached(RandomTTLCache(4096, 900))
+async def fetch_feeds() -> list[JSONFeedItem]:
+    items = []
     url = "https://1024.day/api/discussions?include=user%2ClastPostedUser%2Ctags%2Ctags.parent%2CfirstPost&sort=-createdAt&page%5Boffset%5D=0"
     headers = {
         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
     }
-    res = httpx.get(url, headers=headers, verify=False)
-    if res.is_error:
-        raise HTTPException(res.status_code, f"fetch 1024.day error: {res.text}")
-
-    data = res.json()
+    async with httpx.AsyncClient(headers=headers, verify=False) as clinet:
+        res = await clinet.get(url)
+        if res.is_error:
+            raise HTTPException(res.status_code, f"fetch 1024.day error: {res.text}")
+        data = res.json()
 
     users = {
         x["id"]: User(
@@ -89,4 +94,4 @@ def jsonfeed(req: Request):
                 }
             )
         items.append(JSONFeedItem(**_payload))
-    return feed
+    return items

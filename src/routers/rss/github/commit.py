@@ -6,6 +6,8 @@ from schemas.github import AuthorSchema
 from schemas.github.commits import CommitItemSchema, CommitSchema
 from schemas.rss.jsonfeed import JSONFeed, JSONFeedItem
 from responses import PrettyJSONResponse
+from utils.cache import RandomTTLCache
+from asyncache import cached
 
 
 router = APIRouter(tags=["RSS"], prefix="/rss/github/commits")
@@ -31,7 +33,7 @@ async def commits_list(
     参数详见文档: https://docs.github.com/en/rest/commits/commits?apiVersion=2022-11-28
     """
     host = req.url.hostname
-    items: list[JSONFeedItem] = []
+    items: list[JSONFeedItem] = await fetch_feeds(owner, repo, token, per_page, page)
     feed = {
         "version": "https://jsonfeed.org/version/1",
         "title": f"{owner}/{repo}",
@@ -42,6 +44,13 @@ async def commits_list(
         "favicon": f"https://github.com/{owner}.png",
         "items": items,
     }
+
+    return feed
+
+
+@cached(RandomTTLCache(4096, 300))
+async def fetch_feeds(owner: str, repo: str, token: str | None, per_page: int, page: int) -> list[JSONFeedItem]:
+    items = []
 
     url = f"https://api.github.com/repos/{owner}/{repo}/commits"
     headers = {
@@ -80,5 +89,4 @@ async def commits_list(
             },
         }
         items.append(JSONFeedItem(**payload))
-
-    return feed
+    return items

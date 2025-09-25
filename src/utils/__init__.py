@@ -1025,8 +1025,8 @@ class URLToolkit:
         return f'<img src="{url}">'
 
     @staticmethod
-    def make_video_tag_by_url(url: str) -> str:
-        return f'<video src="{url}"></video>'
+    def make_video_tag_by_url(url: str, preload: str = "auto") -> str:
+        return f'<video src="{url}" preload="{preload}"></video>'
 
     @staticmethod
     def resolve_url(url: str) -> str:
@@ -1093,6 +1093,7 @@ def init_logger(log_level: int):
 class ShelveStorage:
     def __init__(self, path: str | Path, lock: LockType | None = None):
         self._lock = lock or Lock()
+
         if isinstance(path, str):
             path = Path(path).expanduser()
         self.path = path
@@ -1103,6 +1104,12 @@ class ShelveStorage:
                 with shelve.open(str(self.path), "c") as _:
                     pass
 
+    def __enter__(self):
+        self._lock.acquire()
+
+    def __exit__(self, type, value, traceback):
+        self._lock.release()
+
     def _get(self, key):
         with shelve.open(str(self.path), "r") as shl:
             return shl.get(key)
@@ -1112,23 +1119,17 @@ class ShelveStorage:
             shl[key] = value
 
     def __setitem__(self, key, value):
-        with self._lock:
-            return self._set(key, value)
+        return self._set(key, value)
 
     def __getitem__(self, key):
-        with self._lock:
-            return self._get(key)
+        return self._get(key)
 
     def keys(self):
-        with self._lock:
-            with shelve.open(str(self.path), "r") as shl:
-                for key in shl:
-                    yield key
+        with shelve.open(str(self.path), "r") as shl:
+            for key in shl:
+                yield key
 
     def iterall(self):
-        with self._lock:
-            if not self.path.exists():
-                return
-            with shelve.open(str(self.path), "r") as shl:
-                for key in shl:
-                    yield (key, shl[key])
+        with shelve.open(str(self.path), "r") as shl:
+            for key in shl:
+                yield (key, shl[key])
