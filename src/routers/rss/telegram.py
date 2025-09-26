@@ -45,10 +45,9 @@ async def channel_jsonfeed(req: Request, channels: list[str] = Query(..., descri
     return feed
 
 
-@cached(RandomTTLCache(4096, 900))
 async def fetch_feeds(channels: list[str]) -> list[JSONFeedItem]:
     items = []
-    tasks = await asyncio.gather(*[TelegramToolkit.get_channel_messages(channelName) for channelName in channels])
+    tasks = await asyncio.gather(*[get_channel_messages(channelName) for channelName in channels])
     for message in chain(*tasks):
         if message.contentHtml:
             try:
@@ -81,3 +80,8 @@ async def fetch_feeds(channels: list[str]) -> list[JSONFeedItem]:
         items.append(JSONFeedItem(**payload))
 
     return items
+
+
+@cached(RandomTTLCache(4096, 900))
+async def get_channel_messages(channelName: str):
+    return await TelegramToolkit.get_channel_messages(channelName)
