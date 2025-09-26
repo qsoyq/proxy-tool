@@ -156,7 +156,7 @@ def douyin_user_feeds_handler(feed: dict, items: list[JSONFeedItem]):
 
 @cached(RandomTTLCache(4096, AppSettings().rss_douyin_user_feeds_cache_time))
 async def get_feeds_by_cache(
-    username: str, cookie: str | None, *, timeout: float = 10, video_autoplay: bool
+    username: str, cookie: str | None, *, timeout: float = 10, video_autoplay: bool = True
 ) -> list[JSONFeedItem]:
     return await get_feeds(username, cookie, timeout, video_autoplay=video_autoplay)
 

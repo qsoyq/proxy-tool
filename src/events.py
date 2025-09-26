@@ -56,7 +56,7 @@ async def startup_event(app: FastAPI):
             for task in history:
                 try:
                     logger.debug(f"[rss_douyin_user_auto_fetch] start {task.username}")
-                    await get_feeds_by_cache(task.username, task.cookie)
+                    await get_feeds_by_cache(task.username, task.cookie, video_autoplay=True)
                     await asyncio.sleep(AppSettings().rss_douyin_user_auto_fetch_once_wait)
                 except Exception:
                     msg = traceback.format_exc()
