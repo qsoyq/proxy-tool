@@ -17,6 +17,8 @@ RUN poetry install --no-root
 
 RUN poetry run playwright install --with-deps
 
+RUN poetry run python -m pretty_errors -s -p
+
 COPY src /app/
 
 RUN mkdir -p /logs
