@@ -49,8 +49,8 @@ async def startup_event(app: FastAPI):
         for task in history:
             logger.info(f"[rss_douyin_user_auto_fetch] [user] {task.username}")
 
-        # 启动 30s 后开始拉取, 避免异常频繁重启导致的资源浪费
-        await asyncio.sleep(30)
+        # 避免异常频繁重启导致的资源浪费
+        await asyncio.sleep(AppSettings().rss_douyin_user_auto_fetch_start_wait)
         while True:
             history = await AccessHistory.get_history()
             for task in history:
