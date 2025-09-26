@@ -31,6 +31,7 @@ async def user(
     ),
     timeout: float = Query(10, description="执行抖音内容抓取的超时时间"),
     use_cache: bool | None = Query(True, description="是否从缓存返回"),
+    autoplay: bool = Query(True, description="是否为video 标签添加 autoplay 属性"),
 ):
     """
     <pre class="mermaid">
@@ -65,9 +66,9 @@ async def user(
     cookie = None
     try:
         items = (
-            await get_feeds_by_cache(username, cookie, timeout)
+            await get_feeds_by_cache(username, cookie, timeout=timeout, video_autoplay=autoplay)
             if use_cache
-            else await get_feeds(username, cookie, timeout)
+            else await get_feeds(username, cookie, timeout, video_autoplay=autoplay)
         )
     except asyncio.TimeoutError:
         raise HTTPException(status_code=504, detail="获取数据超时")
@@ -92,6 +93,7 @@ async def user_with_cookie(
     sessionid_ss: str = Path(..., description="用户 Cookie"),
     timeout: float = Query(10, description="执行抖音内容抓取的超时时间"),
     use_cache: bool | None = Query(True, description="是否从缓存返回"),
+    autoplay: bool = Query(True, description="是否为video 标签添加 autoplay 属性"),
 ):
     """
     <pre class="mermaid">
@@ -126,9 +128,9 @@ async def user_with_cookie(
     cookie = f"sessionid_ss={sessionid_ss}"
     try:
         items = (
-            await get_feeds_by_cache(username, cookie, timeout)
+            await get_feeds_by_cache(username, cookie, timeout=timeout, video_autoplay=autoplay)
             if use_cache
-            else await get_feeds(username, cookie, timeout)
+            else await get_feeds(username, cookie, timeout, video_autoplay=autoplay)
         )
     except asyncio.TimeoutError:
         raise HTTPException(status_code=504, detail="获取数据超时")
@@ -153,15 +155,17 @@ def douyin_user_feeds_handler(feed: dict, items: list[JSONFeedItem]):
 
 
 @cached(RandomTTLCache(4096, AppSettings().rss_douyin_user_feeds_cache_time))
-async def get_feeds_by_cache(username: str, cookie: str | None, timeout: float = 10) -> list[JSONFeedItem]:
-    return await get_feeds(username, cookie, timeout)
+async def get_feeds_by_cache(
+    username: str, cookie: str | None, *, timeout: float = 10, video_autoplay: bool
+) -> list[JSONFeedItem]:
+    return await get_feeds(username, cookie, timeout, video_autoplay=video_autoplay)
 
 
-async def get_feeds(username: str, cookie: str | None, timeout: float) -> list[JSONFeedItem]:
+async def get_feeds(username: str, cookie: str | None, timeout: float, video_autoplay: bool) -> list[JSONFeedItem]:
     async with rss_douyin_user_semaphore:
         if cookie:
             await AccessHistory.append(username, cookie)
 
-        play = AsyncDouyinPlaywright(username=username, cookie=cookie, timeout=timeout)
+        play = AsyncDouyinPlaywright(username=username, cookie=cookie, timeout=timeout, video_autoplay=video_autoplay)
         items = await play.run()
         return cast(list[JSONFeedItem], items)

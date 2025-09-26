@@ -70,6 +70,8 @@ class AsyncDouyinPlaywright:
         cookie: str | None,
         user_agent: str = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
         timeout: float = 10,
+        *,
+        video_autoplay: bool = False,
     ):
         self.fut: asyncio.Future[list[JSONFeedItem]] = asyncio.Future()
         self.feeds: list[JSONFeedItem] | None = None
@@ -80,6 +82,7 @@ class AsyncDouyinPlaywright:
         self._timeout = timeout
         self._start_ts = time.time()
         self._end_ts = self._start_ts + timeout
+        self._video_autoplay = video_autoplay
 
     @property
     def timeout(self) -> float:
@@ -189,7 +192,7 @@ class AsyncDouyinPlaywright:
             tags = list(video_tags | desc_tags)
             content_html = ""
             if video_url:
-                video_url = URLToolkit.make_video_tag_by_url(video_url)
+                video_url = URLToolkit.make_video_tag_by_url(video_url, autoplay=self._video_autoplay)
                 content_html = f"{content_html} {video_url}<br>"
 
             if not video_url and img:

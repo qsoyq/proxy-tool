@@ -640,8 +640,12 @@ class URLToolkit:
         return f'<img src="{url}">'
 
     @staticmethod
-    def make_video_tag_by_url(url: str, preload: str = "auto") -> str:
-        return f'<video src="{url}" preload="{preload}"></video>'
+    def make_video_tag_by_url(url: str, preload: str = "auto", autoplay: bool = False) -> str:
+        extra = ""
+        if autoplay:
+            extra = f"{extra} autoplay"
+
+        return f'<video src="{url}" preload="{preload}" {extra}></video>'
 
     @staticmethod
     def resolve_url(url: str) -> str:
