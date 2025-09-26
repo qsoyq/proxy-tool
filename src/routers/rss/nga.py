@@ -36,17 +36,14 @@ async def favorite_jsonfeed(
 
     在网页控制台中输出当前域的 cookie: console.log(document.cookie);
     """
-    host = req.url.hostname
-
-    threads = await NgaToolkit.get_threads(uid, cid, favor=favorid)
-
+    threads = await get_threads_by_cache(uid, cid, favor=favorid)
     items: list = []
     feed = {
         "version": "https://jsonfeed.org/version/1",
         "title": "NGA 分区 RSS 订阅",
         "description": "按创建时间订阅指定分区的帖子",
         "home_page_url": "https://bbs.nga.cn/",
-        "feed_url": f"{req.url.scheme}://{host}/api/rss/nga/threads?{req.url.query}",
+        "feed_url": f"{req.url.scheme}://{req.url.hostname}/api/rss/nga/threads?{req.url.query}",
         "icon": "https://bbs.nga.cn/favicon.ico",
         "favicon": "https://bbs.nga.cn/favicon.ico",
         "items": items,
