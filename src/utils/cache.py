@@ -3,6 +3,9 @@ import time
 import collections
 from typing import Any
 from cachetools import _TimedCache, Cache
+import asyncache
+
+cached = asyncache.cached
 
 
 class RandomTTLCache(_TimedCache):
