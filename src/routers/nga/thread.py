@@ -3,7 +3,7 @@ import asyncio
 
 from fastapi import APIRouter, Query, Header
 from schemas.nga.thread import OrderByEnum, Threads, GetForumSectionsRes, GetThreadsV2Res, GetNGASmiles
-from utils import NgaToolkit  # type: ignore
+from utils.nga import NgaToolkit  # type: ignore
 
 
 router = APIRouter(tags=["Utils"], prefix="/nga")

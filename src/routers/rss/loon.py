@@ -15,6 +15,7 @@ router = APIRouter(tags=["RSS"], prefix="/rss/loon")
 logger = logging.getLogger(__file__)
 
 
+@cached(RandomTTLCache(4096, 1800))
 async def get_ipx_info(url: str, useragent: str) -> dict:
     meta = {}
     headers = {"User-Agent": useragent}
@@ -60,7 +61,6 @@ async def ipx_jsonfeed(
     return feed
 
 
-@cached(RandomTTLCache(4096, 1800))
 async def fetch_feeds(url_list: list[str], ua: str) -> list[JSONFeedItem]:
     items = []
     ret = await asyncio.gather(*[get_ipx_info(url, useragent=ua) for url in url_list])

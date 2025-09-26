@@ -6,7 +6,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from schemas.ping import get_default_memory
 from settings import AppSettings
-from utils import NgaToolkit  # type:ignore
+from utils.nga import NgaToolkit  # type:ignore
 from routers.rss.douyin.user import get_feeds_by_cache
 from utils.rss.douyin import AccessHistory
 

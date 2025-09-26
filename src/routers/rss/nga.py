@@ -8,7 +8,7 @@ from schemas.rss.jsonfeed import JSONFeed
 from responses import PrettyJSONResponse
 from fastapi import APIRouter, Request, Query, Path
 
-from utils import NgaToolkit  # type: ignore
+from utils.nga import NgaToolkit  # type: ignore
 from schemas.nga.thread import Thread
 
 
