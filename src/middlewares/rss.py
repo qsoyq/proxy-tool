@@ -74,7 +74,7 @@ class UpdateTelegraphHTMLFeedMiddleware(BaseHTTPMiddleware):
     @cached(FIFOCache(maxsize=1024))
     def make_html_by_url(self, url: str) -> str:
         res = httpx.get(url)
-        doc = Soup(res.text)
+        doc = Soup(res.text, "lxml")
         return "<br/>".join([str(img) for img in doc.find_all("img")])
 
     def fixupx_match(self, item: dict):
