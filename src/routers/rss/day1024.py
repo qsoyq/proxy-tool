@@ -48,7 +48,7 @@ async def jsonfeed(req: Request):
     return feed
 
 
-@cached(RandomTTLCache(4096, 900))
+@cached(RandomTTLCache(4096, 3600))
 async def fetch_feeds() -> list[JSONFeedItem]:
     items = []
     url = "https://1024.day/api/discussions?include=user%2ClastPostedUser%2Ctags%2Ctags.parent%2CfirstPost&sort=-createdAt&page%5Boffset%5D=0"

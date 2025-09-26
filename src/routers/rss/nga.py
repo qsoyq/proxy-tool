@@ -10,6 +10,8 @@ from fastapi import APIRouter, Request, Query, Path
 
 from utils.nga import NgaToolkit  # type: ignore
 from schemas.nga.thread import Thread
+from utils.cache import cached, RandomTTLCache
+from utils.nga import OrderByEnum, Threads
 
 
 router = APIRouter(tags=["RSS"], prefix="/rss/nga")
@@ -89,7 +91,7 @@ async def threads_jsonfeed(
     在网页控制台中输出当前域的 cookie: console.log(document.cookie);
     """
     host = req.url.hostname
-    tasks = [NgaToolkit.get_threads(uid, cid, fid=fid, if_include_child_node=False) for fid in fids]
+    tasks = [get_threads_by_cache(uid, cid, fid=fid, if_include_child_node=False) for fid in fids]
     res = await asyncio.gather(*tasks)
 
     threads: list[Thread] = list(chain(*[threads.threads for threads in res]))
@@ -132,3 +134,19 @@ async def threads_jsonfeed(
             items[index]["content_html"] = detail.content_html
             items[index]["content_text"] = None
     return feed
+
+
+@cached(RandomTTLCache(4096, 300))
+async def get_threads_by_cache(
+    uid: str | None = None,
+    cid: str | None = None,
+    order_by: OrderByEnum | None = OrderByEnum.lastpostdesc,
+    *,
+    fid: int | None = None,
+    favor: int | None = None,
+    if_include_child_node: bool | None = None,
+    page: int = 1,
+) -> Threads:
+    return await NgaToolkit.get_threads(
+        uid, cid, order_by=order_by, fid=fid, favor=favor, if_include_child_node=if_include_child_node, page=page
+    )
