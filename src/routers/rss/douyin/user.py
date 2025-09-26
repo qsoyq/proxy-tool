@@ -11,6 +11,7 @@ from asyncache import cached
 from settings import AppSettings
 from utils.cache import RandomTTLCache
 
+rss_douyin_user_semaphore = asyncio.locks.Semaphore(AppSettings().rss_douyin_user_semaphore)
 
 router = APIRouter(tags=["RSS"], prefix="/rss/douyin/user")
 
@@ -157,9 +158,10 @@ async def get_feeds_by_cache(username: str, cookie: str | None, timeout: float =
 
 
 async def get_feeds(username: str, cookie: str | None, timeout: float) -> list[JSONFeedItem]:
-    if cookie:
-        await AccessHistory.append(username, cookie)
+    async with rss_douyin_user_semaphore:
+        if cookie:
+            await AccessHistory.append(username, cookie)
 
-    play = AsyncDouyinPlaywright(username=username, cookie=cookie, timeout=timeout)
-    items = await play.run()
-    return cast(list[JSONFeedItem], items)
+        play = AsyncDouyinPlaywright(username=username, cookie=cookie, timeout=timeout)
+        items = await play.run()
+        return cast(list[JSONFeedItem], items)

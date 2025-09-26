@@ -20,7 +20,7 @@ class AppSettings(BaseSettings):  # type:ignore
 
     cloud_scraper_verify: bool = True
 
-    rss_douyin_user_concurrency: int = 5
+    rss_douyin_user_semaphore: int = 5
     rss_douyin_user_feeds_cache_time: int = 1800
 
     rss_douyin_user_auto_fetch_enable: bool = False
