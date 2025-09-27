@@ -116,8 +116,8 @@ class BaseFeedFilterMiddleware(BaseHTTPMiddleware):
     BLOCK_TAG: list[str] = []
     BLOCK_CONTENT: list[str] = []
 
-    BLOCK_REGEX_CONTENT: str = ""
-    BLOCK_REGEX_TITLE: str = ""
+    BLOCK_REGEX_CONTENT: list[str] = []
+    BLOCK_REGEX_TITLE: list[str] = []
 
     MATCH_URL_PATTERN = r""
 
@@ -184,14 +184,14 @@ class TelegramFeedFilterMiddleware(BaseFeedFilterMiddleware):
 
 
 class NodeseekFeedFilterMiddleware(BaseFeedFilterMiddleware):
-    BLOCK_REGEX_CONTENT = r"(?i)HostDZire"
-    BLOCK_REGEX_TITLE = r"(?i)HostDZire"
+    BLOCK_REGEX_CONTENT = [r"(?i)HostDZire"]
+    BLOCK_REGEX_TITLE = [r"(?i)HostDZire"]
 
     MATCH_URL_PATTERN = r"/api/rss/nodeseek/"
 
 
 class NGAFeedFilterMiddleware(BaseFeedFilterMiddleware):
-    BLOCK_REGEX_CONTENT = "预制菜"
-    BLOCK_REGEX_TITLE = "预制菜"
+    BLOCK_REGEX_CONTENT = ["预制菜"]
+    BLOCK_REGEX_TITLE = ["预制菜"]
 
     MATCH_URL_PATTERN = r"/api/rss/nga/"
