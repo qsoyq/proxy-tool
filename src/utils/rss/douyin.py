@@ -12,11 +12,9 @@ import threading
 
 import pytz
 
-# from playwright.sync_api import Response
 from playwright import sync_api
 from playwright import async_api
 
-# from playwright.async_api import async_playwright, Response
 from playwright._impl._errors import TargetClosedError
 
 from schemas.rss.jsonfeed import JSONFeedItem
