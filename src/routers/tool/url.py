@@ -68,4 +68,5 @@ async def get_douyin_video_download_link_by_cache(text: str):
 
     play = AsyncDouyinVideoPlaywright(video_path)
     body = await play.run()
+    assert isinstance(body, dict)
     return tool.to_download_url(body)
