@@ -15,22 +15,35 @@ class SMS:
         self._sessionid = sessionid
 
     @property
+    def cookies(self) -> dict:
+        cookies = {
+            "JSESSIONID": self._password,
+        }
+        return cookies
+
+    @property
     def headers(self) -> dict:
         headers = {
-            "Cookie": f"JSESSIONID={self._sessionid}",
             "Referer": f"{self._host}/index.html",
         }
         return headers
 
     async def login(self):
-        async with httpx.AsyncClient(headers=self.headers) as client:
-            content = f"isTest=false&goformId=LOGIN&password={self._password}"
+        headers = self.headers
+        cookies = self.cookies
+        async with httpx.AsyncClient(headers=headers, cookies=cookies) as client:
+            data = {
+                "isTest": "false",
+                "goformId": "LOGIN",
+                "password": self._password,
+            }
             url = f"{self._host}/goform/goform_set_cmd_process"
-            res = await client.post(url, content=content)
+            res = await client.post(url, data=data)
             if res.is_error:
                 raise HTTPException(res.status_code, detail=res.text)
             body = res.json()
             assert body.get("result", 0) == 0
+            return body
 
     async def get_sms_list(self) -> list[Message]:
         async with httpx.AsyncClient(headers=self.headers) as client:
