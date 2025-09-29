@@ -56,6 +56,7 @@ import routers.rss.github.release
 import routers.rss.github.commit
 import routers.rss.readhub
 import routers.rss.douyin.user
+import routers.rss.f50
 import routers.rss.example
 import routers.dandanplay.bilibili
 
@@ -123,6 +124,7 @@ app.include_router(routers.rss.github.release.router, prefix=api_prefix)
 app.include_router(routers.rss.github.commit.router, prefix=api_prefix)
 app.include_router(routers.rss.readhub.router, prefix=api_prefix)
 app.include_router(routers.rss.douyin.user.router, prefix=api_prefix)
+app.include_router(routers.rss.f50.router, prefix=api_prefix)
 app.include_router(routers.rss.example.router, prefix=api_prefix)
 app.include_router(routers.dandanplay.bilibili.router, prefix=api_prefix)
 
