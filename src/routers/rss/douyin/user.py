@@ -6,7 +6,7 @@ from fastapi import APIRouter, Query, Path, Request, HTTPException
 
 from schemas.rss.jsonfeed import JSONFeed, JSONFeedItem
 from responses import PrettyJSONResponse
-from utils.rss.douyin import TimeoutException, AccessHistory, AsyncDouyinPlaywright
+from utils.rss.douyin import TimeoutException, AccessHistory, DouyinPlaywright, to_feeds
 from asyncache import cached
 from settings import AppSettings
 from utils.cache import RandomTTLCache
@@ -166,6 +166,12 @@ async def get_feeds(username: str, cookie: str | None, timeout: float, video_aut
         if cookie:
             await AccessHistory.append(username, cookie)
 
-        play = AsyncDouyinPlaywright(username=username, cookie=cookie, timeout=timeout, video_autoplay=video_autoplay)
-        items = await play.run()
+        url = f"https://www.douyin.com/user/{username}"
+        play = DouyinPlaywright(url)
+        if cookie is not None:
+            cookies = play.cookies_by_str(cookie, "https://www.douyin.com")
+            play.add_cookies(cookies)
+
+        result = await play.run()
+        items = to_feeds(username, cast(dict, result))
         return cast(list[JSONFeedItem], items)
