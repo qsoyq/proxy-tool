@@ -66,7 +66,8 @@ async def get_douyin_video_download_link_by_cache(text: str):
         raise ValueError(f"[get_douyin_video_download_link_by_cache] invalid url, text: {text}")
     video_path = tool.get_share_url_video_path(url)
 
-    play = AsyncDouyinVideoPlaywright(video_path)
+    url = f"https://www.douyin.com/video/{video_path}"
+    play = AsyncDouyinVideoPlaywright(url)
     body = await play.run()
     assert isinstance(body, dict)
     return tool.to_download_url(body)
