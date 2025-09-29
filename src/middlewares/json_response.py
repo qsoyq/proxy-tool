@@ -47,5 +47,7 @@ class UsePrettryJSONResponse(BaseHTTPMiddleware):
             body = json.loads(response_body)
             headers = dict(response.headers)
             headers.pop("content-length", None)
+            if headers.get("content-type") == "application/json":
+                headers["content-type"] = "application/json;charset=utf-8"
             return PrettyJSONResponse(body, status_code=response.status_code, headers=headers)
         return response
