@@ -22,7 +22,6 @@ async def test_nameserver_policy_override():
 async def test_nameserver_policy_with_attributes_override():
     override = NameserverPolicyGeositeOverride("google", attribute="ads")
     content = await override.to_yaml()
-    print(content)
     data = yaml.safe_load(content)
     assert isinstance(data, dict), content
     assert "name" in data
@@ -37,7 +36,6 @@ async def test_nameserver_policy_with_attributes_override():
 
     override = NameserverPolicyGeositeOverride("google", attribute="cn")
     content = await override.to_yaml()
-    print(content)
     data = yaml.safe_load(content)
     assert isinstance(data, dict), content
 

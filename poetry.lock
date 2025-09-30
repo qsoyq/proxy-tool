@@ -1722,6 +1722,43 @@ files = [
 wcwidth = "*"
 
 [[package]]
+name = "proto-plus"
+version = "1.26.1"
+description = "Beautiful, Pythonic protocol buffers"
+optional = false
+python-versions = ">=3.7"
+groups = ["main"]
+files = [
+    {file = "proto_plus-1.26.1-py3-none-any.whl", hash = "sha256:13285478c2dcf2abb829db158e1047e2f1e8d63a077d94263c2b88b043c75a66"},
+    {file = "proto_plus-1.26.1.tar.gz", hash = "sha256:21a515a4c4c0088a773899e23c7bbade3d18f9c66c73edd4c7ee3816bc96a012"},
+]
+
+[package.dependencies]
+protobuf = ">=3.19.0,<7.0.0"
+
+[package.extras]
+testing = ["google-api-core (>=1.31.5)"]
+
+[[package]]
+name = "protobuf"
+version = "6.32.1"
+description = ""
+optional = false
+python-versions = ">=3.9"
+groups = ["main"]
+files = [
+    {file = "protobuf-6.32.1-cp310-abi3-win32.whl", hash = "sha256:a8a32a84bc9f2aad712041b8b366190f71dde248926da517bde9e832e4412085"},
+    {file = "protobuf-6.32.1-cp310-abi3-win_amd64.whl", hash = "sha256:b00a7d8c25fa471f16bc8153d0e53d6c9e827f0953f3c09aaa4331c718cae5e1"},
+    {file = "protobuf-6.32.1-cp39-abi3-macosx_10_9_universal2.whl", hash = "sha256:d8c7e6eb619ffdf105ee4ab76af5a68b60a9d0f66da3ea12d1640e6d8dab7281"},
+    {file = "protobuf-6.32.1-cp39-abi3-manylinux2014_aarch64.whl", hash = "sha256:2f5b80a49e1eb7b86d85fcd23fe92df154b9730a725c3b38c4e43b9d77018bf4"},
+    {file = "protobuf-6.32.1-cp39-abi3-manylinux2014_x86_64.whl", hash = "sha256:b1864818300c297265c83a4982fd3169f97122c299f56a56e2445c3698d34710"},
+    {file = "protobuf-6.32.1-cp39-cp39-win32.whl", hash = "sha256:68ff170bac18c8178f130d1ccb94700cf72852298e016a2443bdb9502279e5f1"},
+    {file = "protobuf-6.32.1-cp39-cp39-win_amd64.whl", hash = "sha256:d0975d0b2f3e6957111aa3935d08a0eb7e006b1505d825f862a1fffc8348e122"},
+    {file = "protobuf-6.32.1-py3-none-any.whl", hash = "sha256:2601b779fc7d32a866c6b4404f9d42a3f67c5b9f3f15b4db3cccabe06b95c346"},
+    {file = "protobuf-6.32.1.tar.gz", hash = "sha256:ee2469e4a021474ab9baafea6cd070e5bf27c7d29433504ddea1a4ee5850f68d"},
+]
+
+[[package]]
 name = "psutil"
 version = "7.0.0"
 description = "Cross-platform lib for process and system monitoring in Python.  NOTE: the syntax of this script MUST be kept compatible with Python 2.7."
@@ -3008,4 +3045,4 @@ dkim = ["dkimpy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.10"
-content-hash = "48337e86dc45c8b39c9d5b1925ce0194e0570ba8268f801dddcc509db2d23795"
+content-hash = "a9f651be15de89b2f0569baffb5b4488b5861086512d67dc7a6b0148fcc7db05"

@@ -652,6 +652,10 @@ async def loon(
 async def nameserver_policy_by_geosite(
     geosite: str = Path(..., examples=["google", "google@cn", "google@dns"]),
     dns: str = Query("system", examples=["system", "1.1.1.", "https://223.6.6.6/dns-query"]),
+    geosite_url: str = Query(
+        "https://github.com/v2fly/domain-list-community/releases/latest/download/dlc.dat",
+        examples=["https://github.com/v2fly/domain-list-community/releases/latest/download/dlc.dat"],
+    ),
 ):
     """geosite 数据来源自 https://github.com/v2fly/domain-list-community
 

@@ -1,6 +1,6 @@
 import asyncio
 import pytest
-from utils.v2fly.geosite import get_domains_by_geosite
+from utils.v2fly.geosite import get_domains_by_geosite, get_domains_by_geosite_library
 
 
 @pytest.mark.asyncio
@@ -21,3 +21,24 @@ async def test_geosite():
 
     # test cache
     await asyncio.wait_for(get_domains_by_geosite("google"), 1)
+
+
+@pytest.mark.asyncio
+async def test_geosite_librady_by_url():
+    results = await get_domains_by_geosite_library("google")
+    assert "beacons3.gvt2.com" in results
+    assert "+.fastlane.tools" in results
+
+    results = await get_domains_by_geosite_library("google", attribute="cn")
+    assert "sup.l.google.com" in results
+    assert "+.adsense.com" not in results
+
+    results = await get_domains_by_geosite_library("google", attribute="ads")
+    assert "+.sup.l.google.com" not in results
+    assert "+.adsense.com" in results
+
+    results = await get_domains_by_geosite_library("google-ads")
+    assert "+.sup.l.google.com" not in results
+    assert "+.adsense.com" in results
+
+    await asyncio.wait_for(get_domains_by_geosite_library("google"), 1)

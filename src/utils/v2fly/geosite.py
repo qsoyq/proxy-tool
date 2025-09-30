@@ -4,8 +4,10 @@ from itertools import chain
 from enum import Enum
 
 import httpx
+import proto
 from fastapi import HTTPException
 from utils.cache import cached, RandomTTLCache
+from schemas.v2fly.geosite_pb import GeoSiteList, DomainTypeEnum
 
 
 class RecordEnum(str, Enum):
@@ -114,3 +116,40 @@ async def get_domains_by_geosite(name: str, *, include_all: bool = True) -> set[
         result |= item
 
     return result
+
+
+@cached(RandomTTLCache(16, 43200))
+async def get_geosite_library_by_url(
+    url: str = "https://github.com/v2fly/domain-list-community/releases/latest/download/dlc.dat",
+) -> proto.Message:
+    async with httpx.AsyncClient() as client:
+        resp = await client.get(url, follow_redirects=True)
+        content = resp.content
+        geosite_list = GeoSiteList.deserialize(content)
+    return geosite_list
+
+
+async def get_domains_by_geosite_library(
+    name: str,
+    *,
+    attribute: str | None = None,
+    geosite_url: str = "https://github.com/v2fly/domain-list-community/releases/latest/download/dlc.dat",
+) -> set[str]:
+    name = name.upper()
+    results = set()
+    geosite_list = await get_geosite_library_by_url(geosite_url)
+    for entry in geosite_list.entry:
+        if entry.country_code != name:
+            continue
+        for domain in entry.domain:
+            if attribute is None:
+                results.add(get_stash_policy_value(domain.value, domain.type))
+            elif domain.attribute and domain.attribute[0].key == attribute:
+                results.add(get_stash_policy_value(domain.value, domain.type))
+    return results
+
+
+def get_stash_policy_value(value: str, type_: int):
+    if type_ == DomainTypeEnum.Domain_RootDomain:
+        return f"+.{value}"
+    return value
