@@ -26,7 +26,6 @@ class NameserverPolicyGeositeOverride:
         name = self.name
         if self._attribute:
             name = f"{name}@{self._attribute}"
-
         body = {
             "name": f"nameserver-policy-geosite-{name}",
             "desc": "基于 geosite 动态生成的 nameserver-policy 覆写策略",
@@ -35,4 +34,4 @@ class NameserverPolicyGeositeOverride:
             "dns": {"nameserver-policy": policy},
         }
 
-        return cast(str, yaml.safe_dump(body, width=9999, allow_unicode=True))
+        return cast(str, yaml.safe_dump(body, width=9999, allow_unicode=True, sort_keys=False))
