@@ -8,7 +8,7 @@ import urllib.parse
 from typing import Any, cast
 
 import httpx
-from fastapi import APIRouter, Query, HTTPException
+from fastapi import APIRouter, Query, HTTPException, Path
 from fastapi.responses import PlainTextResponse
 from cachetools import TTLCache
 from asyncache import cached
@@ -16,11 +16,106 @@ from asyncache import cached
 from schemas.adapter import HttpUrl, KeyValuePairStr
 from schemas.github.releases import ReleaseSchema
 from schemas.loon import LoonArgument
-
+from utils.stash.dns import NameserverPolicyGeositeOverride
 
 router = APIRouter(tags=["Stash"], prefix="/stash/stoverride")
 
+
 logger = logging.getLogger(__file__)
+
+
+def rewrite_loon_argument(
+    argument: str, loon_arguments: dict[str, LoonArgument], overrideScriptArguments: dict | None
+) -> str | None:
+    """将 Loon 脚本参数重写为 Stash 可用的脚本参数，填充 Argument 默认值"""
+    if overrideScriptArguments is None:
+        overrideScriptArguments = {}
+
+    if not argument:
+        return ""
+
+    argument = r"argument=[{blockUpload},{blockShorts},{blockImmersive},{captionLang},{lyricLang},{debug}]"
+    fields = re.findall(r"\{([^}]+)\}", argument)
+    body = {}
+    for field in fields:
+        value = overrideScriptArguments.get(field) or loon_arguments[field].default
+        if value == "true":
+            value = True
+        if value == "false":
+            value = False
+        body[field] = value
+    return json.dumps(body, ensure_ascii=False)
+
+
+@cached(TTLCache(32, 600))
+async def get_jq_path_content(url: str, user_agent: str) -> str:
+    async with httpx.AsyncClient(headers={"User-Agent": user_agent}, verify=False) as client:
+        resp = await client.get(url)
+        if resp.is_error:
+            raise HTTPException(status_code=resp.status_code, detail=resp.text)
+        text = resp.text
+
+    lines = [line for line in text.splitlines() if not line.strip().startswith("#")]
+    return re.sub(r"\s+", " ", " ".join(lines))
+
+
+def kv_pair_parse(content: str) -> dict:
+    data = {}
+    key = ""
+    index = 0
+    stop = len(content)
+    while index < stop:
+        char = content[index]
+        if char == " ":
+            index += 1
+            continue
+
+        # get key name
+        if char == "=":
+            index += 1
+
+            # parse value
+            prefix: list[str] = []
+            value = ""
+            while index < stop:
+                char = content[index]
+                if char == "," and len(prefix) == 0:
+                    index += 1
+                    break
+
+                value += char
+                if key.lower() == "argument":
+                    if char in "[(":
+                        prefix.append(char)
+                        index += 1
+                        continue
+
+                    if char == ")":
+                        if not prefix or prefix[-1] != "(":
+                            raise ValueError(f"bad character at index of: {index}\ncontent:{content}")
+                        prefix.pop()
+                        index += 1
+                        continue
+
+                    if char == "]":
+                        if not prefix or prefix[-1] != "[":
+                            raise ValueError(f"bad character at index of: {index}\ncontent:{content}")
+                        prefix.pop()
+                        index += 1
+                        continue
+
+                index += 1
+
+            if prefix:
+                raise ValueError(f"invalid value: {key} - {value} - {prefix}")
+
+            data[key] = value
+            key = ""
+        else:
+            key += char
+            index += 1
+
+    return data
 
 
 @cached(TTLCache(32, 86400))
@@ -59,7 +154,9 @@ def rules_random(name: str = Query("name"), category: str = Query("category"), s
     rules = [f"DOMAIN,{uuid.uuid4().hex}.com,DIRECT" for x in range(size)]
     data = {"name": name, "category": category, "rules": rules}
     res = yaml.safe_dump(data)
-    return PlainTextResponse(res, headers={"Content-Disposition": "inline"})
+    return PlainTextResponse(
+        res, headers={"Content-Disposition": "inline"}, media_type="application/yaml;charset=utf-8"
+    )
 
 
 @router.get("/override", summary="Stash覆写修改")
@@ -88,7 +185,7 @@ def override(
     if icon is not None:
         dom["icon"] = icon
     content = yaml.safe_dump(dom, allow_unicode=True)
-    return PlainTextResponse(content=content)
+    return PlainTextResponse(content=content, media_type="application/yaml;charset=utf-8")
 
 
 @router.get("/override/v2", summary="Stash覆写修改V2")
@@ -136,7 +233,7 @@ def override_v2(
     if icon is not None:
         lines.insert(0, f"icon: {icon}")
     content = "\n".join(lines)
-    return PlainTextResponse(content=content)
+    return PlainTextResponse(content=content, media_type="application/yaml;charset=utf-8")
 
 
 @router.get("/tiles/oil", summary="Stash油价磁贴")
@@ -156,7 +253,9 @@ def oil(provname: str = Query(..., description="省份名")):
         {provname}-youjia:
             url: https://raw.githubusercontent.com/deezertidal/Surge_Module/master/files/oil.js
     """
-    return PlainTextResponse(inspect.cleandoc(payload.format(provname=provname)))
+    return PlainTextResponse(
+        inspect.cleandoc(payload.format(provname=provname)), media_type="application/yaml;charset=utf-8"
+    )
 
 
 @router.get("/tiles/github/rate-limit", summary="GitHub访问429限制")
@@ -177,7 +276,7 @@ def github_rate_limit():
         header-rewrite:
             - https://(avatars|gist|raw).githubusercontent.com request-replace Accept-Language en-us
     """
-    return PlainTextResponse(inspect.cleandoc(content))
+    return PlainTextResponse(inspect.cleandoc(content), media_type="application/yaml;charset=utf-8")
 
 
 @router.get("/headers", summary="Header调试覆写")
@@ -546,98 +645,24 @@ async def loon(
     headers = {
         "Content-Disposition": "inline",
     }
-    return PlainTextResponse(text, media_type="text/plain;charset=utf-8", headers=headers)
+    return PlainTextResponse(text, media_type="application/yaml;charset=utf-8", headers=headers)
 
 
-def rewrite_loon_argument(
-    argument: str, loon_arguments: dict[str, LoonArgument], overrideScriptArguments: dict | None
-) -> str | None:
-    """将 Loon 脚本参数重写为 Stash 可用的脚本参数，填充 Argument 默认值"""
-    if overrideScriptArguments is None:
-        overrideScriptArguments = {}
+@router.get("/geosite/nameserver-policy/{geosite}", summary="生成基于 geosite 的 nameserver-policy")
+async def nameserver_policy_by_geosite(
+    geosite: str = Path(..., examples=["google", "google@cn", "google@dns"]),
+    dns: str = Query("system", examples=["system", "1.1.1.", "https://223.6.6.6/dns-query"]),
+):
+    """geosite 数据来源自 https://github.com/v2fly/domain-list-community
 
-    if not argument:
-        return ""
-
-    argument = r"argument=[{blockUpload},{blockShorts},{blockImmersive},{captionLang},{lyricLang},{debug}]"
-    fields = re.findall(r"\{([^}]+)\}", argument)
-    body = {}
-    for field in fields:
-        value = overrideScriptArguments.get(field) or loon_arguments[field].default
-        if value == "true":
-            value = True
-        if value == "false":
-            value = False
-        body[field] = value
-    return json.dumps(body, ensure_ascii=False)
-
-
-@cached(TTLCache(32, 600))
-async def get_jq_path_content(url: str, user_agent: str) -> str:
-    async with httpx.AsyncClient(headers={"User-Agent": user_agent}, verify=False) as client:
-        resp = await client.get(url)
-        if resp.is_error:
-            raise HTTPException(status_code=resp.status_code, detail=resp.text)
-        text = resp.text
-
-    lines = [line for line in text.splitlines() if not line.strip().startswith("#")]
-    return re.sub(r"\s+", " ", " ".join(lines))
-
-
-def kv_pair_parse(content: str) -> dict:
-    data = {}
-    key = ""
-    index = 0
-    stop = len(content)
-    while index < stop:
-        char = content[index]
-        if char == " ":
-            index += 1
-            continue
-
-        # get key name
-        if char == "=":
-            index += 1
-
-            # parse value
-            prefix: list[str] = []
-            value = ""
-            while index < stop:
-                char = content[index]
-                if char == "," and len(prefix) == 0:
-                    index += 1
-                    break
-
-                value += char
-                if key.lower() == "argument":
-                    if char in "[(":
-                        prefix.append(char)
-                        index += 1
-                        continue
-
-                    if char == ")":
-                        if not prefix or prefix[-1] != "(":
-                            raise ValueError(f"bad character at index of: {index}\ncontent:{content}")
-                        prefix.pop()
-                        index += 1
-                        continue
-
-                    if char == "]":
-                        if not prefix or prefix[-1] != "[":
-                            raise ValueError(f"bad character at index of: {index}\ncontent:{content}")
-                        prefix.pop()
-                        index += 1
-                        continue
-
-                index += 1
-
-            if prefix:
-                raise ValueError(f"invalid value: {key} - {value} - {prefix}")
-
-            data[key] = value
-            key = ""
-        else:
-            key += char
-            index += 1
-
-    return data
+    数据存在 12-24h 的动态缓存时间
+    """
+    attribute = None
+    if "@" in geosite:
+        geosite, attribute = geosite.split("@", 1)
+    policy = NameserverPolicyGeositeOverride(geosite, dns=dns, attribute=attribute)
+    text = await policy.to_yaml()
+    headers = {
+        "Content-Disposition": "inline",
+    }
+    return PlainTextResponse(text, media_type="application/yaml;charset=utf-8", headers=headers)
