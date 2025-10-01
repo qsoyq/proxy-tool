@@ -181,6 +181,7 @@ class TelegramFeedFilterMiddleware(BaseFeedFilterMiddleware):
     ]
 
     MATCH_URL_PATTERN = r"/api/rss/telegram/"
+    BLOCK_REGEX_TITLE = [r".*.*机场优惠活动.*.*"]
 
 
 class NodeseekFeedFilterMiddleware(BaseFeedFilterMiddleware):
