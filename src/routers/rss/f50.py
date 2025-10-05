@@ -1,7 +1,9 @@
 import logging
 from typing import Any
 from typing import cast
-from fastapi import APIRouter, Request, Query, Path
+
+import httpx
+from fastapi import APIRouter, Request, Query, Path, HTTPException
 from schemas.rss.jsonfeed import JSONFeed, JSONFeedItem
 from utils.f50 import SMS
 from schemas.f50 import Message
@@ -32,7 +34,10 @@ async def sms_list(
     }
 
     sms = SMS(password)
-    await sms.login()
+    try:
+        await sms.login()
+    except httpx.RemoteProtocolError:
+        raise HTTPException(status_code=502, detail="device maybe closed")
     messages: list[Message] = await sms.get_sms_list()
 
     messages.sort(key=lambda x: -cast(int, x.timestamp))
