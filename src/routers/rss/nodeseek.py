@@ -8,11 +8,9 @@ from typing import MutableMapping
 
 import requests
 import cloudscraper
-import feedgen.feed
 
 from htmlmin import minify
-from fastapi import APIRouter, Request, Response, Query, Path, HTTPException
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Request, Query, Path, HTTPException
 from dateparser import parse
 from cachetools import TTLCache
 from bs4 import BeautifulSoup as Soup
@@ -20,6 +18,7 @@ from bs4 import BeautifulSoup as Soup
 from responses import PrettyJSONResponse
 from schemas.rss.jsonfeed import JSONFeed
 from settings import AppSettings
+from utils.cache import cached, RandomTTLCache
 
 
 router = APIRouter(tags=["RSS"], prefix="/rss/nodeseek/category")
@@ -151,79 +150,10 @@ async def cloudscraper_get(
     return await asyncio.to_thread(scraper.get, url, cookies=cookies, verify=False)
 
 
-@router.get("/{category}/v1", summary="Nodeseek 板块新贴 RSS 订阅", include_in_schema=False)
-def newest(
-    req: Request,
-    session: str = Query(None, description="Cookie.session, 登陆可见的版块需要"),
-    smac: str = Query(None, description="Cookie.smac, 登陆可见的版块需要"),
-    category: str = Path(..., description="版块名称, 如tech"),
-    cookie: str = Query("", description="完整 Cookie 字符串, 存在时无视 session 和 smac"),
-    sortby: str = Query("postTime", description="排序方式, postTime、replyTime"),
-):
-    """Nodeseek 分类帖子新鲜出炉
-
-    部分登陆可见的帖子，需要传递 smac 和 session 参数
-
-    在网页控制台中输出当前域的 cookie: console.log(document.cookie);
-    """
-    host = req.url.hostname
-    port = req.url.port
-    if port is None:
-        port = 80 if req.url.scheme == "http" else 443
-
-    url = f"https://www.nodeseek.com/categories/{category}?sortBy={sortby}"
-    cookies = {
-        "colorscheme": "light",
-        "session": session,
-        "smac": smac,
-        "sortBy": sortby,
-    }
-    if cookie:
-        cookies = {k.strip(): v.strip() for k, v in (item.split("=") for item in cookie.strip().split("; "))}
-    ssl_context = ssl.create_default_context()
-    ssl_context.check_hostname = False
-    ssl_context.verify_mode = ssl.CERT_NONE
-    scraper = cloudscraper.create_scraper(ssl_context=ssl_context)
-    resp = scraper.get(url, cookies=cookies, verify=False)
-    if not resp.ok:
-        return JSONResponse({"msg": resp.text}, status_code=resp.status_code)
-
-    document = Soup(resp.text, "lxml")
-    post_list = document.select("div[class='post-list-content']")
-
-    fg = feedgen.feed.FeedGenerator()
-    fg.id("https://www.nodeseek.com/")
-    fg.title("Nodeseek 分类 RSS 订阅")
-    fg.subtitle("按发帖时间")
-    fg.author({"name": "qsssssssss", "email": "support@19940731.xyz"})
-    fg.link(href="https://www.nodeseek.com/", rel="alternate")
-    fg.logo("https://www.nodeseek.com/static/image/favicon/favicon-32x32.png")
-    fg.link(href=f"https://{host}:{port}/api/rss/nodessek/category/{category}", rel="self")
-    fg.language("zh-CN")
-    for item in post_list:
-        a = item.select_one("div > a")
-        if not a:
-            continue
-        href = f"https://www.nodeseek.com{a.attrs['href']}"  # type: ignore
-        title = a.text
-        datetime = parse(item.select_one("a[class='info-item info-last-comment-time'] > time").attrs["datetime"])  # type: ignore
-        ret = urllib.parse.urlparse(href)
-        uid = ret.path.split("/")[-1].split("-")[1]
-
-        entry = fg.add_entry()
-        entry.id(uid)
-        entry.title(f"{title}")
-        entry.content("")
-        entry.published(datetime)
-        entry.link(href=href)
-    rss_xml = fg.rss_str(pretty=True)
-    return Response(content=rss_xml, media_type="application/xml")
-
-
 @router.get(
     "/{category}", summary="Nodeseek 板块新贴 RSS 订阅", response_model=JSONFeed, response_class=PrettyJSONResponse
 )
-async def newest_jsonfeed(
+async def category(
     req: Request,
     session: str = Query(None, description="Cookie.session, 登陆可见的版块需要"),
     smac: str = Query(None, description="Cookie.smac, 登陆可见的版块需要"),
@@ -238,7 +168,62 @@ async def newest_jsonfeed(
 
     在网页控制台中输出当前域的 cookie: console.log(document.cookie);
     """
+    return await get_feeds_by_category(req, category, session, smac, cookie, sortby, get_or_create)
+
+
+@router.get(
+    "/{category}/{session}/{smac}",
+    summary="Nodeseek 板块新贴 RSS 订阅",
+    response_model=JSONFeed,
+    response_class=PrettyJSONResponse,
+)
+async def category_with_session_smac(
+    req: Request,
+    session: str = Path(..., description="Cookie.session, 登陆可见的版块需要"),
+    smac: str = Path(..., description="Cookie.smac, 登陆可见的版块需要"),
+    category: str = Path(..., description="版块名称, 如tech"),
+    cookie: str = Query("", description="完整 Cookie 字符串, 存在时无视 session 和 smac"),
+    sortby: str = Query("postTime", description="排序方式, postTime、replyTime"),
+    get_or_create: bool = Query(False, description="contentHTML缓存策略, 是否在未命中缓存后拉取内容"),
+):
+    """Nodeseek 分类帖子新鲜出炉
+
+    部分登陆可见的帖子，需要传递 smac 和 session 参数
+
+    在网页控制台中输出当前域的 cookie: console.log(document.cookie);
+    """
+    return await get_feeds_by_category(req, category, session, smac, cookie, sortby, get_or_create)
+
+
+async def get_feeds_by_category(req, category, session, smac, cookie, sortby, get_or_create):
+    items = []
+    feed: dict[str, str | list[dict[str, object]]] = {
+        "version": "https://jsonfeed.org/version/1",
+        "title": f"Nodeseek RSS {category}",
+        "description": f"Nodeseek RSS {category}",
+        "home_page_url": f"https://www.nodeseek.com/categories/{category}",
+        "feed_url": f"{req.url.scheme}://{req.url.hostname}{req.url.path}?{req.url.query}",
+        "icon": "https://www.nodeseek.com/static/image/favicon/android-chrome-512x512.png",
+        "favicon": "https://www.nodeseek.com/static/image/favicon/android-chrome-512x512.png",
+        "items": [],
+    }
     token = NodeseekToolkit.GetOrCreate.set(get_or_create)
+
+    items = await get_feeds_by_cache(category, session=session, smac=smac, cookie=cookie, sortby=sortby)
+    feed["items"] = items
+    NodeseekToolkit.GetOrCreate.reset(token)
+    return feed
+
+
+@cached(RandomTTLCache(4096, 600))
+async def get_feeds_by_cache(
+    category: str,
+    *,
+    session: str | None = None,
+    smac: str | None = None,
+    cookie: str | None = "",
+    sortby: str = "postTime",
+):
     url = f"https://www.nodeseek.com/categories/{category}?sortBy={sortby}"
     cookies = {
         "colorscheme": "light",
@@ -252,19 +237,8 @@ async def newest_jsonfeed(
     scraper = cloudscraper.create_scraper()
     resp = await cloudscraper_get(scraper, url, cookies)
     if not resp.ok:
-        return JSONResponse({"msg": resp.text}, status_code=resp.status_code)
+        raise HTTPException(status_code=resp.status_code, detail=resp.text)
 
-    items = []
-    feed: dict[str, str | list[dict[str, object]]] = {
-        "version": "https://jsonfeed.org/version/1",
-        "title": f"Nodeseek RSS {category}",
-        "description": f"Nodeseek RSS {category}",
-        "home_page_url": f"https://www.nodeseek.com/categories/{category}",
-        "feed_url": f"{req.url.scheme}://{req.url.hostname}{req.url.path}?{req.url.query}",
-        "icon": "https://www.nodeseek.com/static/image/favicon/android-chrome-512x512.png",
-        "favicon": "https://www.nodeseek.com/static/image/favicon/android-chrome-512x512.png",
-        "items": [],
-    }
     items = NodeseekToolkit.make_feeds_by_document(resp.text)
     count = 0
     for item in items:
@@ -287,7 +261,4 @@ async def newest_jsonfeed(
         if content_html:
             item["content_html"] = content_html
             item["content_text"] = None
-
-    feed["items"] = items
-    NodeseekToolkit.GetOrCreate.reset(token)
-    return feed
+    return items
