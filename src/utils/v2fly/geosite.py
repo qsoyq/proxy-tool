@@ -124,6 +124,7 @@ async def get_geosite_library_by_url(
 ) -> proto.Message:
     async with httpx.AsyncClient() as client:
         resp = await client.get(url, follow_redirects=True)
+        resp.raise_for_status()
         content = resp.content
         geosite_list = GeoSiteList.deserialize(content)
     return geosite_list

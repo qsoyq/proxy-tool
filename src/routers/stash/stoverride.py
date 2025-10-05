@@ -17,6 +17,7 @@ from schemas.adapter import HttpUrl, KeyValuePairStr
 from schemas.github.releases import ReleaseSchema
 from schemas.loon import LoonArgument
 from utils.stash.dns import NameserverPolicyGeositeOverride
+from utils.stash.ruleset import RulesetGeositeOverride
 
 router = APIRouter(tags=["Stash"], prefix="/stash/stoverride")
 
@@ -664,8 +665,31 @@ async def nameserver_policy_by_geosite(
     attribute = None
     if "@" in geosite:
         geosite, attribute = geosite.split("@", 1)
-    policy = NameserverPolicyGeositeOverride(geosite, dns=dns, attribute=attribute)
+    policy = NameserverPolicyGeositeOverride(geosite, dns=dns, attribute=attribute, geosite_url=geosite_url)
     text = await policy.to_yaml()
+    headers = {
+        "Content-Disposition": "inline",
+    }
+    return PlainTextResponse(text, media_type="application/yaml;charset=utf-8", headers=headers)
+
+
+@router.get("/geosite/ruleset/{geosite}", summary="生成基于 geosite 的 ruleset")
+async def ruleset_by_geosite(
+    geosite: str = Path(..., examples=["google", "google@cn", "google@dns"]),
+    geosite_url: str = Query(
+        "https://github.com/v2fly/domain-list-community/releases/latest/download/dlc.dat",
+        examples=["https://github.com/v2fly/domain-list-community/releases/latest/download/dlc.dat"],
+    ),
+):
+    """geosite 数据来源自 https://github.com/v2fly/domain-list-community
+
+    数据存在 12-24h 的动态缓存时间
+    """
+    attribute = None
+    if "@" in geosite:
+        geosite, attribute = geosite.split("@", 1)
+    ruleset = RulesetGeositeOverride(geosite, attribute=attribute, geosite_url=geosite_url)
+    text = await ruleset.to_yaml()
     headers = {
         "Content-Disposition": "inline",
     }

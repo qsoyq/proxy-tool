@@ -1,4 +1,5 @@
 import pytest
+import yaml
 from fastapi.testclient import TestClient
 from main import app
 
@@ -39,3 +40,17 @@ def test_override_loon(client: TestClient):
         },
     )
     assert response.status_code == 200, response.text
+
+
+def test_nameserver_policy_by_geosite(client: TestClient):
+    response = client.get("/api/stash/stoverride/geosite/nameserver-policy/apple")
+    assert response.status_code == 200
+    data = yaml.safe_load(response.text)
+    assert data["dns"]["nameserver-policy"], data
+
+
+def test_ruleset_by_geosite(client: TestClient):
+    response = client.get("/api/stash/stoverride/geosite/ruleset/apple")
+    assert response.status_code == 200
+    data = yaml.safe_load(response.text)
+    assert data and data["payload"], data
