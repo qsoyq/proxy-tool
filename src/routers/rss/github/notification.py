@@ -96,7 +96,7 @@ async def fetch_feeds(
         payload: dict[str, Any] = {
             "id": f"github-notifications-{notification.id}",
             "url": url,
-            "title": notification.subject.title,
+            "title": f"{notification.subject.type} - {notification.subject.title}",
             "content_text": "",
             "date_published": notification.updated_at,
             "date_modified": notification.updated_at,
