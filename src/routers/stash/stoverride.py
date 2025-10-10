@@ -420,15 +420,16 @@ async def loon(
         match section:
             # 优先处理 Argument, 便于后续 Script 填充参数
             case "argument":
-                # blockUpload=switch, false, true, tag=隐藏上传按钮, desc=用于隐藏YouTube底栏的上传按钮
                 name = None
                 result: dict[str, Any] = {}
                 for part in line.split(","):
                     part = part.strip().strip('"')
                     if "=" in part:
                         key, value = part.split("=", 1)
+                        key = key.strip()
+                        value = value.strip()
                         if name is None and key not in ("tag", "desc"):
-                            name = key
+                            name = key.strip()
                         result[key] = value
                     else:
                         result.setdefault("_values", []).append(part)
@@ -444,6 +445,8 @@ async def loon(
                 }
 
                 arguments[name] = LoonArgument(**_payload)
+
+    logger.debug(f"[loon] arguments: {arguments}")
 
     for line in resp.text.splitlines():
         line = line.strip()
