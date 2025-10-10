@@ -578,6 +578,13 @@ async def loon(
                 raise NotImplementedError(line)
 
             case "script":
+                matched = re.match(r"(cron) (.*)", line)
+
+                if matched:
+                    # TODO: 实现 cron 脚本转换
+                    logger.debug("skip because of cron script")
+                    continue
+
                 matched = re.match(r"(http-request|http-response) (.*?http.*?) (.*)", line)
                 if not matched:
                     raise ValueError(f"invalid script line: {line}")
