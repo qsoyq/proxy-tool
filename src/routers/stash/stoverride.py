@@ -35,7 +35,6 @@ def rewrite_loon_argument(
     if not argument:
         return ""
 
-    argument = r"argument=[{blockUpload},{blockShorts},{blockImmersive},{captionLang},{lyricLang},{debug}]"
     fields = re.findall(r"\{([^}]+)\}", argument)
     body = {}
     for field in fields:
