@@ -348,19 +348,12 @@ async def loon(
     https://nsloon.app/docs/Plugin/
 
 
-    支持以下参数的转写
-    - MitM
-    - Script
+    不支持的内容
     - Rewrite
-        - Header Rewrite
-        - URL Rewrite
-    - Rule
-    - Argument
-
-    已知未支持参数
-    - Rewrite
-        - Body Rewrite
         - Mock
+    - Script
+        - generic
+        - cron
     """
     overrideScriptArguments = {k: v for item in scriptArguments for k, v in [item.split("=", 1)]}
 
@@ -586,6 +579,11 @@ async def loon(
                 if matched:
                     # TODO: 实现 cron 脚本转换
                     logger.debug("skip because of cron script")
+                    continue
+
+                matched = re.match(r"(generic) (.*)", line)
+                if matched:
+                    logger.debug("skip because of generic script")
                     continue
 
                 matched = re.match(r"(http-request|http-response) (.*?http.*?) (.*)", line)
