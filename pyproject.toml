@@ -1,59 +1,56 @@
-[tool.poetry]
-name = "project"
+[project]
+name = "proxy-tool"
 version = "0.1.0"
-description = ""
-authors = ["wangqs <wqs1639@gmail.com>"]
-
-[tool.poetry.dependencies]
-python = "^3.10"
-fastapi = "^0.116.0"
-uvicorn = "^0.17.0"
-httpx = { version = "^0.22.0", extras = ["http2", "socks"] }
-hypercorn = "^0.13.2"
-pretty-errors = "^1.2.25"
-typer = { version = "^0.4.0", extras = ["all"] }
-pyyaml = "5.3.1"
-oss2 = "^2.16.0"
-ruff = "^0.5.0"
-types-pyyaml = "^6.0.12.12"
-python-dateutil = "^2.9.0.post0"
-types-python-dateutil = "^2.9.0.20240316"
-xmltodict = "^0.13.0"
-types-xmltodict = "^0.13.0.3"
-beautifulsoup4 = "^4.12.3"
-yagmail = "^0.15.293"
-types-beautifulsoup4 = "^4.12.0.20240229"
-cairosvg = "^2.7.1"
-python-multipart = "^0.0.17"
-pip = "^24.3.1"
-pycairo = "^1.27.0"
-pyjwt = "^2.9.0"
-ics = "^0.7.2"
-dateparser = "^1.2.1"
-types-dateparser = "^1.2.0.20250408"
-psutil = "^7.0.0"
-python-ssl-checker = "^1.1.0"
-pytest-asyncio = "^0.26.0"
-feedgen = "^1.0.0"
-pytz = "^2025.2"
-cloudscraper = "^1.2.71"
-pydantic-settings = "^2.10.1"
-cachetools = ">=5.2.0,<6.0.0"
-htmlmin = "^0.1.12"
-asyncache = "^0.3.1"
-types-cachetools = "^6.1.0.20250717"
-js2py = "^0.74"
-markdown = "^3.8.2"
-curl-cffi = "^0.13.0"
-pytest-playwright = "^0.7.1"
-proto-plus = "^1.26.1"
-
-[tool.poetry.group.dev.dependencies]
-pytest = "^8.2"
-mypy = "^1.9.0"
-pre-commit = "^2.17.0"
-ipython = "^8.0.1"
-
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "pytest",
+    "mypy",
+    "pre-commit",
+    "ipython",
+    "fastapi",
+    "uvicorn",
+    "httpx[http2,socks]",
+    "hypercorn",
+    "pretty-errors",
+    "typer[all]",
+    "pyyaml",
+    "oss2",
+    "ruff",
+    "types-pyyaml",
+    "python-dateutil",
+    "types-python-dateutil",
+    "xmltodict",
+    "types-xmltodict",
+    "beautifulsoup4",
+    "yagmail",
+    "types-beautifulsoup4",
+    "cairosvg",
+    "python-multipart",
+    "pip",
+    "pycairo",
+    "pyjwt",
+    "ics",
+    "dateparser",
+    "types-dateparser",
+    "psutil",
+    "python-ssl-checker",
+    "pytest-asyncio",
+    "feedgen",
+    "pytz",
+    "cloudscraper",
+    "pydantic-settings",
+    "cachetools",
+    "htmlmin",
+    "asyncache",
+    "types-cachetools",
+    "js2py",
+    "markdown",
+    "curl-cffi",
+    "pytest-playwright",
+    "proto-plus",
+]
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.
 exclude = [
@@ -122,9 +119,9 @@ docstring-code-format = true
 # This only has an effect when the `docstring-code-format` setting is
 # enabled.
 # docstring-code-line-length = "dynamic"
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+# [build-system]
+# requires = ["poetry-core>=1.0.0"]
+# build-backend = "poetry.core.masonry.api"
 
 [tool.mypy]
 warn_return_any = true
