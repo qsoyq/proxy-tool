@@ -1,4 +1,5 @@
 import gc
+import time
 import traceback
 import logging
 import asyncio
@@ -53,11 +54,18 @@ async def startup_event(app: FastAPI):
         await asyncio.sleep(AppSettings().rss_douyin_user_auto_fetch_start_wait)
         while True:
             history = await AccessHistory.get_history()
+            cache_hit_count = 0
             for task in history:
                 try:
+                    cache_hit_count += 1
+                    t0 = time.monotonic()
                     logger.debug(f"[rss_douyin_user_auto_fetch] start {task.username}")
                     await get_feeds_by_cache(task.username, task.cookie, video_autoplay=True)
-                    await asyncio.sleep(AppSettings().rss_douyin_user_auto_fetch_once_wait)
+                    t1 = time.monotonic()
+                    # 命中缓存的情况下
+                    if (t1 - t0) > 1 or cache_hit_count >= 30:
+                        cache_hit_count = 0
+                        await asyncio.sleep(AppSettings().rss_douyin_user_auto_fetch_once_wait)
                 except Exception:
                     msg = traceback.format_exc()
                     logger.warning(f"[rss_douyin_user_auto_fetch] [get_feeds_by_cache] failed, {task.username}\n{msg}")
