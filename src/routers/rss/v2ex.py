@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from typing import cast
 
 import httpx
 from bs4 import BeautifulSoup as Soup
@@ -140,12 +141,15 @@ def get_url_from_notification_text(text: str) -> str | None:
     document = Soup(text, "lxml")
     for tag in document.select("a"):
         href = tag.get("href")
-        if isinstance(href, str) and href.startswith("/t/"):
-            return f"https://www.v2ex.com{href}"
+        if isinstance(href, str):
+            if href.startswith("/t/"):
+                return f"https://www.v2ex.com{href}"
+            elif href.startswith("/solana/tips"):
+                return f"https://www.v2ex.com{href}"
     return None
 
 
-def get_title_from_notification_text(text: str) -> str | None:
+def get_title_from_notification_text(text: str) -> str:
     type_ = ""
     if "感谢了你在主题" in text:
         type_ = "感谢"
@@ -156,4 +160,4 @@ def get_title_from_notification_text(text: str) -> str | None:
         href = tag.get("href")
         if isinstance(href, str) and href.startswith("/t/"):
             return f"{type_} - {tag.text}"
-    return None
+    return cast(str, Soup(text, "lxml").text)
