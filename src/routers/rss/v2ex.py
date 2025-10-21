@@ -121,10 +121,13 @@ async def notifications(
     for item in notifications:
         _url = get_url_from_notification_text(item.text)
         assert url, item.text
+
+        _title = get_title_from_notification_text(item.text)
+        assert _title, item.text
         payload = {
             "author": {},
             "url": _url,
-            "title": item.text,
+            "title": _title,
             "id": f"{item.id}",
             "date_published": get_date_string_for_shanghai(item.created),
             "content_html": item.payload_rendered,
@@ -139,4 +142,18 @@ def get_url_from_notification_text(text: str) -> str | None:
         href = tag.get("href")
         if isinstance(href, str) and href.startswith("/t/"):
             return f"https://www.v2ex.com{href}"
+    return None
+
+
+def get_title_from_notification_text(text: str) -> str | None:
+    type_ = ""
+    if "感谢了你在主题" in text:
+        type_ = "感谢"
+    elif "在回复" in text:
+        type_ = "回复"
+    document = Soup(text, "lxml")
+    for tag in document.select("a"):
+        href = tag.get("href")
+        if isinstance(href, str) and href.startswith("/t/"):
+            return f"{type_} - {tag.text}"
     return None
