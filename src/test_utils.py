@@ -1,5 +1,6 @@
 import os
-from utils import AsyncSSLClientContext, NgaToolkit  # type:ignore
+from utils.basic import AsyncSSLClientContext
+from utils.nga import NgaToolkit
 
 
 import pytest

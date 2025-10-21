@@ -45,10 +45,12 @@ async def aggregation(req: Request, topics: list[str] = Query([], description="è
         "favicon": "https://www.v2ex.com/favicon.ico",
         "items": items,
     }
-    result = await asyncio.gather(*[fetch_jsonfeed_items(topic) for topic in topics])
-    for one in result:
-        items.extend(one)
+    tasks: list[asyncio.Task[list[JSONFeedItem]]] = []
+    async with asyncio.TaskGroup() as tg:
+        tasks = [tg.create_task(fetch_jsonfeed_items(topic)) for topic in topics]
 
+    items = [item for task in tasks for item in task.result()]
+    feed["items"] = items
     return feed
 
 

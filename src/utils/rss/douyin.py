@@ -11,7 +11,7 @@ import pytz
 
 
 from schemas.rss.jsonfeed import JSONFeedItem
-from utils import URLToolkit, ShelveStorage  # type: ignore
+from utils.basic import URLToolkit, ShelveStorage  # type: ignore
 from utils.playwright import AsyncPlaywright
 from settings import AppSettings
 

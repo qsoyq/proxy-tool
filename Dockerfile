@@ -1,4 +1,4 @@
-FROM python:3.10.17
+FROM python:3.11.6
 # TODO: upgrade base image
 
 ENV TZ=Asia/Shanghai

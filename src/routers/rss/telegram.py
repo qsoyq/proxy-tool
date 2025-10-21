@@ -6,7 +6,7 @@ import markdown
 from fastapi import APIRouter, Request, Query
 from responses import PrettyJSONResponse
 from schemas.rss.jsonfeed import JSONFeed, JSONFeedItem
-from utils import TelegramToolkit  # type:ignore
+from utils.basic import TelegramToolkit
 from asyncache import cached
 from utils.cache import RandomTTLCache
 

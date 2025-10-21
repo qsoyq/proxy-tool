@@ -1,5 +1,5 @@
 import logging
-from fastapi import APIRouter, Path, Query, Body, HTTPException
+from fastapi import APIRouter, Path, Query, Body
 from schemas.dandanplay.v2 import (
     MatchBodySchema,
     MatchResSchema,
@@ -18,7 +18,7 @@ logger = logging.getLogger(__file__)
 @router.post("/api/v2/match", summary="DanDanPlay Bilibili 文件识别", response_model=MatchResSchema)
 async def match(body: MatchBodySchema | None = Body(None)):
     if body is None:
-        raise HTTPException(status_code=400, detail="body not exists.")
+        body = MatchBodySchema.model_validate({})
 
     logger.debug(f"[dandanplay bilbili match] req {body}")
     matched = [

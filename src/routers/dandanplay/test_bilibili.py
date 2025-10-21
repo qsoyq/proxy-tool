@@ -17,5 +17,5 @@ def test_match(client: TestClient):
 
 def test_comment(client: TestClient):
     episodeId = random.randint(1, 9999999)
-    response = client.post(f"/api/dandanplay/bilibili/api/v2/comment/{episodeId}")
+    response = client.get(f"/api/dandanplay/bilibili/api/v2/comment/{episodeId}")
     assert response.status_code == 200, response.text

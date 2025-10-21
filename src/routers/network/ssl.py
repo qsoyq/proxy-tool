@@ -5,7 +5,7 @@ import ssl_checker
 from fastapi import APIRouter, Query
 from concurrent.futures import ThreadPoolExecutor
 from schemas.network.ssl import SSLCertsResSchema, SSLCertSchema
-from utils import AsyncSSLClientContext  # type:ignore
+from utils.basic import AsyncSSLClientContext
 
 
 router = APIRouter(tags=["Utils"], prefix="/network/ssl")

@@ -30,6 +30,7 @@ def delay(request):
     yield
 
 
+@pytest.mark.skip(reason="Upstream unavailable.")
 def test_random_image(client: TestClient):
     app: FastAPI = cast(FastAPI, client.app)
     path = app.url_path_for("random_image")

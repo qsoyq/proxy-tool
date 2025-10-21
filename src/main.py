@@ -70,7 +70,7 @@ from schemas.ping import ping_responses, PingRes
 from responses import PingResponse
 from routers.rss.nodeseek import NodeseekToolkit
 from events import lifespan
-from utils import init_logger  # type:ignore
+from utils.basic import init_logger
 from utils.mermaid import load_mermaid_plugin
 
 
