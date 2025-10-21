@@ -20,12 +20,13 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.x509.oid import NameOID
 from functools import reduce, partial
-from typing import Callable
+from typing import Callable, cast
 
 from dataclasses import dataclass, asdict
 
 
 import dateparser
+import pytz
 import click
 import httpx
 from bs4 import BeautifulSoup as Soup, Tag
@@ -752,3 +753,9 @@ class ShelveStorage:
         with shelve.open(str(self.path), "r") as shl:
             for key in shl:
                 yield (key, shl[key])
+
+
+def get_date_string_for_shanghai(ts: int) -> str:
+    return cast(
+        str, pytz.timezone("Asia/Shanghai").localize(datetime.fromtimestamp(ts)).strftime("%Y-%m-%dT%H:%M:%S%z")
+    )
