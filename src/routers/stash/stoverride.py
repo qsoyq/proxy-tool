@@ -649,7 +649,7 @@ async def loon(
         override["http"]["script"] = scripts
         override["script-providers"] = script_providers
     # 设置 width 避免默认的单行内容过长导致的换行
-    text = yaml.safe_dump(override, sort_keys=False, allow_unicode=True, width=2000)
+    text = yaml.safe_dump(override, sort_keys=False, allow_unicode=True, width=9999)
     headers = {
         "Content-Disposition": "inline",
     }
