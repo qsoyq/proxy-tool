@@ -47,7 +47,7 @@ def rewrite_loon_argument(
     return json.dumps(body, ensure_ascii=False)
 
 
-@cached(TTLCache(32, 600))
+@cached(TTLCache(1024, 600))
 async def get_jq_path_content(url: str, user_agent: str) -> str:
     async with httpx.AsyncClient(headers={"User-Agent": user_agent}, verify=False) as client:
         resp = await client.get(url)
@@ -530,10 +530,9 @@ async def loon(
                         jq_path_pattern = r'jq-path="(http.*)"'
                         jq_path_matched = re.match(jq_path_pattern, content)
                         if jq_path_matched:
-                            url = jq_path_matched.group(1)
-                            content = await get_jq_path_content(url, user_agent)
-
-                        content = content.strip("'")
+                            jq_url = jq_path_matched.group(1)
+                            content = await get_jq_path_content(jq_url, user_agent)
+                            content = content.strip("'")
                     body_rewrites.append(f"{url} {rewrite_type} {content}")
                     continue
 
@@ -550,11 +549,8 @@ async def loon(
                         jq_path_pattern = r'jq-path="(http.*)"'
                         jq_path_matched = re.match(jq_path_pattern, content)
                         if jq_path_matched:
-                            url = jq_path_matched.group(1)
-                            content = await get_jq_path_content(url, user_agent)
-
-                        content = content.strip("'")
-
+                            jq_url = jq_path_matched.group(1)
+                            content = await get_jq_path_content(jq_url, user_agent)
                     body_rewrites.append(f"{url} {rewrite_type} {content}")
                     continue
 
