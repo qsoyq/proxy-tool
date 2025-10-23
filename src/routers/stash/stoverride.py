@@ -56,7 +56,7 @@ async def get_jq_path_content(url: str, user_agent: str) -> str:
         text = resp.text
 
     lines = [line for line in text.splitlines() if not line.strip().startswith("#")]
-    return re.sub(r"\s+", " ", " ".join(lines))
+    return re.sub(r"\s+", " ", " ".join(lines)).strip("'")
 
 
 def kv_pair_parse(content: str) -> dict:
@@ -532,6 +532,7 @@ async def loon(
                         if jq_path_matched:
                             jq_url = jq_path_matched.group(1)
                             content = await get_jq_path_content(jq_url, user_agent)
+                        else:
                             content = content.strip("'")
                     body_rewrites.append(f"{url} {rewrite_type} {content}")
                     continue
@@ -551,6 +552,8 @@ async def loon(
                         if jq_path_matched:
                             jq_url = jq_path_matched.group(1)
                             content = await get_jq_path_content(jq_url, user_agent)
+                        else:
+                            content = content.strip("'")
                     body_rewrites.append(f"{url} {rewrite_type} {content}")
                     continue
 
