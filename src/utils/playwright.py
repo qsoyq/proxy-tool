@@ -18,23 +18,12 @@ class AsyncPlaywright(ABC):
         self,
         url: str,
         user_agent: str = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
-        timeout: float = 10,
     ):
         self.url = url
         self._cookies: list = []
         self.user_agent = user_agent
-        self._timeout = timeout
         self._start_ts = time.time()
-        self._end_ts = self._start_ts + timeout
         self.fut: asyncio.Future[str | dict] = asyncio.Future()
-
-    @property
-    def timeout(self) -> float:
-        cur = time.time()
-        if cur >= self._end_ts:
-            return 0
-
-        return self._end_ts - cur
 
     def add_cookies(self, cookies: list):
         self._cookies.extend(cookies)
@@ -49,11 +38,10 @@ class AsyncPlaywright(ABC):
         logger.debug(f"{self.__class__.__name__} run {self.url}")
         url = self.url
         cookies = self._cookies
-
         async with async_api.async_playwright() as playwright:
             logger.debug(f"{self.__class__.__name__} enter playwright context: {self.url}")
             chromium = playwright.chromium
-            browser = await chromium.launch(headless=self.__class__.HEADLESS, timeout=self.timeout * 1000)
+            browser = await chromium.launch(headless=self.__class__.HEADLESS)
             logger.debug(f"{self.__class__.__name__} new browser: {self.url}")
             browser = await browser.new_context(user_agent=self.user_agent)
             logger.debug(f"{self.__class__.__name__} new context: {self.url}")
@@ -66,13 +54,13 @@ class AsyncPlaywright(ABC):
 
             try:
                 logger.debug(f"{self.__class__.__name__} goto page: {self.url}")
-                await asyncio.wait_for(page.goto(url, timeout=self.timeout * 1000), self.timeout)
+                await page.goto(url)
                 logger.debug(f"{self.__class__.__name__} wait for: {self.url}")
-                result = await asyncio.wait_for(self.fut, self.timeout)
+                result = await self.fut
                 logger.debug(f"{self.__class__.__name__} fetch result done, {self.url}")
                 return result
-            except asyncio.TimeoutError as e:
-                logger.warning(f"{self.__class__.__name__} [run] 等待数据超时, 请检查用户 id: {self.url}")
+            except Exception as e:
+                logger.warning(f"{self.__class__.__name__} [run] 运行错误, 请检查用户 id: {self.url}")
                 raise e
             finally:
                 await browser.close()

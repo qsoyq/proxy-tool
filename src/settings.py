@@ -1,12 +1,11 @@
 import time
-import pytz
-from datetime import datetime
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from utils.basic import get_date_string_for_shanghai
 
 
 run_at_ts = int(time.time())
-run_at = pytz.timezone("Asia/Shanghai").localize(datetime.fromtimestamp(run_at_ts)).strftime("%Y-%m-%dT%H:%M:%S%z")
-version = "0.2.6"
+run_at = get_date_string_for_shanghai(run_at_ts)
+version = "0.2.7"
 
 
 class AppSettings(BaseSettings):  # type:ignore
@@ -14,15 +13,20 @@ class AppSettings(BaseSettings):  # type:ignore
     basic_auth_user: str = "root"
     basic_auth_passwd: str = "example"
 
-    ics_fetch_vlrgg_match_time_semaphore: int = 15
     gc_trigger_memory_percent_limit: float = 80
     gc_trigger_memory_percent_interval: int = 30
 
     cloud_scraper_verify: bool = True
 
+    # calander
+    ## vlrgg
+    ics_fetch_vlrgg_match_time_semaphore: int = 15
+
+    # rss
+    ## douyin
     rss_douyin_user_semaphore: int = 5
     rss_douyin_user_feeds_cache_time: int = 1800
-
+    rss_douyin_user_auto_fetch_timeout: float = 60
     rss_douyin_user_auto_fetch_start_wait: float = 30
     rss_douyin_user_auto_fetch_enable: bool = False
     rss_douyin_user_auto_fetch_wait: int = 600
@@ -30,6 +34,7 @@ class AppSettings(BaseSettings):  # type:ignore
     rss_douyin_user_history_storage: str = "~/.proxy-tool/rss.douyin.user.history"
     rss_douyin_user_headless: bool = True
 
+    # meta
     model_config = SettingsConfigDict(env_file=".env")
 
 

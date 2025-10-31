@@ -45,6 +45,7 @@ async def startup_event(app: FastAPI):
             logger.info("[rss_douyin_user_auto_fetch] Disable")
             return
 
+        timeout = AppSettings().rss_douyin_user_auto_fetch_timeout
         logger.info("[rss_douyin_user_auto_fetch] Start")
         history = await AccessHistory.get_history()
         for task in history:
@@ -60,9 +61,15 @@ async def startup_event(app: FastAPI):
                     cache_hit_count += 1
                     t0 = time.monotonic()
                     logger.debug(f"[rss_douyin_user_auto_fetch] start {task.username}")
-                    await get_feeds_by_cache(task.username, task.cookie, video_autoplay=True)
+                    try:
+                        async with asyncio.timeout(timeout):
+                            await get_feeds_by_cache(task.username, task.cookie)
+                    except TimeoutError:
+                        logger.debug(f"[rss_douyin_user_auto_fetch] timeout with {task.username}")
+
                     t1 = time.monotonic()
-                    # 命中缓存的情况下
+                    # 命中缓存的情况下, 连续 30 次命中缓存后才会进入等待
+                    # 持续时间大于 1s 认定未命中缓存, 同时重置缓存命中计数器
                     if (t1 - t0) > 1 or cache_hit_count >= 30:
                         cache_hit_count = 0
                         await asyncio.sleep(AppSettings().rss_douyin_user_auto_fetch_once_wait)
