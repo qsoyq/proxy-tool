@@ -497,6 +497,15 @@ async def loon(
                     url_rewrites.append(f"{p1} - {p2}")
                     continue
 
+                # reject-200
+                # ^.*?(ad(.*)?\.tencentmusic\.com|kuwo\.cn\/((EcomResource|(Mobile)?Ad)Serv(er|ice)|(vip|(open)?api)?\/(setting\/sidebar\/menus|v\d\/(operate\/((adVip\/)?text|pop\/info)|online\/homepage\/homepageBanner|user\/freeMode|album\/adBar|app\/(newMenuList\/menuListInfo|pasterAdvert\/config)))|kuwopay\/vip-tab\/page\/floatbox|commercia\/eproxy\/boot\/recommend\/fee\/config)) reject-200
+                matched = re.match(r"(.*) (reject-200)", line)
+                if matched:
+                    p1, p2 = matched.groups()
+                    # p2.replace("-", "_").replace(" ", "").strip()
+                    url_rewrites.append(f"{p1} - {p2}")
+                    continue
+
                 # request header
                 matched = re.match(
                     r"(.*?http.*?) (header-add|header-del|header-replace|header-replace-regex) (.*)", line
@@ -585,7 +594,7 @@ async def loon(
                     logger.debug("skip because of generic script")
                     continue
 
-                matched = re.match(r"(http-request|http-response) (.*?http.*?) (.*)", line)
+                matched = re.match(r"(http-request|http-response) (\S+) (.*)", line)
                 if not matched:
                     raise ValueError(f"invalid script line: {line}")
 
@@ -603,6 +612,10 @@ async def loon(
                     raise e
 
                 try:
+                    if "script-path" not in kwargs:
+                        logger.error(f"[loon] can't find script-path: {kwargs}")
+                        raise RuntimeError()
+
                     _payload = {
                         "match": match_,
                         "name": kwargs.pop("tag", uuid.uuid4().hex),
