@@ -4,6 +4,7 @@ import typer
 import uvicorn
 
 from fastapi import FastAPI
+from rssapi.applications.rss.routers.nodeseek import NodeseekToolkit
 
 
 from exception import register_exception_handler
@@ -44,21 +45,6 @@ import routers.apple.ics.github
 import routers.apple.ics.vlrgg
 import routers.apple.ics.gofans
 import routers.iptv.sub
-import routers.rss.nnr
-import routers.rss.day1024
-import routers.rss.nodeseek
-import routers.rss.v2ex
-import routers.rss.nga
-import routers.rss.gofans
-import routers.rss.loon
-import routers.rss.telegram
-import routers.rss.github.release
-import routers.rss.github.commit
-import routers.rss.github.notification
-import routers.rss.readhub
-import routers.rss.douyin.user
-import routers.rss.f50
-import routers.rss.example
 import routers.dandanplay.bilibili
 
 import middlewares.rss
@@ -68,7 +54,7 @@ import middlewares.json_response
 from settings import AppSettings, version
 from schemas.ping import ping_responses, PingRes
 from responses import PingResponse
-from routers.rss.nodeseek import NodeseekToolkit
+
 from events import lifespan
 from utils.basic import init_logger
 from utils.mermaid import load_mermaid_plugin
@@ -113,21 +99,6 @@ app.include_router(routers.apple.ics.github.router, prefix=api_prefix)
 app.include_router(routers.apple.ics.vlrgg.router, prefix=api_prefix)
 app.include_router(routers.apple.ics.gofans.router, prefix=api_prefix)
 app.include_router(routers.iptv.sub.router, prefix=api_prefix)
-app.include_router(routers.rss.nnr.router, prefix=api_prefix)
-app.include_router(routers.rss.day1024.router, prefix=api_prefix)
-app.include_router(routers.rss.nodeseek.router, prefix=api_prefix)
-app.include_router(routers.rss.v2ex.router, prefix=api_prefix)
-app.include_router(routers.rss.nga.router, prefix=api_prefix)
-app.include_router(routers.rss.gofans.router, prefix=api_prefix)
-app.include_router(routers.rss.loon.router, prefix=api_prefix)
-app.include_router(routers.rss.telegram.router, prefix=api_prefix)
-app.include_router(routers.rss.github.release.router, prefix=api_prefix)
-app.include_router(routers.rss.github.commit.router, prefix=api_prefix)
-app.include_router(routers.rss.github.notification.router, prefix=api_prefix)
-app.include_router(routers.rss.readhub.router, prefix=api_prefix)
-app.include_router(routers.rss.douyin.user.router, prefix=api_prefix)
-app.include_router(routers.rss.f50.router, prefix=api_prefix)
-app.include_router(routers.rss.example.router, prefix=api_prefix)
 app.include_router(routers.dandanplay.bilibili.router, prefix=api_prefix)
 
 

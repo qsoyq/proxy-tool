@@ -1,6 +1,6 @@
 [project]
 name = "proxy-tool"
-version = "0.2.0"
+version = "0.2.1"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -50,6 +50,7 @@ dependencies = [
     "curl-cffi",
     "pytest-playwright",
     "proto-plus",
+    "rssapi",
 ]
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.
@@ -167,9 +168,13 @@ module = [
     "curl_cffi",
     "playwright.*",
     "proto.*",
+    "rssapi.*",
 ]
 ignore_missing_imports = true
 follow_untyped_imports = true
 
 [tool.pytest.ini_options]
 markers = ["nga_delay: add a delay before running the marked tests.d')"]
+
+[tool.uv.sources]
+rssapi = { git = "https://github.com/qsoyq/rssapi.git", rev = "0.1.0" }
