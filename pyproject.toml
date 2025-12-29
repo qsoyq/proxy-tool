@@ -177,4 +177,4 @@ follow_untyped_imports = true
 markers = ["nga_delay: add a delay before running the marked tests.d')"]
 
 [tool.uv.sources]
-rssapi = { git = "https://github.com/qsoyq/rssapi.git", rev = "0.1.0" }
+rssapi = { git = "https://github.com/qsoyq/rssapi.git", rev = "0.1.1" }
