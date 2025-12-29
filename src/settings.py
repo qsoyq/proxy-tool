@@ -1,11 +1,12 @@
 import time
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from utils.basic import get_date_string_for_shanghai
+from typer_utils.utils import get_project_version
 
 
 run_at_ts = int(time.time())
 run_at = get_date_string_for_shanghai(run_at_ts)
-version = "0.2.7"
+version = str(get_project_version())
 
 
 class AppSettings(BaseSettings):  # type:ignore
