@@ -1516,7 +1516,7 @@ wheels = [
 
 [[package]]
 name = "proxy-tool"
-version = "0.3.0"
+version = "0.3.1"
 source = { virtual = "." }
 dependencies = [
     { name = "asyncache" },
@@ -1605,7 +1605,7 @@ requires-dist = [
     { name = "python-ssl-checker" },
     { name = "pytz" },
     { name = "pyyaml" },
-    { name = "rssapi", git = "https://github.com/qsoyq/rssapi.git?rev=0.1.2" },
+    { name = "rssapi", git = "https://github.com/qsoyq/rssapi.git?rev=0.1.5" },
     { name = "ruff" },
     { name = "typer" },
     { name = "typer-utils", git = "https://github.com/qsoyq/typer_utils.git" },
@@ -2277,8 +2277,8 @@ wheels = [
 
 [[package]]
 name = "rssapi"
-version = "0.1.2"
-source = { git = "https://github.com/qsoyq/rssapi.git?rev=0.1.2#ef359163bb39eb560df63eb7f60301926f6607b8" }
+version = "0.1.5"
+source = { git = "https://github.com/qsoyq/rssapi.git?rev=0.1.5#e82fb4ce5e80cb11770538435ed9c3fe4afef68c" }
 dependencies = [
     { name = "asyncache" },
     { name = "beautifulsoup4" },
@@ -2317,6 +2317,7 @@ dependencies = [
     { name = "pyyaml" },
     { name = "ruff" },
     { name = "typer" },
+    { name = "typer-utils" },
     { name = "types-beautifulsoup4" },
     { name = "types-cachetools" },
     { name = "types-dateparser" },
@@ -2545,7 +2546,7 @@ wheels = [
 [[package]]
 name = "typer-utils"
 version = "0.1.1"
-source = { git = "https://github.com/qsoyq/typer_utils.git#18ac4a4d3a1f454ef209cf85d82de058ad84459c" }
+source = { git = "https://github.com/qsoyq/typer_utils#18ac4a4d3a1f454ef209cf85d82de058ad84459c" }
 dependencies = [
     { name = "pre-commit" },
     { name = "pytest" },
