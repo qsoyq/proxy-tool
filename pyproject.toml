@@ -1,6 +1,6 @@
 [project]
 name = "proxy-tool"
-version = "0.3.3"
+version = "0.3.4"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -52,6 +52,7 @@ dependencies = [
     "proto-plus",
     "rssapi",
     "typer-utils@git+https://github.com/qsoyq/typer_utils.git",
+    "ical-api@git+https://github.com/qsoyq/ical-api.git",
 ]
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.
@@ -172,6 +173,7 @@ module = [
     "proto.*",
     "rssapi.*",
     "typer_utils.*",
+    "ical_api.*",
 ]
 ignore_missing_imports = true
 follow_untyped_imports = true
@@ -180,5 +182,6 @@ follow_untyped_imports = true
 markers = ["nga_delay: add a delay before running the marked tests.d')"]
 
 [tool.uv.sources]
-rssapi = { git = "https://github.com/qsoyq/rssapi.git", rev = "0.1.6" }
 typer-utils = { git = "https://github.com/qsoyq/typer_utils.git" }
+rssapi = { git = "https://github.com/qsoyq/rssapi.git", rev = "0.1.6" }
+ical-api = { git = "https://github.com/qsoyq/ical-api", rev = "0.1.1" }

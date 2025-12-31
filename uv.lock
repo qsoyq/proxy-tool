@@ -126,6 +126,18 @@ wheels = [
 ]
 
 [[package]]
+name = "bs4"
+version = "0.0.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "beautifulsoup4" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/c9/aa/4acaf814ff901145da37332e05bb510452ebed97bc9602695059dd46ef39/bs4-0.0.2.tar.gz", hash = "sha256:a48685c58f50fe127722417bae83fe6badf500d54b55f7e39ffe43b798653925", size = 698, upload-time = "2024-01-17T18:15:47.371Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/51/bb/bf7aab772a159614954d84aa832c129624ba6c32faa559dfb200a534e50b/bs4-0.0.2-py2.py3-none-any.whl", hash = "sha256:abf8742c0805ef7f662dce4b51cca104cffe52b835238afc169142ab9b3fbccc", size = 1189, upload-time = "2024-01-17T18:15:48.613Z" },
+]
+
+[[package]]
 name = "cachetools"
 version = "5.5.2"
 source = { registry = "https://pypi.org/simple" }
@@ -765,6 +777,39 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/02/e7/94f8232d4a74cc99514c13a9f995811485a6903d48e5d952771ef6322e30/hyperframe-6.1.0.tar.gz", hash = "sha256:f630908a00854a7adeabd6382b43923a4c4cd4b821fcb527e6ab9e15382a3b08", size = 26566, upload-time = "2025-01-22T21:41:49.302Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/48/30/47d0bf6072f7252e6521f3447ccfa40b421b6824517f82854703d0f5a98b/hyperframe-6.1.0-py3-none-any.whl", hash = "sha256:b03380493a519fce58ea5af42e4a42317bf9bd425596f7a0835ffce80f1a42e5", size = 13007, upload-time = "2025-01-22T21:41:47.295Z" },
+]
+
+[[package]]
+name = "ical-api"
+version = "0.1.1"
+source = { git = "https://github.com/qsoyq/ical-api?rev=0.1.1#59c3a400a65b71f832aa0cedd1275c978d00b13a" }
+dependencies = [
+    { name = "asyncache" },
+    { name = "bs4" },
+    { name = "cachetools" },
+    { name = "click" },
+    { name = "dateparser" },
+    { name = "fastapi" },
+    { name = "httpx", extra = ["http2", "socks"] },
+    { name = "hypercorn" },
+    { name = "ics" },
+    { name = "ipython", version = "8.37.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "ipython", version = "9.8.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "lxml" },
+    { name = "mypy" },
+    { name = "pip" },
+    { name = "pre-commit" },
+    { name = "pretty-errors" },
+    { name = "pydantic-settings" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "python-multipart" },
+    { name = "pytz" },
+    { name = "requests" },
+    { name = "ruff" },
+    { name = "typer" },
+    { name = "types-pyyaml" },
+    { name = "uvicorn" },
 ]
 
 [[package]]
@@ -1516,7 +1561,7 @@ wheels = [
 
 [[package]]
 name = "proxy-tool"
-version = "0.3.1"
+version = "0.3.3"
 source = { virtual = "." }
 dependencies = [
     { name = "asyncache" },
@@ -1531,6 +1576,7 @@ dependencies = [
     { name = "htmlmin" },
     { name = "httpx", extra = ["http2", "socks"] },
     { name = "hypercorn" },
+    { name = "ical-api" },
     { name = "ics" },
     { name = "ipython", version = "8.37.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "ipython", version = "9.8.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
@@ -1583,6 +1629,7 @@ requires-dist = [
     { name = "htmlmin" },
     { name = "httpx", extras = ["http2", "socks"] },
     { name = "hypercorn" },
+    { name = "ical-api", git = "https://github.com/qsoyq/ical-api?rev=0.1.1" },
     { name = "ics" },
     { name = "ipython" },
     { name = "js2py" },
@@ -1605,7 +1652,7 @@ requires-dist = [
     { name = "python-ssl-checker" },
     { name = "pytz" },
     { name = "pyyaml" },
-    { name = "rssapi", git = "https://github.com/qsoyq/rssapi.git?rev=0.1.5" },
+    { name = "rssapi", git = "https://github.com/qsoyq/rssapi.git?rev=0.1.6" },
     { name = "ruff" },
     { name = "typer" },
     { name = "typer-utils", git = "https://github.com/qsoyq/typer_utils.git" },
@@ -2277,8 +2324,8 @@ wheels = [
 
 [[package]]
 name = "rssapi"
-version = "0.1.5"
-source = { git = "https://github.com/qsoyq/rssapi.git?rev=0.1.5#e82fb4ce5e80cb11770538435ed9c3fe4afef68c" }
+version = "0.1.6"
+source = { git = "https://github.com/qsoyq/rssapi.git?rev=0.1.6#c12f84ba0300bffaf721a0e5af054dc99c4795ed" }
 dependencies = [
     { name = "asyncache" },
     { name = "beautifulsoup4" },

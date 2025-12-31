@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from rssapi.core.middlewares.rss import add_middleware as add_rssapi_middlewares
 from rssapi.init import include_routers as include_rssapi_routers
+from ical_api.init import include_routers as include_ical_api_routers
 
 
 from exception import register_exception_handler
@@ -36,10 +37,6 @@ import routers.v2ex.nodes
 import routers.v2ex.my
 import routers.apple.location
 import routers.apple.itunes.appstore
-import routers.apple.ics
-import routers.apple.ics.github
-import routers.apple.ics.vlrgg
-import routers.apple.ics.gofans
 import routers.iptv.sub
 import routers.dandanplay.bilibili
 
@@ -84,14 +81,11 @@ def include_routers(app: FastAPI):
     app.include_router(routers.stash.ruleset.router, prefix=api_prefix)
     app.include_router(routers.apple.location.router, prefix=api_prefix)
     app.include_router(routers.apple.itunes.appstore.router, prefix=api_prefix)
-    app.include_router(routers.apple.ics.router, prefix=api_prefix)
-    app.include_router(routers.apple.ics.github.router, prefix=api_prefix)
-    app.include_router(routers.apple.ics.vlrgg.router, prefix=api_prefix)
-    app.include_router(routers.apple.ics.gofans.router, prefix=api_prefix)
     app.include_router(routers.iptv.sub.router, prefix=api_prefix)
     app.include_router(routers.dandanplay.bilibili.router, prefix=api_prefix)
 
     include_rssapi_routers(app, api_prefix=api_prefix)
+    include_ical_api_routers(app, api_prefix=api_prefix)
 
 
 def add_middlewares(app: FastAPI):
