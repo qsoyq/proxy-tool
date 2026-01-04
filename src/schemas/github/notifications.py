@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field
+
 from schemas.github import AuthorSchema
 
 
@@ -24,8 +25,8 @@ class NotificationSchema(BaseModel):
     id: str
     unread: bool
     reason: str
-    updated_at: str = Field(..., examples=["2025-10-06T13:29:36Z"])
-    last_read_at: str | None = Field(None, examples=["2025-10-06T13:29:36Z"])
+    updated_at: str = Field(..., examples=['2025-10-06T13:29:36Z'])
+    last_read_at: str | None = Field(None, examples=['2025-10-06T13:29:36Z'])
     url: str
     subscription_url: str
 

@@ -1,12 +1,13 @@
-from typing import Any
-from pydantic import BaseModel
 from enum import Enum
+from typing import Any
+
+from pydantic import BaseModel
 
 
 class ArgumentTypeEnum(str, Enum):
-    intput = "input"
-    select = "select"
-    switch = "switch"
+    intput = 'input'
+    select = 'select'
+    switch = 'switch'
 
 
 class LoonArgument(BaseModel):

@@ -1,39 +1,40 @@
-import urllib.parse
 import logging
 import random
+import urllib.parse
 from typing import List
+
+import httpx
+from bs4 import BeautifulSoup as soup
 from fastapi import APIRouter, Query
 from fastapi.responses import HTMLResponse
-from bs4 import BeautifulSoup as soup
-import httpx
 from pydantic import BaseModel, Field
 
 
 class CountryCodeSchema(BaseModel):
-    name: str = Field(..., description="名称, 如中国")
-    code: str = Field(..., description="代码, 如CN")
+    name: str = Field(..., description='名称, 如中国')
+    code: str = Field(..., description='代码, 如CN')
 
 
 class CountryCodeResSchema(BaseModel):
     data: list[CountryCodeSchema]
 
 
-router = APIRouter(tags=["Utils"], prefix="/tool")
+router = APIRouter(tags=['Utils'], prefix='/tool')
 
 logger = logging.getLogger(__file__)
 
 
-@router.get("/eat", summary="今天吃什么")
-def eat(choices: List[str] = Query(..., description="选择列表, 随机返回一个")):
+@router.get('/eat', summary='今天吃什么')
+def eat(choices: List[str] = Query(..., description='选择列表, 随机返回一个')):
     select = random.choice(choices)
-    meituanwaimai = urllib.parse.quote(f"meituanwaimai://waimai.meituan.com/search?query={select}")
-    meituanwaimai_href = f"https://p.19940731.xyz/api/network/url/redirect?url={meituanwaimai}"
+    meituanwaimai = urllib.parse.quote(f'meituanwaimai://waimai.meituan.com/search?query={select}')
+    meituanwaimai_href = f'https://p.19940731.xyz/api/network/url/redirect?url={meituanwaimai}'
 
-    eleme = f"eleme://search?keyword={select}"
-    eleme_href = f"https://p.19940731.xyz/api/network/url/redirect?url={eleme}"
+    eleme = f'eleme://search?keyword={select}'
+    eleme_href = f'https://p.19940731.xyz/api/network/url/redirect?url={eleme}'
 
-    dianping = f"dianping://searchshoplist?keyword={select}"
-    dianping_href = f"https://p.19940731.xyz/api/network/url/redirect?url={dianping}"
+    dianping = f'dianping://searchshoplist?keyword={select}'
+    dianping_href = f'https://p.19940731.xyz/api/network/url/redirect?url={dianping}'
     body = f"""
     <!DOCTYPE html>
     <html lang="zh">
@@ -70,30 +71,30 @@ def eat(choices: List[str] = Query(..., description="选择列表, 随机返回�
     </body>
     </html>
     """
-    return HTMLResponse(content=body, headers={"content-type": "text/html; charset=UTF-8"})
+    return HTMLResponse(content=body, headers={'content-type': 'text/html; charset=UTF-8'})
 
 
-@router.get("/countrycode/freejson", response_model=CountryCodeResSchema)
+@router.get('/countrycode/freejson', response_model=CountryCodeResSchema)
 def countrycode():
     """数据来源: http://www.freejson.com/countrycode.html"""
-    url = "http://www.freejson.com/countrycode.html"
+    url = 'http://www.freejson.com/countrycode.html'
     res = httpx.get(url, verify=False)
     res.raise_for_status()
 
-    document = soup(res.text, "lxml")
-    tbody = document.select_one("tbody")
+    document = soup(res.text, 'lxml')
+    tbody = document.select_one('tbody')
     ret = []
-    more = {"尼尔利亚": "NG", "台湾": "TW"}
+    more = {'尼尔利亚': 'NG', '台湾': 'TW'}
     mapping = {}
     if tbody:
-        trs = tbody.select("tr")
+        trs = tbody.select('tr')
         if trs:
             trs = trs[1:]
             for tr in trs:
-                tds = tr.select("td")
+                tds = tr.select('td')
                 _, name, code, _, _ = tds
-                if name.text and code.text and code.text != "\xa0":
+                if name.text and code.text and code.text != '\xa0':
                     mapping[name.text] = code.text
     mapping.update(more)
-    ret = [{"name": name, "code": code} for name, code in mapping.items()]
+    ret = [{'name': name, 'code': code} for name, code in mapping.items()]
     return ret

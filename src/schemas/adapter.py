@@ -1,6 +1,6 @@
 from typing import Annotated
-from pydantic import TypeAdapter, BeforeValidator, AnyHttpUrl
 
+from pydantic import AnyHttpUrl, BeforeValidator, TypeAdapter
 
 HttpUrlTypeAdapter = TypeAdapter(AnyHttpUrl)
 HttpUrl = Annotated[
@@ -10,5 +10,5 @@ HttpUrl = Annotated[
 
 KeyValuePairStr = Annotated[
     str,
-    BeforeValidator(lambda value: "=" in value and value),
+    BeforeValidator(lambda value: '=' in value and value),
 ]

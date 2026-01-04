@@ -2,7 +2,6 @@ import importlib
 from functools import wraps
 from typing import Callable
 
-
 import fastapi
 import fastapi.applications
 import fastapi.openapi.docs
@@ -32,7 +31,7 @@ def add_mermaid_support(func: Callable[..., HTMLResponse]):
         res = func(*args, **kwargs)
         if isinstance(res.body, bytes):
             content = res.body.decode(res.charset)
-            index = content.find("</head>")
+            index = content.find('</head>')
             if index != -1:
                 content = content[:index] + mermaid_js + content[index:]
 

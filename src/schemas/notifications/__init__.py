@@ -1,9 +1,10 @@
 from pydantic import BaseModel
-import schemas.notifications.telegram as telegram_
+
+import schemas.notifications.apple as apple_
 import schemas.notifications.bark as bark_
 import schemas.notifications.gmail as gmail_
 import schemas.notifications.gotify as gotify_
-import schemas.notifications.apple as apple_
+import schemas.notifications.telegram as telegram_
 
 
 class PushMessage(BaseModel):

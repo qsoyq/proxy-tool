@@ -1,6 +1,7 @@
-import tempfile
-import yagmail
 import json
+import tempfile
+
+import yagmail
 from pydantic import BaseModel, Field
 
 
@@ -17,10 +18,10 @@ class GmailPushMessage(BaseModel):
     contents: str | list[str]
 
     sender: str
-    password: str | None = Field(None, description="使用密码登录时需要该值")
+    password: str | None = Field(None, description='使用密码登录时需要该值')
     oauth2_file: GmailOauth2File | None = Field(
         None,
-        description="使用 oauth2 验证时需要该对象. 见 https://github.com/kootenpv/yagmail?tab=readme-ov-file#oauth2",
+        description='使用 oauth2 验证时需要该对象. 见 https://github.com/kootenpv/yagmail?tab=readme-ov-file#oauth2',
     )
 
     def push(self) -> None:
@@ -29,7 +30,7 @@ class GmailPushMessage(BaseModel):
             yag = yagmail.SMTP(self.sender, self.password)
 
         elif self.oauth2_file:
-            with tempfile.NamedTemporaryFile("w+") as f:
+            with tempfile.NamedTemporaryFile('w+') as f:
                 f.write(json.dumps(self.oauth2_file.dict()))
                 f.seek(0)
                 yag = yagmail.SMTP(self.sender, oauth2_file=f.name)

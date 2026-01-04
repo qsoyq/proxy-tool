@@ -2,18 +2,18 @@ from pydantic import BaseModel, Field
 
 
 class EnclosureSchema(BaseModel):
-    url: str = Field("", alias="@url")
-    type_: str = Field("", alias="@type")
-    length: str = Field("", alias="@length")
+    url: str = Field('', alias='@url')
+    type_: str = Field('', alias='@type')
+    length: str = Field('', alias='@length')
 
 
 class GUIDSchema(BaseModel):
-    text: str = Field("", alias="#text")
-    isPermaLink: str = Field("", alias="@isPermaLink")
+    text: str = Field('', alias='#text')
+    isPermaLink: str = Field('', alias='@isPermaLink')
 
 
 class TorrentSchema(BaseModel):
-    xmlns: str = Field("", alias="@xmlns")
+    xmlns: str = Field('', alias='@xmlns')
     link: str
     contentLength: str
     pubDate: str
@@ -26,8 +26,8 @@ class ChannelItemSchema(BaseModel):
     description: str
     torrent: TorrentSchema
     enclosure: EnclosureSchema
-    image: str = Field("")
-    real_title: str = Field("")
+    image: str = Field('')
+    real_title: str = Field('')
 
 
 class ChannelSchema(BaseModel):
@@ -38,7 +38,7 @@ class ChannelSchema(BaseModel):
 
 
 class RssSchema(BaseModel):
-    version: str = Field(..., alias="@version")
+    version: str = Field(..., alias='@version')
     channel: ChannelSchema
 
 
@@ -59,34 +59,34 @@ magnet:?xt=urn:btih:c35e2a8a93d965f8689473e1bf9b8d61d0a33b4d&tr=http%3a%2f%2ft.n
 
 
 mikanani_rss_subscribe_success_example = {
-    "rss": {
-        "@version": "2.0",
-        "channel": {
-            "title": "Mikan Project - 我的番组",
-            "link": "http://mikanani.me/RSS/MyBangumi?token=token",
-            "description": "Mikan Project - 我的番组",
-            "item": [
+    'rss': {
+        '@version': '2.0',
+        'channel': {
+            'title': 'Mikan Project - 我的番组',
+            'link': 'http://mikanani.me/RSS/MyBangumi?token=token',
+            'description': 'Mikan Project - 我的番组',
+            'item': [
                 {
-                    "guid": {
-                        "@isPermaLink": "false",
-                        "#text": "[不当舔狗制作组] 机动战士高达 GQuuuuuuX - 01V2 [AMZN WebRip 1080p HEVC-10bit E-AC-3][简繁内封字幕]",
+                    'guid': {
+                        '@isPermaLink': 'false',
+                        '#text': '[不当舔狗制作组] 机动战士高达 GQuuuuuuX - 01V2 [AMZN WebRip 1080p HEVC-10bit E-AC-3][简繁内封字幕]',
                     },
-                    "link": "https://mikanani.me/Home/Episode/f5a6c93027ddd512c55285bb68e2f5d45cf80fb6",
-                    "title": "[不当舔狗制作组] 机动战士高达 GQuuuuuuX - 01V2 [AMZN WebRip 1080p HEVC-10bit E-AC-3][简繁内封字幕]",
-                    "description": "[不当舔狗制作组] 机动战士高达 GQuuuuuuX - 01V2 [AMZN WebRip 1080p HEVC-10bit E-AC-3][简繁内封字幕][560.7MB]",
-                    "torrent": {
-                        "@xmlns": "https://mikanani.me/0.1/",
-                        "link": "https://mikanani.me/Home/Episode/f5a6c93027ddd512c55285bb68e2f5d45cf80fb6",
-                        "contentLength": "587936576",
-                        "pubDate": "2025-04-15T21:38:00",
+                    'link': 'https://mikanani.me/Home/Episode/f5a6c93027ddd512c55285bb68e2f5d45cf80fb6',
+                    'title': '[不当舔狗制作组] 机动战士高达 GQuuuuuuX - 01V2 [AMZN WebRip 1080p HEVC-10bit E-AC-3][简繁内封字幕]',
+                    'description': '[不当舔狗制作组] 机动战士高达 GQuuuuuuX - 01V2 [AMZN WebRip 1080p HEVC-10bit E-AC-3][简繁内封字幕][560.7MB]',
+                    'torrent': {
+                        '@xmlns': 'https://mikanani.me/0.1/',
+                        'link': 'https://mikanani.me/Home/Episode/f5a6c93027ddd512c55285bb68e2f5d45cf80fb6',
+                        'contentLength': '587936576',
+                        'pubDate': '2025-04-15T21:38:00',
                     },
-                    "enclosure": {
-                        "@type": "application/x-bittorrent",
-                        "@length": "587936576",
-                        "@url": "https://mikanani.me/Download/20250415/f5a6c93027ddd512c55285bb68e2f5d45cf80fb6.torrent",
+                    'enclosure': {
+                        '@type': 'application/x-bittorrent',
+                        '@length': '587936576',
+                        '@url': 'https://mikanani.me/Download/20250415/f5a6c93027ddd512c55285bb68e2f5d45cf80fb6.torrent',
                     },
-                    "image": "https://mikanani.me/images/Bangumi/202504/e33a7226.jpg?width=400&height=560&format=webp",
-                    "real_title": "机动战士高达 GQuuuuuuX - 01V2",
+                    'image': 'https://mikanani.me/images/Bangumi/202504/e33a7226.jpg?width=400&height=560&format=webp',
+                    'real_title': '机动战士高达 GQuuuuuuX - 01V2',
                 },
             ],
         },
@@ -96,14 +96,14 @@ mikanani_rss_subscribe_success_example = {
 
 mikanani_rss_subscribe_responses: dict[int | str, dict[str, object]] = {
     200: {
-        "description": "200 Successful Response",
-        "content": {"application/json": {"example": mikanani_rss_subscribe_success_example}},
+        'description': '200 Successful Response',
+        'content': {'application/json': {'example': mikanani_rss_subscribe_success_example}},
     }
 }
 
 mikanani_bangumi_torrent_responses: dict[int | str, dict[str, object]] = {
     200: {
-        "description": "200 Successful Response",
-        "content": {"text/plain": {"example": mikanani_bangumi_torrent_success_example}},
+        'description': '200 Successful Response',
+        'content': {'text/plain': {'example': mikanani_bangumi_torrent_success_example}},
     }
 }

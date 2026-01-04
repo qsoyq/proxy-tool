@@ -1,57 +1,58 @@
 import asyncio
-from typing import cast
-from itertools import chain
 from enum import Enum
+from itertools import chain
+from typing import cast
 
 import httpx
 import proto
 from fastapi import HTTPException
-from utils.cache import cached, RandomTTLCache
-from schemas.v2fly.geosite_pb import GeoSiteList, DomainTypeEnum
+
+from schemas.v2fly.geosite_pb import DomainTypeEnum, GeoSiteList
+from utils.cache import RandomTTLCache, cached
 
 
 class RecordEnum(str, Enum):
-    comment = "comment"
-    full = "full"
-    regexp = "regexp"
-    include = "include"
-    domain = "domain"
+    comment = 'comment'
+    full = 'full'
+    regexp = 'regexp'
+    include = 'include'
+    domain = 'domain'
 
 
 class Record:
     def __init__(self, line: str):
         line = line.strip()
         self._type = self._value = self._attribute = None
-        if line.startswith("#"):
+        if line.startswith('#'):
             self._type = RecordEnum.comment.value
             line = line[1:].strip()
-        elif line.startswith("full"):
+        elif line.startswith('full'):
             self._type = RecordEnum.full.value
-            line = line.split(":", 1)[1].strip()
-        elif line.startswith("regexp"):
+            line = line.split(':', 1)[1].strip()
+        elif line.startswith('regexp'):
             self._type = RecordEnum.regexp.value
-            line = line = line.split(":", 1)[1].strip()
-        elif line.startswith("include"):
+            line = line = line.split(':', 1)[1].strip()
+        elif line.startswith('include'):
             self._type = RecordEnum.include.value
-            line = line = line.split(":", 1)[1].strip()
+            line = line = line.split(':', 1)[1].strip()
         else:
             self._type = RecordEnum.domain.value
 
-        if "@" in line:
-            self._value, self._attribute = [x.strip() for x in line.split(" ", 1)]
+        if '@' in line:
+            self._value, self._attribute = [x.strip() for x in line.split(' ', 1)]
         else:
             self._value = line.strip()
 
-        if self._attribute and self._attribute.startswith("@"):
+        if self._attribute and self._attribute.startswith('@'):
             self._attribute = self._attribute[1:]
 
     def __repr__(self) -> str:
-        return f"{self._type} - {self._value} - {self._attribute}"
+        return f'{self._type} - {self._value} - {self._attribute}'
 
 
 @cached(RandomTTLCache(4096, 43200))
 async def fetch_by_name(name):
-    url = f"https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/{name}"
+    url = f'https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/{name}'
     async with httpx.AsyncClient(verify=False) as client:
         resp = await client.get(url)
         if resp.is_error:
@@ -63,15 +64,15 @@ async def fetch_by_name(name):
 class GeoSite:
     def __init__(self, name):
         attribute = None
-        if "@" in name:
-            name, attribute = name.split("@")
+        if '@' in name:
+            name, attribute = name.split('@')
         self._name = name
         self._attribute = attribute
         self.data: list[Record] = []
 
     async def fetch(self):
         lines = await fetch_by_name(self._name)
-        for line in lines.split("\n"):
+        for line in lines.split('\n'):
             if not line:
                 continue
             self.data.append(Record(line))
@@ -81,19 +82,19 @@ class GeoSite:
 
     @property
     def domains(self) -> list[Record]:
-        return [x for x in self.data if x._type == "domain"]
+        return [x for x in self.data if x._type == 'domain']
 
     @property
     def include(self) -> list[Record]:
-        return [x for x in self.data if x._type == "include"]
+        return [x for x in self.data if x._type == 'include']
 
     @property
     def regexp(self) -> list[Record]:
-        return [x for x in self.data if x._type == "regexp"]
+        return [x for x in self.data if x._type == 'regexp']
 
     @property
     def full(self) -> list[Record]:
-        return [x for x in self.data if x._type == "full"]
+        return [x for x in self.data if x._type == 'full']
 
 
 async def get_domains_by_geosite(name: str, *, include_all: bool = True) -> set[Record]:
@@ -120,7 +121,7 @@ async def get_domains_by_geosite(name: str, *, include_all: bool = True) -> set[
 
 @cached(RandomTTLCache(16, 43200))
 async def get_geosite_library_by_url(
-    url: str = "https://github.com/v2fly/domain-list-community/releases/latest/download/dlc.dat",
+    url: str = 'https://github.com/v2fly/domain-list-community/releases/latest/download/dlc.dat',
 ) -> proto.Message:
     async with httpx.AsyncClient() as client:
         resp = await client.get(url, follow_redirects=True)
@@ -134,7 +135,7 @@ async def get_domains_by_geosite_library(
     name: str,
     *,
     attribute: str | None = None,
-    geosite_url: str = "https://github.com/v2fly/domain-list-community/releases/latest/download/dlc.dat",
+    geosite_url: str = 'https://github.com/v2fly/domain-list-community/releases/latest/download/dlc.dat',
 ) -> set[str]:
     name = name.upper()
     results = set()
@@ -152,5 +153,5 @@ async def get_domains_by_geosite_library(
 
 def get_stash_policy_value(value: str, type_: int):
     if type_ == DomainTypeEnum.Domain_RootDomain:
-        return f"+.{value}"
+        return f'+.{value}'
     return value

@@ -1,49 +1,46 @@
 from fastapi import FastAPI
-from rssapi.core.middlewares.rss import add_middleware as add_rssapi_middlewares
-from rssapi.init import include_routers as include_rssapi_routers
 from ical_api.init import include_routers as include_ical_api_routers
+from rssapi.core.middlewares.rss import \
+    add_middleware as add_rssapi_middlewares
+from rssapi.init import include_routers as include_rssapi_routers
 
-
-from exception import register_exception_handler
-
-import routers.basic
-import routers.tool.basic
-import routers.tool.image
-import routers.tool.fingerprint
-import routers.tool.browser
-import routers.tool.url
-import routers.tool.f50
-import routers.notifications.push
-import routers.webhook.railway
-import routers.checkin.flyairport
-import routers.store.memory
-import routers.clash.basic
-import routers.clash.config
-import routers.stash.stoverride
-import routers.stash.ruleset
-import routers.network.dns.doh
-import routers.network.proxy.reverse
-import routers.network.url.redirect
-import routers.network.url.forward
-import routers.network.ssl
-import routers.bilibili.live.room
-import routers.convert.xml
-import routers.convert.svg
-import routers.convert.curl
-import routers.mikanani.rss
-import routers.mikanani.bangumi
-import routers.nga.thread
-import routers.v2ex.nodes
-import routers.v2ex.my
-import routers.apple.location
-import routers.apple.itunes.appstore
-import routers.iptv.sub
-import routers.dandanplay.bilibili
-
-import middlewares.rss
 import middlewares.errors
 import middlewares.json_response
-
+import middlewares.rss
+import routers.apple.itunes.appstore
+import routers.apple.location
+import routers.basic
+import routers.bilibili.live.room
+import routers.checkin.flyairport
+import routers.clash.basic
+import routers.clash.config
+import routers.convert.curl
+import routers.convert.svg
+import routers.convert.xml
+import routers.dandanplay.bilibili
+import routers.iptv.sub
+import routers.mikanani.bangumi
+import routers.mikanani.rss
+import routers.network.dns.doh
+import routers.network.proxy.reverse
+import routers.network.ssl
+import routers.network.url.forward
+import routers.network.url.redirect
+import routers.nga.thread
+import routers.notifications.push
+import routers.stash.ruleset
+import routers.stash.stoverride
+import routers.store.memory
+import routers.tool.basic
+import routers.tool.browser
+import routers.tool.f50
+import routers.tool.fingerprint
+import routers.tool.image
+import routers.tool.url
+import routers.v2ex.my
+import routers.v2ex.nodes
+import routers.webhook.railway
+from exception import register_exception_handler
 from settings import AppSettings
 from utils.mermaid import load_mermaid_plugin
 
