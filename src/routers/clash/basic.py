@@ -10,7 +10,6 @@ import pytz
 import yaml
 from fastapi import APIRouter, Path, Query
 from fastapi.responses import PlainTextResponse, Response
-
 from models import ClashModel
 from settings import RegionCodeTable
 

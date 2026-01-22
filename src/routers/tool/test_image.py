@@ -4,7 +4,6 @@ from typing import cast
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-
 from main import app
 
 FIRST_DELAY = True

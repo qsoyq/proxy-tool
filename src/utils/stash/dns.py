@@ -1,7 +1,6 @@
 from typing import cast
 
 import yaml
-
 from utils.v2fly.geosite import get_domains_by_geosite_library
 
 

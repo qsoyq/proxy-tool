@@ -4,7 +4,6 @@ import httpx
 import yaml
 from fastapi import APIRouter, Query
 from fastapi.responses import PlainTextResponse
-
 from schemas.adapter import HttpUrl
 
 router = APIRouter(tags=['Stash'], prefix='/stash/ruleset')

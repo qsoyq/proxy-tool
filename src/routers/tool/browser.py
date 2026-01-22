@@ -5,7 +5,6 @@ import cloudscraper
 import curl_cffi
 from fastapi import APIRouter, Query
 from playwright.async_api import async_playwright
-
 from responses import PrettyJSONResponse
 from schemas.adapter import HttpUrl
 

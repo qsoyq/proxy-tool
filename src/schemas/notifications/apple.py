@@ -6,7 +6,6 @@ from typing import Any, Dict
 import httpx
 import jwt
 from pydantic import BaseModel, Field
-
 from schemas.adapter import HttpUrl
 
 APNS_HOST_NAME = 'api.push.apple.com'

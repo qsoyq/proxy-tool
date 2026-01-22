@@ -1,5 +1,4 @@
 from pydantic import BaseModel, Field, model_validator
-
 from schemas.adapter import HttpUrl
 
 

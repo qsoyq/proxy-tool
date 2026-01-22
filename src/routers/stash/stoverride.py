@@ -12,7 +12,6 @@ from asyncache import cached
 from cachetools import TTLCache
 from fastapi import APIRouter, HTTPException, Path, Query
 from fastapi.responses import PlainTextResponse
-
 from schemas.adapter import HttpUrl, KeyValuePairStr
 from schemas.github.releases import ReleaseSchema
 from schemas.loon import LoonArgument

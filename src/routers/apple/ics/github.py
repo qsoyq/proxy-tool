@@ -6,9 +6,12 @@ import httpx
 from fastapi import APIRouter, Path, Query
 from fastapi.responses import PlainTextResponse
 from ics import Calendar, Event
-
-from schemas.github.issues import (GithubIssue, GithubIssueDirection,
-                                   GithubIssueSort, GithubIssueState)
+from schemas.github.issues import (
+    GithubIssue,
+    GithubIssueDirection,
+    GithubIssueSort,
+    GithubIssueState,
+)
 
 router = APIRouter(tags=['Utils'], prefix='/apple/ics/github')
 

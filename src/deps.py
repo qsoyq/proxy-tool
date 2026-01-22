@@ -2,7 +2,6 @@ import secrets
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
-
 from settings import AppSettings
 
 security = HTTPBasic()

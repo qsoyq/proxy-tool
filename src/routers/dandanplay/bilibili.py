@@ -1,10 +1,14 @@
 import logging
 
 from fastapi import APIRouter, Body, Path, Query
-
-from schemas.dandanplay.v2 import (AnimeTypeEnum, CommentResSchema,
-                                   GetBangumiResSchema, MatchBodySchema,
-                                   MatchResSchema, SearchAnimeResSchema)
+from schemas.dandanplay.v2 import (
+    AnimeTypeEnum,
+    CommentResSchema,
+    GetBangumiResSchema,
+    MatchBodySchema,
+    MatchResSchema,
+    SearchAnimeResSchema,
+)
 
 router = APIRouter(tags=['DanDanPlay'], prefix='/dandanplay/bilibili')
 

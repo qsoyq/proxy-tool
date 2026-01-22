@@ -7,7 +7,6 @@ from datetime import datetime
 from typing import Any
 
 import pytz
-
 from schemas.rss.jsonfeed import JSONFeedItem
 from settings import AppSettings
 from utils.basic import ShelveStorage, URLToolkit  # type: ignore

@@ -5,7 +5,6 @@ from contextlib import AsyncExitStack, asynccontextmanager
 
 from fastapi import FastAPI
 from rssapi.core.events import lifespan as rssapi_lifespan
-
 from schemas.ping import get_default_memory
 from settings import AppSettings
 

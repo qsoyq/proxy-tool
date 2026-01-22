@@ -1,7 +1,6 @@
 import os
 
 import pytest
-
 from utils.basic import AsyncSSLClientContext
 from utils.nga import NgaToolkit
 

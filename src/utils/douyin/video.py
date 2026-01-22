@@ -3,7 +3,6 @@ import re
 from urllib.parse import parse_qs, urlparse
 
 import httpx
-
 from utils.playwright import AsyncPlaywright
 
 logger = logging.getLogger(__file__)

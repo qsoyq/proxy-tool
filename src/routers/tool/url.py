@@ -5,7 +5,6 @@ import httpx
 from cachetools import FIFOCache
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import PlainTextResponse, RedirectResponse
-
 from utils.cache import cached
 from utils.douyin.video import AsyncDouyinVideoPlaywright, DouyinVideoTool
 

@@ -4,7 +4,6 @@ from concurrent.futures import ThreadPoolExecutor
 
 import ssl_checker
 from fastapi import APIRouter, Query
-
 from schemas.network.ssl import SSLCertSchema, SSLCertsResSchema
 from utils.basic import AsyncSSLClientContext
 

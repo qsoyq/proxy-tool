@@ -1,14 +1,13 @@
 import logging
 
+import middlewares.errors
 import typer
 import uvicorn
-from fastapi import FastAPI
-from rssapi.applications.rss.routers.nodeseek import NodeseekToolkit
-
-import middlewares.errors
 from events import lifespan
+from fastapi import FastAPI
 from init import initial
 from responses import PingResponse
+from rssapi.applications.rss.routers.nodeseek import NodeseekToolkit
 from schemas.ping import PingRes, ping_responses
 from settings import version
 from utils.basic import init_logger

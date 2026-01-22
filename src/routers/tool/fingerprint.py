@@ -3,7 +3,6 @@ from typing import cast
 
 from curl_cffi import BrowserType, BrowserTypeLiteral, requests
 from fastapi import APIRouter, Query, Response
-
 from schemas.adapter import HttpUrl
 
 router = APIRouter(tags=['Utils'], prefix='/fingerprint')

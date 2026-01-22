@@ -7,12 +7,13 @@ from typing import List
 
 import httpx
 from fastapi import APIRouter, Path, Query
-
-from schemas.bilibili.live.room import (BilibiliAnchorInRoomScheme,
-                                        BilibiliRoomInfoScheme,
-                                        LiveRoomListRes,
-                                        LiveRoomResponseSchema,
-                                        get_live_room_list_responses)
+from schemas.bilibili.live.room import (
+    BilibiliAnchorInRoomScheme,
+    BilibiliRoomInfoScheme,
+    LiveRoomListRes,
+    LiveRoomResponseSchema,
+    get_live_room_list_responses,
+)
 
 router = APIRouter(tags=['Utils'], prefix='/bilibili/live/room')
 

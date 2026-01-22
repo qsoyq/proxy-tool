@@ -6,9 +6,7 @@ from functools import lru_cache
 import httpx
 import xmltodict
 from fastapi import APIRouter, Query
-
-from schemas.mikanani import (MikananiResSchema,
-                              mikanani_rss_subscribe_responses)
+from schemas.mikanani import MikananiResSchema, mikanani_rss_subscribe_responses
 
 executor = ThreadPoolExecutor()
 router = APIRouter(tags=['Utils'], prefix='/mikanani/rss')

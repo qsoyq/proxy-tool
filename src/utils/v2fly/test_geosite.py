@@ -1,9 +1,7 @@
 import asyncio
 
 import pytest
-
-from utils.v2fly.geosite import (get_domains_by_geosite,
-                                 get_domains_by_geosite_library)
+from utils.v2fly.geosite import get_domains_by_geosite, get_domains_by_geosite_library
 
 
 @pytest.mark.asyncio

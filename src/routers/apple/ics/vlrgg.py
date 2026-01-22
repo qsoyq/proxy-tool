@@ -8,7 +8,6 @@ from bs4 import BeautifulSoup
 from fastapi import APIRouter, Query
 from fastapi.responses import PlainTextResponse
 from ics import Calendar, Event
-
 from settings import AppSettings
 
 router = APIRouter(tags=['Utils'], prefix='/apple/ics/vlrgg')

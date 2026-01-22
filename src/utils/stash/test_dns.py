@@ -1,6 +1,5 @@
 import pytest
 import yaml
-
 from utils.stash.dns import NameserverPolicyGeositeOverride
 
 

@@ -2,7 +2,6 @@ import logging
 from typing import cast
 
 from fastapi import APIRouter, Path, Query
-
 from schemas.f50 import GetSmsListRes
 from utils.f50 import SMS
 

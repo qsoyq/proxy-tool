@@ -3,10 +3,9 @@ import logging
 from typing import Awaitable, Callable
 
 from fastapi import FastAPI, Request
+from responses import PrettyJSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse, Response
-
-from responses import PrettyJSONResponse
 
 app = FastAPI()
 logger = logging.getLogger(__file__)

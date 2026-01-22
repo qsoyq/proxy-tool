@@ -6,7 +6,6 @@ from pathlib import Path
 import psutil
 import pytz
 from pydantic import BaseModel, Field, model_validator
-
 from settings import run_at, run_at_ts, version
 
 

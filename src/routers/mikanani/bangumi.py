@@ -5,7 +5,6 @@ import httpx
 from bs4 import BeautifulSoup
 from fastapi import APIRouter, Path, Query
 from fastapi.responses import PlainTextResponse
-
 from schemas.mikanani import mikanani_bangumi_torrent_responses
 
 executor = ThreadPoolExecutor()

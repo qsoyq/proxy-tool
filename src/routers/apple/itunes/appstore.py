@@ -2,7 +2,6 @@ import logging
 
 import httpx
 from fastapi import APIRouter, HTTPException, Query
-
 from schemas.apple.itunes import SearchAppListSchema
 
 router = APIRouter(tags=['Utils'], prefix='/apple/itunes')

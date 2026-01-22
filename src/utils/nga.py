@@ -12,9 +12,14 @@ from bs4 import BeautifulSoup as Soup
 from cachetools import TTLCache
 from fastapi import HTTPException
 from pydantic import BaseModel, Field
-
-from schemas.nga.thread import (ForumSectionIndex, GetForumSectionsRes,
-                                NGASmile, OrderByEnum, Thread, Threads)
+from schemas.nga.thread import (
+    ForumSectionIndex,
+    GetForumSectionsRes,
+    NGASmile,
+    OrderByEnum,
+    Thread,
+    Threads,
+)
 from utils.bs4 import select_one_by
 
 logger = logging.getLogger(__name__)

@@ -1,7 +1,6 @@
 from typing import cast
 
 import yaml
-
 from schemas.v2fly.geosite_pb import DomainTypeEnum
 from utils.v2fly.geosite import get_geosite_library_by_url
 

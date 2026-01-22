@@ -1,7 +1,6 @@
 import pytest
 import yaml
 from fastapi.testclient import TestClient
-
 from main import app
 
 

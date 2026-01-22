@@ -4,10 +4,8 @@ from http import HTTPStatus
 
 from fastapi import APIRouter, Query
 from fastapi.responses import JSONResponse, RedirectResponse
-
 from schemas import ErrorDetail
-from schemas.notifications import (PushMessage, PushMessages, PushMessagesV3,
-                                   PushMessageV3)
+from schemas.notifications import PushMessage, PushMessages, PushMessagesV3, PushMessageV3
 
 router = APIRouter(tags=['Basic'], prefix='/notifications')
 logger = logging.getLogger(__file__)

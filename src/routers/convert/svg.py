@@ -4,7 +4,6 @@ import logging
 import cairosvg
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import StreamingResponse
-
 from schemas.adapter import HttpUrl
 
 router = APIRouter(tags=['Utils'], prefix='/convert/svg')

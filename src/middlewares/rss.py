@@ -8,11 +8,10 @@ from bs4 import BeautifulSoup as Soup
 from bs4 import Tag
 from cachetools import FIFOCache, cached
 from fastapi import FastAPI, Request
-from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.responses import Response
-
 from responses import PrettyJSONResponse
 from schemas.rss.jsonfeed import JSONFeedItem
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import Response
 
 app = FastAPI()
 logger = logging.getLogger(__file__)

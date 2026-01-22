@@ -2,7 +2,6 @@ import logging
 from typing import Any
 
 from fastapi import APIRouter, Body, Path
-
 from schemas.notifications.bark import BarkPushLevel, BarkPushMessage
 from schemas.webhook.railway import RailwayWebhookPayload
 

@@ -6,7 +6,6 @@ from typing import cast
 import httpx
 import proto
 from fastapi import HTTPException
-
 from schemas.v2fly.geosite_pb import DomainTypeEnum, GeoSiteList
 from utils.cache import RandomTTLCache, cached
 

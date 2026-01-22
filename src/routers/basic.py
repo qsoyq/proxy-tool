@@ -1,9 +1,8 @@
 import json
 import logging
 
-from fastapi import APIRouter, Depends, Request
-
 from deps import get_current_username
+from fastapi import APIRouter, Depends, Request
 from responses import PrettyJSONResponse
 
 router = APIRouter(tags=['Basic'], prefix='/basic')

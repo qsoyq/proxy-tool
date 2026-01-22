@@ -185,3 +185,7 @@ markers = ["nga_delay: add a delay before running the marked tests.d')"]
 typer-utils = { git = "https://github.com/qsoyq/typer_utils.git" }
 rssapi = { git = "https://github.com/qsoyq/rssapi.git", rev = "0.1.8" }
 ical-api = { git = "https://github.com/qsoyq/ical-api", rev = "0.1.2" }
+
+[tool.isort]
+profile = "hug"
+src_paths = ["src/proxy-tool"]

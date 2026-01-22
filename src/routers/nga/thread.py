@@ -2,9 +2,13 @@ import asyncio
 import logging
 
 from fastapi import APIRouter, Header, Query
-
-from schemas.nga.thread import (GetForumSectionsRes, GetNGASmiles,
-                                GetThreadsV2Res, OrderByEnum, Threads)
+from schemas.nga.thread import (
+    GetForumSectionsRes,
+    GetNGASmiles,
+    GetThreadsV2Res,
+    OrderByEnum,
+    Threads,
+)
 from utils.nga import NgaToolkit  # type: ignore
 
 router = APIRouter(tags=['Utils'], prefix='/nga')

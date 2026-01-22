@@ -2,7 +2,6 @@ import logging
 
 import httpx
 from fastapi import APIRouter, Query
-
 from schemas.adapter import HttpUrl
 from schemas.network.dns.doh import DoHResponse
 
