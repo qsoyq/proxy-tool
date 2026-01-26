@@ -10,7 +10,7 @@ from fastapi.responses import PlainTextResponse
 from ics import Calendar, Event
 from settings import AppSettings
 
-router = APIRouter(tags=['Utils'], prefix='/apple/ics/vlrgg')
+router = APIRouter(tags=["Utils"], prefix="/apple/ics/vlrgg")
 
 logger = logging.getLogger(__file__)
 
@@ -28,12 +28,12 @@ def get_cached_vlrgg_match_time(url: str) -> datetime | None:
         max_datetime = now + timedelta(hours=12)
         min_datetime = now - timedelta(hours=3)
         if min_datetime < cached_match_datetime < max_datetime:
-            logger.debug(f'[get_cached_vlrgg_match_time]: skip for {url}')
+            logger.debug(f"[get_cached_vlrgg_match_time]: skip for {url}")
             return None
         else:
-            logger.debug(f'[get_cached_vlrgg_match_time]: cache hit for {url}, {cached}')
+            logger.debug(f"[get_cached_vlrgg_match_time]: cache hit for {url}, {cached}")
             return cached_match_datetime
-    logger.debug(f'[get_cached_vlrgg_match_time]: cache miss for {url}')
+    logger.debug(f"[get_cached_vlrgg_match_time]: cache miss for {url}")
     return None
 
 
@@ -46,13 +46,13 @@ async def fetch_vlrgg_event_match_time(url: str) -> tuple[str, datetime | None]:
         async with httpx.AsyncClient() as client:
             resp = await client.get(url)
             resp.raise_for_status()
-            document = BeautifulSoup(resp.text, 'lxml')
+            document = BeautifulSoup(resp.text, "lxml")
             tag = document.select_one("div[class='moment-tz-convert']")
             match_datetime = None
             if tag:
-                utc_ts = tag.attrs['data-utc-ts']
-                utc_ts = f'{utc_ts} EDT'
-                logger.debug(f'[VLRGG Event Match Time]: {utc_ts} - {url}')
+                utc_ts = tag.attrs["data-utc-ts"]
+                utc_ts = f"{utc_ts} EDT"
+                logger.debug(f"[VLRGG Event Match Time]: {utc_ts} - {url}")
                 match_datetime = dateparser.parse(utc_ts)
             if match_datetime:
                 vlrgg_match_time_memo[url] = int(match_datetime.timestamp())
@@ -72,20 +72,20 @@ async def add_vlrgg_event_march_time(events: list[Event]):
             e.begin = e.end = match_datetime.astimezone(timezone.utc)
         else:
             logger.warning(f"can't parse match time: {e.name} - {e.url}")
-        logger.debug(f'[Valorant Matches]: {e.name} - {e.begin} - {e.end}')
+        logger.debug(f"[Valorant Matches]: {e.name} - {e.begin} - {e.end}")
 
 
 async def vlrgg_event_to_calendar(vlrgg_event: str) -> list[Event]:
     events = []
     async with httpx.AsyncClient() as client:
-        url = f'https://www.vlr.gg/event/matches/{vlrgg_event}/'
+        url = f"https://www.vlr.gg/event/matches/{vlrgg_event}/"
         resp = await client.get(url)
-        document = BeautifulSoup(resp.text, 'lxml')
+        document = BeautifulSoup(resp.text, "lxml")
         wf_title = document.select_one('h1[class="wf-title"]').text.strip()  # type: ignore
         wf_card_list = document.select('div[class="wf-card"]')
         for wf_card in wf_card_list:
-            for item in wf_card.select('a'):
-                match_url = f'https://www.vlr.gg{item["href"]}'
+            for item in wf_card.select("a"):
+                match_url = f"https://www.vlr.gg{item['href']}"
                 teams = []
                 for team in item.select("div[class='match-item-vs-team-name']"):
                     team_text = team.select_one("div[class='text-of']")
@@ -93,16 +93,16 @@ async def vlrgg_event_to_calendar(vlrgg_event: str) -> list[Event]:
                         teams.append(team_text.text.strip())
 
                 e = Event()
-                e.name = f'{" vs ".join(teams)}'
-                e.description = f'{wf_title}'
+                e.name = f"{' vs '.join(teams)}"
+                e.description = f"{wf_title}"
                 e.url = match_url
                 events.append(e)
     await add_vlrgg_event_march_time(events)
     return events
 
 
-@router.get('/event/matches', summary='Valorant 赛事订阅')
-async def vlrgg(events: list[str] = Query(['2283'], description='赛事ID')):
+@router.get("/event/matches", summary="Valorant 赛事订阅")
+async def vlrgg(events: list[str] = Query(["2283"], description="赛事ID")):
     """赛程数据源自: https://www.vlr.gg/events"""
     results = await asyncio.gather(*[vlrgg_event_to_calendar(event) for event in events])
     c = Calendar()

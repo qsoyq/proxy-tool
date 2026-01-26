@@ -13,14 +13,14 @@ from schemas.github.issues import (
     GithubIssueState,
 )
 
-router = APIRouter(tags=['Utils'], prefix='/apple/ics/github')
+router = APIRouter(tags=["Utils"], prefix="/apple/ics/github")
 
 logger = logging.getLogger(__file__)
 
 
 def github_issues_to_calendar(issues: list[GithubIssue]) -> list[Event]:
     events = []
-    pattern = re.compile(r'\(@(.*)\)')
+    pattern = re.compile(r"\(@(.*)\)")
     for issue in issues:
         e = Event()
         result = re.search(pattern, issue.title)
@@ -30,7 +30,7 @@ def github_issues_to_calendar(issues: list[GithubIssue]) -> list[Event]:
         end = dateparser.parse(datetime_str)
         begin = end
         if not begin or not end:
-            logger.warning(f'Invalid begin or end: {issue.html_url}')
+            logger.warning(f"Invalid begin or end: {issue.html_url}")
             continue
         e.begin = begin
         e.end = end
@@ -39,18 +39,18 @@ def github_issues_to_calendar(issues: list[GithubIssue]) -> list[Event]:
         e.url = issue.html_url
         e.uid = str(issue.id)
         events.append(e)
-        logger.debug(f'[github_issues_to_calendar]: {e}')
+        logger.debug(f"[github_issues_to_calendar]: {e}")
     return events
 
 
-@router.get('/repos/{owner}/{repo}/issues', summary='Github Repo Issues To Apple Calendar')
+@router.get("/repos/{owner}/{repo}/issues", summary="Github Repo Issues To Apple Calendar")
 async def github_repo_issues(
-    token: str = Query(..., description='Github API Token'),
-    owner: str = Path(..., description='Github Repo Owner'),
-    repo: str = Path(..., description='Github Repo Name'),
+    token: str = Query(..., description="Github API Token"),
+    owner: str = Path(..., description="Github Repo Owner"),
+    repo: str = Path(..., description="Github Repo Name"),
     milestone: str | int | None = Query(None),
     assignee: str | None = Query(None),
-    type_: str | None = Query(None, alias='type'),
+    type_: str | None = Query(None, alias="type"),
     creator: str | None = Query(None),
     mentioned: str | None = Query(None),
     labels: str | None = Query(None),
@@ -65,25 +65,25 @@ async def github_repo_issues(
 
     Issue 标题必须包含如 `(@2025-04-18T18:00:00+0800)` 表示截止时间的字符串内容, 否则无法解析为日历事件
     """
-    url = f'https://api.github.com/repos/{owner}/{repo}/issues'
+    url = f"https://api.github.com/repos/{owner}/{repo}/issues"
     headers = {
-        'Accept': 'application/vnd.github+json',
-        'Authorization': f'Bearer {token}',
-        'X-GitHub-Api-Version': '2022-11-28',
+        "Accept": "application/vnd.github+json",
+        "Authorization": f"Bearer {token}",
+        "X-GitHub-Api-Version": "2022-11-28",
     }
 
     params = {
-        'milestone': milestone,
-        'assignee': assignee,
-        'type': type_,
-        'creator': creator,
-        'mentioned': mentioned,
-        'labels': labels,
-        'state': state,
-        'sort': sort,
-        'direction': direction,
-        'per_page': per_page,
-        'page': page,
+        "milestone": milestone,
+        "assignee": assignee,
+        "type": type_,
+        "creator": creator,
+        "mentioned": mentioned,
+        "labels": labels,
+        "state": state,
+        "sort": sort,
+        "direction": direction,
+        "per_page": per_page,
+        "page": page,
     }
 
     params = {k: v for k, v in params.items() if v is not None}

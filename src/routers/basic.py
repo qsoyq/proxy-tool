@@ -5,20 +5,20 @@ from deps import get_current_username
 from fastapi import APIRouter, Depends, Request
 from responses import PrettyJSONResponse
 
-router = APIRouter(tags=['Basic'], prefix='/basic')
+router = APIRouter(tags=["Basic"], prefix="/basic")
 
 logger = logging.getLogger(__file__)
 
 
-@router.get('/users/me', summary='获取当前用户')
+@router.get("/users/me", summary="获取当前用户")
 def read_current_user(username: str = Depends(get_current_username)):
-    return {'username': username}
+    return {"username": username}
 
 
-@router.get('/whoami', summary='Who am i', response_class=PrettyJSONResponse)
-@router.post('/whoami', summary='Who am i', response_class=PrettyJSONResponse)
-@router.put('/whoami', summary='Who am i', response_class=PrettyJSONResponse)
-@router.delete('/whoami', summary='Who am i', response_class=PrettyJSONResponse)
+@router.get("/whoami", summary="Who am i", response_class=PrettyJSONResponse)
+@router.post("/whoami", summary="Who am i", response_class=PrettyJSONResponse)
+@router.put("/whoami", summary="Who am i", response_class=PrettyJSONResponse)
+@router.delete("/whoami", summary="Who am i", response_class=PrettyJSONResponse)
 async def body(req: Request):
     headers = dict(req.headers)
     path = req.url.path
@@ -32,11 +32,11 @@ async def body(req: Request):
     except json.JSONDecodeError as _:
         pass
     return {
-        'headers': headers,
-        'query': query,
-        'json': _json,
-        'path': path,
-        'scheme': scheme,
-        'hostname': hostname,
-        'port': port,
+        "headers": headers,
+        "query": query,
+        "json": _json,
+        "path": path,
+        "scheme": scheme,
+        "hostname": hostname,
+        "port": port,
     }

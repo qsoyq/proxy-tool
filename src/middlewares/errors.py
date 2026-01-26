@@ -18,13 +18,13 @@ logger = logging.getLogger(__file__)
 
 
 class CachedItem(BaseModel):
-    timestamp: float | None = Field(None, description='秒级时间戳')
+    timestamp: float | None = Field(None, description="秒级时间戳")
     name: str
     path: str
     methods: list[str]
     error: str
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def set_timestamp(cls, values):
         if values.timestamp is None:
             values.timestamp = time.time()
@@ -63,12 +63,12 @@ class SentryCacheMiddleware(BaseHTTPMiddleware):
     @staticmethod
     async def add_error(route: APIRoute, exc: Exception):
         async with SentryCacheMiddleware.LOCK:
-            error = ''.join(traceback.format_exception(exc))
+            error = "".join(traceback.format_exception(exc))
             payload: dict[str, Any] = {
-                'name': route.name,
-                'path': route.path,
-                'methods': route.methods,
-                'error': f'{type(exc)} - {error}',
+                "name": route.name,
+                "path": route.path,
+                "methods": route.methods,
+                "error": f"{type(exc)} - {error}",
             }
             item = CachedItem(**payload)
             SentryCacheMiddleware.collections[route.name].insert(0, item)
@@ -77,10 +77,10 @@ class SentryCacheMiddleware(BaseHTTPMiddleware):
         try:
             response = await call_next(request)
         except httpx.HTTPStatusError as e:
-            logging.warning(f'[httpx.HTTPStatusError]: {e}')
+            logging.warning(f"[httpx.HTTPStatusError]: {e}")
             return Response(content=e.response.text, status_code=e.response.status_code)
         except Exception as e:
-            route = request.scope.get('route')
+            route = request.scope.get("route")
             if route:
                 await SentryCacheMiddleware.add_error(route, e)
             raise e

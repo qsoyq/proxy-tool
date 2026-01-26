@@ -26,20 +26,20 @@ class JSONFeedItem(BaseModel):
     summary: str | None = Field(None)
     image: HttpUrl | None = Field(None)
     banner_image: HttpUrl | None = Field(None)
-    date_published: str | None = Field(None, examples=['2010-02-07T14:04:00-05:00'])
-    date_modified: str | None = Field(None, examples=['2010-02-07T14:04:00-05:00'])
+    date_published: str | None = Field(None, examples=["2010-02-07T14:04:00-05:00"])
+    date_modified: str | None = Field(None, examples=["2010-02-07T14:04:00-05:00"])
     tags: list[str] | None = Field(None)
 
     author: JSONFeedAuthor | None = Field(None)
 
     attachments: list[JSONFeedAttachment] | None = Field(None)
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def check_content(cls, values):
         content_html = values.content_html
         content_text = values.content_text
         if content_html is None and content_text is None:
-            raise ValueError('Either content_html or content_text must have at least one valid value.')
+            raise ValueError("Either content_html or content_text must have at least one valid value.")
         return values
 
 
@@ -48,7 +48,7 @@ class JSONFeed(BaseModel):
     https://www.jsonfeed.org/version/1/
     """
 
-    version: str = Field('https://jsonfeed.org/version/1')
+    version: str = Field("https://jsonfeed.org/version/1")
     title: str = Field(...)
     home_page_url: HttpUrl | None = Field(None)
     feed_url: HttpUrl | None = Field(None)

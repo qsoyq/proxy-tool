@@ -4,20 +4,20 @@ from pydantic import BaseModel, Field
 
 
 class GithubIssueState(str, Enum):
-    open = 'open'
-    closed = 'closed'
-    all = 'all'
+    open = "open"
+    closed = "closed"
+    all = "all"
 
 
 class GithubIssueSort(str, Enum):
-    created = 'created'
-    updated = 'updated'
-    comments = 'comments'
+    created = "created"
+    updated = "updated"
+    comments = "comments"
 
 
 class GithubIssueDirection(str, Enum):
-    asc = 'asc'
-    desc = 'desc'
+    asc = "asc"
+    desc = "desc"
 
 
 class GithubIssue(BaseModel):

@@ -12,7 +12,6 @@ repos:
           - id: check-added-large-files
           - id: check-executables-have-shebangs
           - id: debug-statements
-          - id: double-quote-string-fixer
           - id: end-of-file-fixer
           - id: trailing-whitespace
             files: "\\.(py|txt|yaml|json|md|toml|lock|cfg|html|sh|js|yml)$"
@@ -60,3 +59,12 @@ repos:
                 - pytest
                 - python-ssl-checker
                 - feedgen
+
+    - repo: https://github.com/astral-sh/ruff-pre-commit
+      rev: v0.14.14
+      hooks:
+          - id: ruff-check
+            types_or: [python, pyi]
+            args: [--fix]
+          - id: ruff-format
+            types_or: [python, pyi]

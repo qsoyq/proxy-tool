@@ -10,5 +10,5 @@ HttpUrl = Annotated[
 
 KeyValuePairStr = Annotated[
     str,
-    BeforeValidator(lambda value: '=' in value and value),
+    BeforeValidator(lambda value: "=" in value and value),
 ]

@@ -8,26 +8,26 @@ from playwright.async_api import async_playwright
 from responses import PrettyJSONResponse
 from schemas.adapter import HttpUrl
 
-router = APIRouter(tags=['Utils'], prefix='/broswer')
+router = APIRouter(tags=["Utils"], prefix="/broswer")
 
 logger = logging.getLogger(__file__)
 
 
-@router.get('/playwright', summary='playwright', response_class=PrettyJSONResponse)
+@router.get("/playwright", summary="playwright", response_class=PrettyJSONResponse)
 async def playwright(
     url: HttpUrl = Query(...),
     cookie: str = Query(None),
     userAgent: str = Query(
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36',
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36",
         examples=[
-            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"
         ],
     ),
 ):
     cookies = []
     if cookie is not None:
-        _cookies = dict([x.strip().split('=') for x in cookie.split(';') if x != ''])
-        cookies = [{'name': k, 'value': v, 'url': url} for k, v in _cookies.items()]
+        _cookies = dict([x.strip().split("=") for x in cookie.split(";") if x != ""])
+        cookies = [{"name": k, "value": v, "url": url} for k, v in _cookies.items()]
     async with async_playwright() as playwright:
         chromium = playwright.chromium
         browser = await chromium.launch()
@@ -40,40 +40,40 @@ async def playwright(
         text = await res.text() if res else None
         status = res.status if res else None
         await browser.close()
-    return {'text': text, 'status': status}
+    return {"text": text, "status": status}
 
 
-@router.get('/curl_cffi', summary='curl_cffi', response_class=PrettyJSONResponse)
+@router.get("/curl_cffi", summary="curl_cffi", response_class=PrettyJSONResponse)
 async def _curl_cffi(
     url: HttpUrl = Query(...),
     cookie: str = Query(None),
 ):
     cookies = {}
     if cookie is not None:
-        cookies = dict([x.strip().split('=') for x in cookie.split(';') if x != ''])
+        cookies = dict([x.strip().split("=") for x in cookie.split(";") if x != ""])
 
     res = curl_cffi.requests.get(
         url,
         cookies=cookies,
         impersonate=cast(curl_cffi.BrowserTypeLiteral, curl_cffi.requests.impersonate.DEFAULT_CHROME),
     )
-    return {'text': res.text, 'status': res.status_code}
+    return {"text": res.text, "status": res.status_code}
 
 
-@router.get('/cloudscraper', summary='cloudscraper', response_class=PrettyJSONResponse)
+@router.get("/cloudscraper", summary="cloudscraper", response_class=PrettyJSONResponse)
 def cloudscraper_broswer(
     url: HttpUrl = Query(...),
     cookie: str = Query(None),
-    interpreter: str | None = Query(None, examples=['js2py', 'nodejs', 'native']),
+    interpreter: str | None = Query(None, examples=["js2py", "nodejs", "native"]),
     delay: int | None = Query(5),
 ):
     cookies = {}
     if cookie is not None:
-        cookies = dict([x.strip().split('=') for x in cookie.split(';') if x != ''])
-    kwargs: dict[str, Any] = {'delay': delay}
+        cookies = dict([x.strip().split("=") for x in cookie.split(";") if x != ""])
+    kwargs: dict[str, Any] = {"delay": delay}
     if interpreter is not None:
-        kwargs['interpreter'] = interpreter
+        kwargs["interpreter"] = interpreter
     scraper = cloudscraper.create_scraper(**kwargs)
     res = scraper.get(url, cookies=cookies)
 
-    return {'text': res.text, 'status': res.status_code}
+    return {"text": res.text, "status": res.status_code}

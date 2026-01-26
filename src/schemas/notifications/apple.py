@@ -8,7 +8,7 @@ import jwt
 from pydantic import BaseModel, Field
 from schemas.adapter import HttpUrl
 
-APNS_HOST_NAME = 'api.push.apple.com'
+APNS_HOST_NAME = "api.push.apple.com"
 
 # https://raw.githubusercontent.com/Finb/bark-server/master/deploy/AuthKey_LH4T9V5U4R_5U8LBRXG3A.p8
 BARK_TOKEN_PRIVATE_KEY = """
@@ -30,19 +30,19 @@ class JWTPayload(BaseModel):
 def generate_jwt(team_id, token_private_key, auth_key_id) -> JWTPayload:
     jwt_issue_time = int(time.time())
     authentication_token = jwt.encode(
-        {'iss': team_id, 'iat': jwt_issue_time},
-        algorithm='ES256',
+        {"iss": team_id, "iat": jwt_issue_time},
+        algorithm="ES256",
         key=token_private_key,
-        headers={'kid': auth_key_id},
+        headers={"kid": auth_key_id},
     )
     return JWTPayload(token=authentication_token, timestamp=jwt_issue_time)
 
 
 class ApplePushLevel(str, Enum):
-    active = 'active'
-    timeSensitive = 'timeSensitive'
-    passive = 'passive'
-    critical = 'critical'
+    active = "active"
+    timeSensitive = "timeSensitive"
+    passive = "passive"
+    critical = "critical"
 
 
 class AppleAPNSAlertPayload(BaseModel):
@@ -55,30 +55,30 @@ class AppleAPNSMessage(BaseModel):
     """[Create the JSON payload](https://developer.apple.com/documentation/usernotifications/generating-a-remote-notification#Create-the-JSON-payload)"""
 
     alert: str | AppleAPNSAlertPayload
-    thread_id: str | None = Field(None, alias='thread-id')  # type: ignore
+    thread_id: str | None = Field(None, alias="thread-id")  # type: ignore
     category: str | None = None
     sound: str | None = Field(
         None,
-        description='[unnotificationsound](https://developer.apple.com/documentation/usernotifications/unnotificationsound)',
+        description="[unnotificationsound](https://developer.apple.com/documentation/usernotifications/unnotificationsound)",
     )
-    mutable_content: int = Field(1, alias='mutable-content')  # type: ignore
+    mutable_content: int = Field(1, alias="mutable-content")  # type: ignore
     interruption_level: ApplePushLevel = Field(
         ApplePushLevel.passive,
-        alias='interruption-level',  # type: ignore
-        description='[unnotificationinterruptionlevel](https://developer.apple.com/documentation/usernotifications/unnotificationinterruptionlevel)',
+        alias="interruption-level",  # type: ignore
+        description="[unnotificationinterruptionlevel](https://developer.apple.com/documentation/usernotifications/unnotificationinterruptionlevel)",
     )
 
 
 class ApplePushExtParams(BaseModel):
     icon: HttpUrl | None = None
     url: str | None = None
-    group: str = Field('Default')
+    group: str = Field("Default")
 
 
 class ApplePushAuthParams(BaseModel):
-    team_id: str = Field('5U8LBRXG3A')
-    auth_key_id: str = Field('LH4T9V5U4R')
-    topic: str = Field('me.fin.bark')
+    team_id: str = Field("5U8LBRXG3A")
+    auth_key_id: str = Field("LH4T9V5U4R")
+    topic: str = Field("me.fin.bark")
     token_private_key: str = Field(BARK_TOKEN_PRIVATE_KEY)
 
 
@@ -96,7 +96,7 @@ class ApplePushMessage(ApplePushExtParams, ApplePushAuthParams):
     aps: AppleAPNSMessage
 
     def push(self) -> httpx.Response:
-        url = f'https://{APNS_HOST_NAME}/3/device/{self.device_token}'
+        url = f"https://{APNS_HOST_NAME}/3/device/{self.device_token}"
         jwt = generate_jwt(self.team_id, self.token_private_key, self.auth_key_id)
         # 如果有条件，最好改进脚本缓存此 Token。Token 30分钟内复用同一个，每过30分钟重新生成
         # 苹果文档指明 TOKEN 生成间隔最短20分钟，TOKEN 有效期最长60分钟
@@ -107,13 +107,13 @@ class ApplePushMessage(ApplePushExtParams, ApplePushAuthParams):
             jwt = generate_jwt(self.team_id, self.token_private_key, self.auth_key_id)
 
         headers = {
-            'apns-topic': self.topic,
-            'apns-push-type': 'alert',
-            'authorization': f'bearer {jwt.token}',
+            "apns-topic": self.topic,
+            "apns-push-type": "alert",
+            "authorization": f"bearer {jwt.token}",
         }
 
         ext = ApplePushExtParams(**self.model_dump()).model_dump(exclude_none=True)
-        payload: Dict[str, Any] = {'aps': dict(self.aps.model_dump(exclude_none=True, by_alias=True))}
+        payload: Dict[str, Any] = {"aps": dict(self.aps.model_dump(exclude_none=True, by_alias=True))}
         payload.update(ext)
         resp = httpx.Client(http2=True).post(url, json=payload, headers=headers)
         resp.raise_for_status()

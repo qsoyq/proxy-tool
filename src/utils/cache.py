@@ -13,7 +13,7 @@ class RandomTTLCache(_TimedCache):
     """LRU Cache implementation with per-item random time-to-live (TTL) value."""
 
     class _Link:
-        __slots__ = ('key', 'expires', 'next', 'prev')
+        __slots__ = ("key", "expires", "next", "prev")
 
         def __init__(self, key=None, expires=None):
             self.key = key
@@ -138,7 +138,7 @@ class RandomTTLCache(_TimedCache):
             try:
                 key = next(iter(self.__links))
             except StopIteration:
-                raise KeyError('%s is empty' % type(self).__name__) from None
+                raise KeyError("%s is empty" % type(self).__name__) from None
             else:
                 return (key, self.pop(key))
 

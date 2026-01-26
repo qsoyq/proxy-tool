@@ -27,20 +27,20 @@ async def background_gc():
         settings = AppSettings()
         if memory_percent >= settings.gc_trigger_memory_percent_limit:
             logger.debug(
-                f'[background_gc]: trigger gc collect because memory exceeds 80, current: {memory_percent}',
+                f"[background_gc]: trigger gc collect because memory exceeds 80, current: {memory_percent}",
             )
             gc.collect()
         await asyncio.sleep(settings.gc_trigger_memory_percent_interval)
 
 
 async def startup_event(app: FastAPI):
-    app.state.background_gc_task = asyncio.create_task(background_gc(), name='background_gc')
+    app.state.background_gc_task = asyncio.create_task(background_gc(), name="background_gc")
 
 
 async def shutdown(app: FastAPI):
     task: asyncio.Task = app.state.background_gc_task
     if not task.done():
         task.cancel()
-        logger.info('[shutdown]: background_gc task cancelled')
+        logger.info("[shutdown]: background_gc task cancelled")
 
-    logger.info('shutdown')
+    logger.info("shutdown")

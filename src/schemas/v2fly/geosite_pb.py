@@ -16,8 +16,8 @@ class DomainTypeEnum(IntEnum):
 
 class Domain_Attribute(proto.Message):
     key = proto.Field(proto.STRING, number=1)
-    bool_value = proto.Field(proto.BOOL, number=2, oneof='typed_value')
-    int_value = proto.Field(proto.INT64, number=3, oneof='typed_value')
+    bool_value = proto.Field(proto.BOOL, number=2, oneof="typed_value")
+    int_value = proto.Field(proto.INT64, number=3, oneof="typed_value")
 
 
 class Domain(proto.Message):
