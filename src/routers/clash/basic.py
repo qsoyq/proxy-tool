@@ -84,15 +84,15 @@ async def timeout(timeout: float | None = Path(..., description="可控的阻塞
     return ""
 
 
-@router.get("/subscribe", summary="Clash订阅转换")
+@router.get("/subscribe", summary="Clash订阅转换", operation_id="clash_subscribe_convert")
 @router.head("/subscribe", include_in_schema=False)
 async def subscribe(
     user_agent: str = Query("clash.meta"),
     url: str = Query(..., description="订阅链接"),
     proxy_provider: bool = Query(False, description="是否只返回节点", alias="proxy-provider"),
     sort_by_name: bool = Query(True, description="按名称排序节点", alias="sort-by-name"),
-    additional_prefix: str | None = Query(
-        None, description="为代理节点添加前缀, 在只返回节点模式下有效", alias="additional-prefix"
+    additional_prefix: str = Query(
+        "", description="为代理节点添加前缀, 在只返回节点模式下有效", alias="additional-prefix"
     ),
     emoji_additional_prefix: bool = Query(
         True, description="按节点地区添加 emoji 前缀, 在只返回节点模式下有效", alias="emoji-additional-prefix"
