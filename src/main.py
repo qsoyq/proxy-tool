@@ -21,7 +21,6 @@ initial(app)
 @app.get("/ping", response_model=PingRes, tags=["Basic"], responses=ping_responses, response_class=PingResponse)
 async def ping():
     assert getattr(app.state, "background_gc_task", None)
-
     m = PingRes.model_construct()
     m.nodeseek = {"ArticlePostCache": list(NodeseekToolkit.ArticlePostCache.keys())}
     m.sentry_cache = await middlewares.errors.SentryCacheMiddleware.get_errors()
@@ -36,7 +35,6 @@ def http(
     log_level: int = typer.Option(logging.DEBUG, "--log_level", envvar="log_level"),
 ):
     """启动 http 服务"""
-
     init_logger(log_level)
     logging.info(f"http server listening on {host}:{port}")
     uvicorn.run(app, host=host, port=port, reload=reload)

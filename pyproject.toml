@@ -1,6 +1,6 @@
 [project]
 name = "proxy-tool"
-version = "0.3.11"
+version = "0.4.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -53,6 +53,7 @@ dependencies = [
     "rssapi",
     "typer-utils@git+https://github.com/qsoyq/typer_utils.git",
     "ical-api@git+https://github.com/qsoyq/ical-api.git",
+    "fastapi-mcp>=0.4.0",
 ]
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.

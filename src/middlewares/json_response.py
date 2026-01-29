@@ -40,8 +40,12 @@ class UsePrettryJSONResponse(BaseHTTPMiddleware):
         self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
     ) -> Response | PrettyJSONResponse:
         response = await call_next(request)
+
         ct = response.headers.get("content-type")
-        if ct and ct.startswith("application/json"):
+
+        # 兼容 mcp 服务
+        mcp_session = response.headers.get("mcp-session-id")
+        if ct and ct.startswith("application/json") and not mcp_session:
             response_body = b""
             async for chunk in response.body_iterator:  # type: ignore
                 response_body += chunk

@@ -36,6 +36,7 @@ import routers.v2ex.nodes
 import routers.webhook.railway
 from exception import register_exception_handler
 from fastapi import FastAPI
+from fastapi_mcp import FastApiMCP
 from ical_api.init import include_routers as include_ical_api_routers
 from rssapi.core.middlewares.rss import add_middleware as add_rssapi_middlewares
 from rssapi.init import include_routers as include_rssapi_routers
@@ -95,3 +96,5 @@ def initial(app: FastAPI):
 
     register_exception_handler(app)
     load_mermaid_plugin()
+    mcp = FastApiMCP(app, name="proxy-tool-mcp", description="proxy tool mcp")
+    mcp.mount_http()

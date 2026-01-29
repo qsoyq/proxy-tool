@@ -59,6 +59,7 @@ repos:
                 - pytest
                 - python-ssl-checker
                 - feedgen
+                - fastapi_mcp
 
     - repo: https://github.com/astral-sh/ruff-pre-commit
       rev: v0.14.14
