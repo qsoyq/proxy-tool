@@ -146,3 +146,4 @@ sftp-config.json
 .vscode
 
 .proxy-tool
+.settings.toml

@@ -105,6 +105,7 @@ async def subscribe(
     add_total_used_remark: bool = Query(True, description="是否添加一个标注流量使用的节点"),
     add_refresh_time_remark: bool = Query(True, description="是否添加一个订阅更新日期的节点"),
     add_expire_remark: bool = Query(True, description="是否添加一个标注过期时间的节点"),
+    dialer_proxy: str | None = Query(None, description="代理链, 对当前代理集所以节点设置", alias="dialer-proxy"),
 ):
     headers = {}
     if user_agent is not None:
@@ -153,8 +154,13 @@ async def subscribe(
 
         document = {"proxies": document["proxies"]}
 
+    if dialer_proxy:
+        for x in document.get("proxies", []):
+            x["dialer-proxy"] = dialer_proxy
+
     if sort_by_name:
         document["proxies"] = sorted(document["proxies"], key=lambda x: x["name"])
+
     if document.get("proxies"):
         try:
             tz = pytz.timezone("Asia/Shanghai")

@@ -1,6 +1,6 @@
 [project]
 name = "proxy-tool"
-version = "0.4.1"
+version = "0.4.2"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -175,6 +175,7 @@ module = [
     "rssapi.*",
     "typer_utils.*",
     "ical_api.*",
+    "fastapi_mcp",
 ]
 ignore_missing_imports = true
 follow_untyped_imports = true

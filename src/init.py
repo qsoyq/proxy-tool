@@ -90,11 +90,18 @@ def add_middlewares(app: FastAPI):
     middlewares.json_response.add_middleware(app)
 
 
+def init_mcp(app: FastAPI):
+    mcp = FastApiMCP(app, name=AppSettings().mcp.mcp_name, description=AppSettings().mcp.mcp_description)
+    for tool in mcp.tools:
+        tool.name = tool.name[:64]
+
+    mcp.mount_http()
+
+
 def initial(app: FastAPI):
     include_routers(app)
     add_middlewares(app)
 
     register_exception_handler(app)
     load_mermaid_plugin()
-    mcp = FastApiMCP(app, name="proxy-tool-mcp", description="proxy tool mcp")
-    mcp.mount_http()
+    init_mcp(app)
