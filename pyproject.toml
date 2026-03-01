@@ -1,6 +1,6 @@
 [project]
 name = "proxy-tool"
-version = "0.4.6"
+version = "0.4.7"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -185,7 +185,7 @@ markers = ["nga_delay: add a delay before running the marked tests.d')"]
 
 [tool.uv.sources]
 typer-utils = { git = "https://github.com/qsoyq/typer_utils.git" }
-rssapi = { git = "https://github.com/qsoyq/rssapi.git", rev = "0.1.12" }
+rssapi = { git = "https://github.com/qsoyq/rssapi.git", rev = "0.1.13" }
 ical-api = { git = "https://github.com/qsoyq/ical-api", rev = "0.1.4" }
 
 [tool.isort]
