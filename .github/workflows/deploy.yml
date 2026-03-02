@@ -4,6 +4,7 @@ on:
     branches:
       - "main"
       - "actions/image-tag"
+      - "actions/image-test"
 jobs:
   docker:
     runs-on: ubuntu-latest
