@@ -2,26 +2,55 @@ name: build push deploy
 on:
   push:
     branches:
-      - 'main'
+      - "main"
+      - "actions/image-tag"
 jobs:
   docker:
     runs-on: ubuntu-latest
     steps:
-      -
-        name: Set up QEMU
+      - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
-      -
-        name: Set up Docker Buildx
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
-      -
-        name: Login to Docker Hub
+
+      - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
-      -
-        name: Build and push
+
+      - name: Read project version
+        id: project_version
+        run: |
+          version=$(python3 - <<'PY'
+          import tomllib
+          from pathlib import Path
+          pyproject = Path("pyproject.toml")
+          data = tomllib.loads(pyproject.read_text(encoding="utf-8"))
+          print(data["project"]["version"])
+          PY
+          )
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare tags
+        id: prepare_tags
+        run: |
+          version_tag="${{ secrets.IMAGE }}:${{ steps.project_version.outputs.version }}"
+          echo "tags<<EOF" >> "$GITHUB_OUTPUT"
+          echo "${{ secrets.IMAGE }}:latest" >> "$GITHUB_OUTPUT"
+          if docker manifest inspect "${version_tag}" > /dev/null 2>&1; then
+            echo "Version tag ${version_tag} already exists, skip pushing it."
+          else
+            echo "${version_tag}" >> "$GITHUB_OUTPUT"
+          fi
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push
         uses: docker/build-push-action@v4
         with:
           push: true
-          tags: ${{ secrets.IMAGE }}:latest
+          tags: ${{ steps.prepare_tags.outputs.tags }}
