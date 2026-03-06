@@ -570,7 +570,7 @@ name = "exceptiongroup"
 version = "1.3.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "typing-extensions", marker = "python_full_version < '3.13'" },
+    { name = "typing-extensions", marker = "python_full_version < '3.11'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/50/79/66800aadf48771f6b62f7eb014e352e5d06856655206165d775e675a02c9/exceptiongroup-1.3.1.tar.gz", hash = "sha256:8b412432c6055b0b7d14c310000ae93352ed6754f70fa8f7c34141f91c4e3219", size = 30371, upload-time = "2025-11-21T23:01:54.787Z" }
 wheels = [
@@ -1753,7 +1753,7 @@ wheels = [
 
 [[package]]
 name = "proxy-tool"
-version = "0.5.6"
+version = "0.5.7"
 source = { virtual = "." }
 dependencies = [
     { name = "asyncache" },
@@ -1846,7 +1846,7 @@ requires-dist = [
     { name = "python-ssl-checker" },
     { name = "pytz" },
     { name = "pyyaml" },
-    { name = "rssapi", git = "https://github.com/qsoyq/rssapi.git?rev=0.1.21" },
+    { name = "rssapi", git = "https://github.com/qsoyq/rssapi.git?rev=0.1.22" },
     { name = "ruff" },
     { name = "typer" },
     { name = "typer-utils", git = "https://github.com/qsoyq/typer_utils.git" },
@@ -2741,8 +2741,8 @@ wheels = [
 
 [[package]]
 name = "rssapi"
-version = "0.1.21"
-source = { git = "https://github.com/qsoyq/rssapi.git?rev=0.1.21#f9bdf83678bfa6171ecc2314bff561cc334c1c87" }
+version = "0.1.22"
+source = { git = "https://github.com/qsoyq/rssapi.git?rev=0.1.22#846023598ca82915f71fb03a4eda6fda7fa981c7" }
 dependencies = [
     { name = "asyncache" },
     { name = "beautifulsoup4" },
@@ -2901,8 +2901,8 @@ name = "taskgroup"
 version = "0.2.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "exceptiongroup" },
-    { name = "typing-extensions" },
+    { name = "exceptiongroup", marker = "python_full_version < '3.11'" },
+    { name = "typing-extensions", marker = "python_full_version < '3.11'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/f0/8d/e218e0160cc1b692e6e0e5ba34e8865dbb171efeb5fc9a704544b3020605/taskgroup-0.2.2.tar.gz", hash = "sha256:078483ac3e78f2e3f973e2edbf6941374fbea81b9c5d0a96f51d297717f4752d", size = 11504, upload-time = "2025-01-03T09:24:13.761Z" }
 wheels = [
