@@ -1,5 +1,11 @@
 # proxy-tool
 
+## Command Line Dependencies
+
+```shell
+uv tool install git+https://github.com/qsoyq/twitter-cli.git@develop
+```
+
 ## 注意
 
 ### macOS

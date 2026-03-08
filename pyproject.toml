@@ -1,6 +1,6 @@
 [project]
 name = "proxy-tool"
-version = "0.5.8"
+version = "0.5.10"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -54,6 +54,7 @@ dependencies = [
     "typer-utils@git+https://github.com/qsoyq/typer_utils.git",
     "ical-api@git+https://github.com/qsoyq/ical-api.git",
     "fastapi-mcp>=0.4.0",
+    "twitter-cli@git+https://github.com/qsoyq/twitter-cli.git",
 ]
 
 [tool.ruff]
@@ -185,8 +186,9 @@ markers = ["nga_delay: add a delay before running the marked tests.d')"]
 
 [tool.uv.sources]
 typer-utils = { git = "https://github.com/qsoyq/typer_utils.git" }
-rssapi = { git = "https://github.com/qsoyq/rssapi.git", rev = "0.1.23" }
+rssapi = { git = "https://github.com/qsoyq/rssapi.git", rev = "0.1.31" }
 ical-api = { git = "https://github.com/qsoyq/ical-api", rev = "0.1.4" }
+twitter-cli = { git = "https://github.com/qsoyq/twitter-cli.git", rev = "0.1.2" }
 
 [tool.isort]
 profile = "hug"
