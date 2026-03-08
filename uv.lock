@@ -1833,7 +1833,7 @@ wheels = [
 
 [[package]]
 name = "proxy-tool"
-version = "0.5.10"
+version = "0.5.11"
 source = { virtual = "." }
 dependencies = [
     { name = "asyncache" },
@@ -3159,7 +3159,7 @@ wheels = [
 
 [[package]]
 name = "twitter-cli"
-version = "0.1.2"
+version = "0.1.0"
 source = { git = "https://github.com/qsoyq/twitter-cli.git?rev=0.1.2#f4a36f235842d081befc920cbb03f3384cb67a1e" }
 dependencies = [
     { name = "browser-cookie3" },
