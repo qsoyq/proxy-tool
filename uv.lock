@@ -1833,7 +1833,7 @@ wheels = [
 
 [[package]]
 name = "proxy-tool"
-version = "0.5.12"
+version = "0.5.13"
 source = { virtual = "." }
 dependencies = [
     { name = "asyncache" },
@@ -1927,7 +1927,7 @@ requires-dist = [
     { name = "python-ssl-checker" },
     { name = "pytz" },
     { name = "pyyaml" },
-    { name = "rssapi", git = "https://github.com/qsoyq/rssapi.git?rev=0.1.31" },
+    { name = "rssapi", git = "https://github.com/qsoyq/rssapi.git?rev=0.1.32" },
     { name = "ruff" },
     { name = "twitter-cli", git = "https://github.com/qsoyq/twitter-cli.git?rev=0.1.3" },
     { name = "typer" },
@@ -2858,8 +2858,8 @@ wheels = [
 
 [[package]]
 name = "rssapi"
-version = "0.1.31"
-source = { git = "https://github.com/qsoyq/rssapi.git?rev=0.1.31#9183b0f39640331510c69d7a43c4c95179ed04f0" }
+version = "0.1.32"
+source = { git = "https://github.com/qsoyq/rssapi.git?rev=0.1.32#740e9089c193020a1307176f2c4071467ad8defc" }
 dependencies = [
     { name = "asyncache" },
     { name = "beautifulsoup4" },
@@ -2899,6 +2899,7 @@ dependencies = [
     { name = "pytz" },
     { name = "pyyaml" },
     { name = "ruff" },
+    { name = "twitter-cli" },
     { name = "typer" },
     { name = "typer-utils" },
     { name = "types-beautifulsoup4" },
