@@ -9,8 +9,8 @@ from init import initial
 from responses import PingResponse
 from rssapi.applications.rss.routers.nodeseek import NodeseekToolkit
 from schemas.ping import PingRes, ping_responses
-from settings import version
-from utils.basic import init_logger
+from settings import get_settings, version
+from utils.logger import init_logger
 
 cmd = typer.Typer()
 app = FastAPI(title="proxy tool", version=version, lifespan=lifespan)
@@ -31,13 +31,14 @@ async def ping():
 def http(
     host: str = typer.Option("0.0.0.0", "--host", "-h", envvar="http_host"),
     port: int = typer.Option(8000, "--port", "-p", envvar="http_port"),
-    reload: bool = typer.Option(False, "--debug", envvar="http_reload"),
     log_level: int = typer.Option(logging.DEBUG, "--log_level", envvar="log_level"),
 ):
     """启动 http 服务"""
+    settings = get_settings()
+    settings.log_level = log_level
     init_logger(log_level)
     logging.info(f"http server listening on {host}:{port}")
-    uvicorn.run(app, host=host, port=port, reload=reload)
+    uvicorn.run(app, host=host, port=port)
 
 
 if __name__ == "__main__":

@@ -8,13 +8,13 @@ from bs4 import BeautifulSoup
 from fastapi import APIRouter, Query
 from fastapi.responses import PlainTextResponse
 from ics import Calendar, Event
-from settings import AppSettings
+from settings import get_settings
 
 router = APIRouter(tags=["Utils"], prefix="/apple/ics/vlrgg")
 
 logger = logging.getLogger(__file__)
 
-fetch_vlrgg_match_time_semaphore = asyncio.Semaphore(AppSettings().ics_fetch_vlrgg_match_time_semaphore)
+fetch_vlrgg_match_time_semaphore = asyncio.Semaphore(get_settings().ics_fetch_vlrgg_match_time_semaphore)
 vlrgg_match_time_memo: dict[str, int] = {}
 
 

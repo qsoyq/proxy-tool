@@ -55,7 +55,7 @@ def push_v2(messages: PushMessages):
         except Exception as e:
             logger.warning(e, exc_info=True)
             loc.append(current)
-            detail = ErrorDetail(**{"type": "value_error", "loc": loc, "message": f"{e}"})
+            detail = ErrorDetail(type="value_error", loc=loc, message=f"{e}")
         return detail
 
     with ThreadPoolExecutor(thread_name_prefix="notifications.push.") as executor:
@@ -100,7 +100,7 @@ def push_v3(messages: PushMessagesV3):
         except Exception as e:
             logger.warning(e, exc_info=True)
             loc.append(current)
-            detail = ErrorDetail(**{"type": "value_error", "loc": loc, "message": f"{e}"})
+            detail = ErrorDetail(type="value_error", loc=loc, message=f"{e}")
         return detail
 
     with ThreadPoolExecutor(thread_name_prefix="notifications.push.") as executor:

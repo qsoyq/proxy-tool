@@ -1,3 +1,6 @@
+import logging
+import time
+
 import middlewares.errors
 import middlewares.json_response
 import middlewares.rss
@@ -35,17 +38,17 @@ import routers.v2ex.my
 import routers.v2ex.nodes
 import routers.webhook.railway
 from exception import register_exception_handler
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi_mcp import FastApiMCP
 from ical_api.init import include_routers as include_ical_api_routers
 from rssapi.core.middlewares.rss import add_middleware as add_rssapi_middlewares
 from rssapi.init import include_routers as include_rssapi_routers
-from settings import AppSettings
+from settings import get_settings
 from utils.mermaid import load_mermaid_plugin
 
 
 def include_routers(app: FastAPI):
-    api_prefix = AppSettings().api_prefix
+    api_prefix = get_settings().api_prefix
     app.include_router(routers.basic.router, prefix=api_prefix)
     app.include_router(routers.tool.basic.router, prefix=api_prefix)
     app.include_router(routers.tool.image.router, prefix=api_prefix)
@@ -91,17 +94,43 @@ def add_middlewares(app: FastAPI):
 
 
 def init_mcp(app: FastAPI):
-    mcp = FastApiMCP(app, name=AppSettings().mcp.mcp_name, description=AppSettings().mcp.mcp_description)
+    settings = get_settings()
+    mcp = FastApiMCP(app, name=settings.mcp.mcp_name, description=settings.mcp.mcp_description)
     for tool in mcp.tools:
         tool.name = tool.name[:64]
 
     mcp.mount_http()
 
 
+def set_access_logger(app: FastAPI):
+    access_logger = logging.getLogger("http.access")
+
+    @app.middleware("http")
+    async def access_log_middleware(request: Request, call_next):
+        start = time.perf_counter()
+        response = None
+
+        try:
+            response = await call_next(request)
+            return response
+        finally:
+            duration_ms = (time.perf_counter() - start) * 1000
+            client_host = request.client.host if request.client else "-"
+            http_version = request.scope.get("http_version", "1.1")
+            status_code = response.status_code if response else 500
+            path = request.url.path
+            if request.url.query:
+                path = f"{path}?{request.url.query}"
+
+            access_logger.info(
+                f'{client_host} - "{request.method} {path} HTTP/{http_version}" {status_code} {duration_ms:.2f}ms'
+            )
+
+
 def initial(app: FastAPI):
+    set_access_logger(app)
     include_routers(app)
     add_middlewares(app)
-
     register_exception_handler(app)
     load_mermaid_plugin()
     init_mcp(app)

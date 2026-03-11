@@ -8,7 +8,7 @@ from typing import Any
 
 import pytz
 from schemas.rss.jsonfeed import JSONFeedItem
-from settings import AppSettings
+from settings import get_settings
 from utils.basic import ShelveStorage, URLToolkit  # type: ignore
 from utils.playwright import AsyncPlaywright
 
@@ -24,7 +24,7 @@ class DouyinPlaywrightTask:
 
 
 class AccessHistory:
-    storage = ShelveStorage(AppSettings().rss_douyin_user_history_storage)
+    storage = ShelveStorage(get_settings().rss_douyin_user_history_storage)
     lock = asyncio.Lock()
 
     @staticmethod
@@ -133,4 +133,4 @@ def to_feeds(username: str, body: dict, *, video_autoplay: bool = True) -> list[
 
 logger = logging.getLogger(__file__)
 
-Headless = AppSettings().rss_douyin_user_headless
+Headless = get_settings().rss_douyin_user_headless

@@ -6,7 +6,7 @@ from contextlib import AsyncExitStack, asynccontextmanager
 from fastapi import FastAPI
 from rssapi.core.events import lifespan as rssapi_lifespan
 from schemas.ping import get_default_memory
-from settings import AppSettings
+from settings import get_settings
 
 logger = logging.getLogger(__file__)
 
@@ -24,7 +24,7 @@ async def background_gc():
     while True:
         memory = get_default_memory()
         memory_percent = float(memory.percent[:-1])
-        settings = AppSettings()
+        settings = get_settings()
         if memory_percent >= settings.gc_trigger_memory_percent_limit:
             logger.debug(
                 f"[background_gc]: trigger gc collect because memory exceeds 80, current: {memory_percent}",

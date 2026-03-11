@@ -8,10 +8,10 @@ from functools import cache
 import httpx
 import pytz
 import yaml
+from const import RegionCodeTable
 from fastapi import APIRouter, Path, Query
 from fastapi.responses import PlainTextResponse, Response
 from models import ClashModel
-from settings import RegionCodeTable
 
 router = APIRouter(tags=["Proxy"], prefix="/clash")
 
