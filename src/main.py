@@ -7,7 +7,7 @@ from events import lifespan
 from fastapi import FastAPI
 from init import initial
 from responses import PingResponse
-from rssapi.applications.rss.routers.nodeseek import NodeseekToolkit
+from rssapi.applications.nodeseek.router import NodeseekToolkit
 from schemas.ping import PingRes, ping_responses
 from settings import get_settings, version
 from utils.logger import init_logger
