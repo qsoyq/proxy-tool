@@ -1,6 +1,6 @@
 [project]
 name = "proxy-tool"
-version = "0.6.20"
+version = "0.6.21"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -54,6 +54,7 @@ dependencies = [
     "typer-utils@git+https://github.com/qsoyq/typer_utils.git",
     "ical-api@git+https://github.com/qsoyq/ical-api.git",
     "fastapi-mcp>=0.4.0",
+    "dnspython>=2.8.0",
 ]
 
 [tool.ruff]
@@ -177,6 +178,7 @@ module = [
     "typer_utils.*",
     "ical_api.*",
     "fastapi_mcp",
+    "dns.*",
 ]
 ignore_missing_imports = true
 follow_untyped_imports = true
