@@ -3,7 +3,6 @@ import time
 
 import middlewares.errors
 import middlewares.json_response
-import middlewares.rss
 import routers.apple.itunes.appstore
 import routers.apple.location
 import routers.basic
@@ -12,6 +11,7 @@ import routers.checkin.flyairport
 import routers.clash.basic
 import routers.clash.config
 import routers.convert.curl
+import routers.convert.dash
 import routers.convert.svg
 import routers.convert.xml
 import routers.dandanplay.bilibili
@@ -63,6 +63,7 @@ def include_routers(app: FastAPI):
     app.include_router(routers.bilibili.live.room.router, prefix=api_prefix)
     app.include_router(routers.convert.xml.router, prefix=api_prefix)
     app.include_router(routers.convert.svg.router, prefix=api_prefix)
+    app.include_router(routers.convert.dash.router, prefix=api_prefix)
     app.include_router(routers.convert.curl.router, prefix=api_prefix)
     app.include_router(routers.mikanani.rss.router, prefix=api_prefix)
     app.include_router(routers.mikanani.bangumi.router, prefix=api_prefix)
