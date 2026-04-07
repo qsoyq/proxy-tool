@@ -6,7 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 from typing import List
 
 import httpx
-from fastapi import APIRouter, Path, Query
+from fastapi import APIRouter, HTTPException, Path, Query
 from schemas.bilibili.live.room import (
     BilibiliAnchorInRoomScheme,
     BilibiliRoomInfoScheme,
@@ -38,7 +38,14 @@ async def getLiveRoomInfo(roomId: int):
     async with httpx.AsyncClient(verify=False) as client:
         resp = await client.get(url, params=params, headers=headers)
         resp.raise_for_status()
-    data = resp.json().get("data")
+        body = resp.json()
+
+        data = body.get("data")
+        code = body.get("code")
+        msg = body.get("msg")
+        if code == 1024 or msg == "timeout":
+            raise HTTPException(504, detail="getLiveRoomInfo timeout")
+
     assert data, resp.text
     return BilibiliRoomInfoScheme(**data)
 
@@ -55,7 +62,14 @@ async def getAnchorInRoom(roomId: int) -> BilibiliAnchorInRoomScheme:
     async with httpx.AsyncClient(verify=False) as client:
         resp = await client.get(url, params=params, headers=headers)
         resp.raise_for_status()
-        data = resp.json().get("data")
+        body = resp.json()
+
+        data = body.get("data")
+        code = body.get("code")
+        msg = body.get("msg")
+        if code == 1024 or msg == "timeout":
+            raise HTTPException(504, detail="getAnchorInRoom timeout")
+
     assert data, resp.text
     return BilibiliAnchorInRoomScheme(**data["info"])
 
