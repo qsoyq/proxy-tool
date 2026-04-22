@@ -2923,7 +2923,7 @@ wheels = [
 
 [[package]]
 name = "proxy-tool"
-version = "0.6.43"
+version = "0.6.44"
 source = { virtual = "." }
 dependencies = [
     { name = "asyncache" },
@@ -3020,7 +3020,7 @@ requires-dist = [
     { name = "python-ssl-checker" },
     { name = "pytz" },
     { name = "pyyaml" },
-    { name = "rssapi", git = "https://github.com/qsoyq/rssapi.git?rev=0.2.45" },
+    { name = "rssapi", git = "https://github.com/qsoyq/rssapi.git?rev=0.3.0" },
     { name = "ruff" },
     { name = "typer" },
     { name = "typer-utils", git = "https://github.com/qsoyq/typer_utils.git" },
@@ -4148,8 +4148,8 @@ wheels = [
 
 [[package]]
 name = "rssapi"
-version = "0.2.45"
-source = { git = "https://github.com/qsoyq/rssapi.git?rev=0.2.45#c6640c6e5a0a3f9d43019b9a602368c49f4112d1" }
+version = "0.3.0"
+source = { git = "https://github.com/qsoyq/rssapi.git?rev=0.3.0#1910e2accbde97bf359337f0e49d25990ce63a8f" }
 dependencies = [
     { name = "ai-assistant" },
     { name = "asyncache" },
@@ -4168,39 +4168,23 @@ dependencies = [
     { name = "httpx-disable-verify" },
     { name = "hypercorn" },
     { name = "ics" },
-    { name = "ipython", version = "8.38.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "ipython", version = "9.10.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
     { name = "js2py" },
     { name = "markdown" },
-    { name = "mypy" },
     { name = "oss2" },
-    { name = "pip" },
-    { name = "pre-commit" },
-    { name = "pretty-errors" },
     { name = "proto-plus" },
     { name = "psutil" },
     { name = "pycairo" },
     { name = "pydantic-settings" },
     { name = "pyjwt" },
-    { name = "pytest" },
-    { name = "pytest-asyncio" },
-    { name = "pytest-playwright" },
     { name = "python-dateutil" },
     { name = "python-multipart" },
     { name = "python-ssl-checker" },
     { name = "pytz" },
     { name = "pyyaml" },
     { name = "rdt-cli" },
-    { name = "ruff" },
     { name = "twitter-cli" },
     { name = "typer" },
     { name = "typer-utils" },
-    { name = "types-beautifulsoup4" },
-    { name = "types-cachetools" },
-    { name = "types-dateparser" },
-    { name = "types-python-dateutil" },
-    { name = "types-pyyaml" },
-    { name = "types-xmltodict" },
     { name = "uvicorn" },
     { name = "xmltodict" },
     { name = "yagmail" },
