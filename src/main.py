@@ -13,7 +13,7 @@ from settings import get_settings, version
 from utils.logger import init_logger
 
 cmd = typer.Typer()
-app = FastAPI(title="proxy tool", version=version, lifespan=lifespan)
+app = FastAPI(title="api", version=version, lifespan=lifespan)
 initial(app)
 
 

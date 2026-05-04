@@ -2923,7 +2923,7 @@ wheels = [
 
 [[package]]
 name = "proxy-tool"
-version = "0.6.46"
+version = "0.7.0"
 source = { virtual = "." }
 dependencies = [
     { name = "asyncache" },
