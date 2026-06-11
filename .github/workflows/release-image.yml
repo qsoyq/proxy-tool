@@ -5,9 +5,18 @@ on:
     types:
       - published
 
+permissions:
+  contents: read
+
+concurrency:
+  group: release-image-${{ github.event.release.tag_name }}
+  cancel-in-progress: false
+
 jobs:
   docker:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: production
     steps:
       - name: Checkout
         uses: actions/checkout@v5

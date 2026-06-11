@@ -1,0 +1,53 @@
+name: Bug report
+description: Report a reproducible bug
+title: "fix: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: background
+    attributes:
+      label: Background
+      description: What happened and why is it a problem?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      placeholder: "- [ ] ..."
+    validations:
+      required: true
+  - type: textarea
+    id: verification
+    attributes:
+      label: Verification method
+      placeholder: "Commands, logs, or manual checks to verify the fix."
+    validations:
+      required: true
+  - type: textarea
+    id: risk
+    attributes:
+      label: Risks and dependencies
+      description: Include affected routes, services, credentials, or dependent work.

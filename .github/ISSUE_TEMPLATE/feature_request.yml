@@ -1,0 +1,66 @@
+name: Feature or tech task
+description: Propose a feature, refactor, research task, or governance task
+title: "feat: "
+labels: ["enhancement"]
+body:
+  - type: dropdown
+    id: type
+    attributes:
+      label: Issue type
+      options:
+        - Feature
+        - Tech Task
+        - Refactor
+        - Research
+        - QA Task
+        - Release Task
+        - Incident
+    validations:
+      required: true
+  - type: textarea
+    id: background
+    attributes:
+      label: Background
+      description: Why is this needed?
+    validations:
+      required: true
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What outcome should this issue deliver?
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      placeholder: "What is included?"
+    validations:
+      required: true
+  - type: textarea
+    id: out_of_scope
+    attributes:
+      label: Out of scope
+      placeholder: "What is explicitly excluded?"
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      placeholder: "- [ ] ..."
+    validations:
+      required: true
+  - type: textarea
+    id: verification
+    attributes:
+      label: Verification method
+      placeholder: "Commands, logs, or manual checks to verify completion."
+    validations:
+      required: true
+  - type: textarea
+    id: risk
+    attributes:
+      label: Risks, dependencies, and references
+      description: Link related issues, PRs, docs, and note priority or milestone when known.

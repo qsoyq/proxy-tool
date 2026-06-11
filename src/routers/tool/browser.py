@@ -31,14 +31,15 @@ async def playwright(
     async with async_playwright() as playwright:
         chromium = playwright.chromium
         browser = await chromium.launch()
-        browser = await browser.new_context(user_agent=userAgent)
+        context = await browser.new_context(user_agent=userAgent)
         if cookies:
-            await browser.add_cookies(cookies)  # type: ignore
+            await context.add_cookies(cookies)  # type: ignore
 
-        page = await browser.new_page()
+        page = await context.new_page()
         res = await page.goto(url)
         text = await res.text() if res else None
         status = res.status if res else None
+        await context.close()
         await browser.close()
     return {"text": text, "status": status}
 
