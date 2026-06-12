@@ -1035,8 +1035,7 @@ dependencies = [
     { name = "attrs" },
     { name = "python-dateutil" },
     { name = "six" },
-    { name = "tatsu", version = "5.15.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
-    { name = "tatsu", version = "5.17.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
+    { name = "tatsu" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/43/fa/2cb7cbe23566140f011da4fec280d4873da4389c8b838bb3e5ce3fc39b16/ics-0.7.2.tar.gz", hash = "sha256:6743539bca10391635249b87d74fcd1094af20b82098bebf7c7521df91209f05", size = 190643, upload-time = "2022-07-06T11:25:41.666Z" }
 wheels = [
@@ -1171,20 +1170,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/3c/56/3f325b1eef9791759784aa5046a8f6a1aff8f7c898a2e34506771d3b99d8/jmespath-0.10.0.tar.gz", hash = "sha256:b85d0567b8666149a93172712e68920734333c0ce7e89b78b3e987f71e5ed4f9", size = 21607, upload-time = "2020-05-12T22:03:47.267Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/07/cb/5f001272b6faeb23c1c9e0acc04d48eaaf5c862c17709d20e3469c6e0139/jmespath-0.10.0-py2.py3-none-any.whl", hash = "sha256:cdf6525904cc597730141d61b36f2e4b8ecc257c420fa2f4549bac2c2d0cb72f", size = 24489, upload-time = "2020-05-12T22:03:45.643Z" },
-]
-
-[[package]]
-name = "js2py"
-version = "0.74"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "pyjsparser" },
-    { name = "six" },
-    { name = "tzlocal" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/cb/a5/3d8b3e4511cc21479f78f359b1b21f1fb7c640988765ffd09e55c6605e3b/Js2Py-0.74.tar.gz", hash = "sha256:39f3a6aa8469180efba3c8677271df27c31332fd1b471df1af2af58b87b8972f", size = 2504984, upload-time = "2022-11-06T10:43:53.746Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/88/58/2feb430d47c9f18f331494b429697342722b51f28dad8ad92a511c0f6fc8/Js2Py-0.74-py3-none-any.whl", hash = "sha256:40a508a79e2f8d624e3f2e604f90a1e6f46ac75b416d7f4745939ff4a2e95e09", size = 1033007, upload-time = "2022-11-06T10:43:50.988Z" },
 ]
 
 [[package]]
@@ -2058,7 +2043,6 @@ dependencies = [
     { name = "ics" },
     { name = "ipython", version = "8.38.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "ipython", version = "9.10.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
-    { name = "js2py" },
     { name = "markdown" },
     { name = "mypy" },
     { name = "oss2" },
@@ -2080,6 +2064,7 @@ dependencies = [
     { name = "pyyaml" },
     { name = "rssapi" },
     { name = "ruff" },
+    { name = "tatsu" },
     { name = "typer" },
     { name = "typer-utils" },
     { name = "types-beautifulsoup4" },
@@ -2113,7 +2098,6 @@ requires-dist = [
     { name = "ical-api", git = "https://github.com/qsoyq/ical-api?rev=0.1.4" },
     { name = "ics" },
     { name = "ipython" },
-    { name = "js2py" },
     { name = "markdown" },
     { name = "mypy" },
     { name = "oss2" },
@@ -2135,6 +2119,7 @@ requires-dist = [
     { name = "pyyaml" },
     { name = "rssapi", git = "https://github.com/qsoyq/rssapi.git?rev=0.4.5" },
     { name = "ruff" },
+    { name = "tatsu", specifier = "<5.17" },
     { name = "typer" },
     { name = "typer-utils", git = "https://github.com/qsoyq/typer_utils.git" },
     { name = "types-beautifulsoup4" },
@@ -2486,12 +2471,6 @@ sdist = { url = "https://files.pythonhosted.org/packages/b0/77/a5b8c569bf593b014
 wheels = [
     { url = "https://files.pythonhosted.org/packages/c7/21/705964c7812476f378728bdf590ca4b771ec72385c533964653c68e86bdc/pygments-2.19.2-py3-none-any.whl", hash = "sha256:86540386c03d588bb81d44bc3928634ff26449851e99741617ecb9037ee5ec0b", size = 1225217, upload-time = "2025-06-21T13:39:07.939Z" },
 ]
-
-[[package]]
-name = "pyjsparser"
-version = "2.7.1"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/48/ef/c72abcfa2c6accd03e7c89c400790fc3d908c5804d50a7c4e9ceabd74d23/pyjsparser-2.7.1.tar.gz", hash = "sha256:be60da6b778cc5a5296a69d8e7d614f1f870faf94e1b1b6ac591f2ad5d729579", size = 24196, upload-time = "2019-04-21T21:56:17.708Z" }
 
 [[package]]
 name = "pyjwt"
@@ -3245,35 +3224,9 @@ wheels = [
 name = "tatsu"
 version = "5.15.1"
 source = { registry = "https://pypi.org/simple" }
-resolution-markers = [
-    "python_full_version == '3.11.*' and sys_platform == 'win32'",
-    "python_full_version == '3.11.*' and sys_platform == 'emscripten'",
-    "python_full_version == '3.11.*' and sys_platform != 'emscripten' and sys_platform != 'win32'",
-    "python_full_version < '3.11'",
-]
 sdist = { url = "https://files.pythonhosted.org/packages/dc/0b/46725961e0b77e88352e60b9e78aef268cacd6dfae7f1527a348b0247606/tatsu-5.15.1.tar.gz", hash = "sha256:38b0467dbf086f032a7321023e65a773201c1acdebe0e9ac35c5ec26637e0b0d", size = 133908, upload-time = "2026-01-04T13:39:47.97Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/e8/2f/7afdd76cac1511c456fdd880394cd54bc27ff5d991d3cb6b2ce0720b7d80/tatsu-5.15.1-py3-none-any.whl", hash = "sha256:3a1229eec55dcb1da7ae2842b1abf26bb746e92dc6734ab6785e84cecb465f06", size = 80069, upload-time = "2026-01-04T13:39:46.358Z" },
-]
-
-[[package]]
-name = "tatsu"
-version = "5.17.1"
-source = { registry = "https://pypi.org/simple" }
-resolution-markers = [
-    "python_full_version >= '3.14' and sys_platform == 'win32'",
-    "python_full_version >= '3.14' and sys_platform == 'emscripten'",
-    "python_full_version >= '3.14' and sys_platform != 'emscripten' and sys_platform != 'win32'",
-    "python_full_version == '3.13.*' and sys_platform == 'win32'",
-    "python_full_version == '3.13.*' and sys_platform == 'emscripten'",
-    "python_full_version == '3.13.*' and sys_platform != 'emscripten' and sys_platform != 'win32'",
-    "python_full_version == '3.12.*' and sys_platform == 'win32'",
-    "python_full_version == '3.12.*' and sys_platform == 'emscripten'",
-    "python_full_version == '3.12.*' and sys_platform != 'emscripten' and sys_platform != 'win32'",
-]
-sdist = { url = "https://files.pythonhosted.org/packages/36/78/7a5b45eba65aa101f446caed391d2141d1f0267e501cf1f13cfab3e98780/tatsu-5.17.1.tar.gz", hash = "sha256:8b11e732206463f31cad57729da6aa60846aa680bdb0c0b64339a8ac7cb6ebb4", size = 313266, upload-time = "2026-02-21T00:29:03.09Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/18/9d/be290eb415481050a7ee7c237750a0efb0816fbdde75166277eb7485f652/tatsu-5.17.1-py3-none-any.whl", hash = "sha256:e71f2bea8408fe4e1d778269c5d4cd4b7b76bec466068e115db4cd57605592fb", size = 128514, upload-time = "2026-02-21T00:29:01.379Z" },
 ]
 
 [[package]]
