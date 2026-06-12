@@ -14,6 +14,7 @@ async def test_async_ssl_client_context():
         assert cert, cert
 
 
+@pytest.mark.skip(reason="Requires NGA credential environment variables that are not available in CI")
 @pytest.mark.asyncio
 @pytest.mark.nga_delay
 async def test_nga_fetch_thread_detail():
