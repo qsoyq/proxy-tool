@@ -24,6 +24,7 @@ async def test_geosite():
     await asyncio.wait_for(get_domains_by_geosite("google"), 1)
 
 
+@pytest.mark.skip(reason="Depends on upstream v2fly geosite data that changes over time")
 @pytest.mark.asyncio
 async def test_geosite_librady_by_url():
     results = await get_domains_by_geosite_library("google")

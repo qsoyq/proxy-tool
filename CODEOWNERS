@@ -1,0 +1,7 @@
+# Default code owner for this repository.
+* @qsoyq
+
+# GitHub workflow and governance changes require repository owner review.
+.github/ @qsoyq
+CODEOWNERS @qsoyq
+SECURITY.md @qsoyq

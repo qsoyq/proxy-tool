@@ -1,0 +1,11 @@
+# Normalize text files across platforms.
+* text=auto eol=lf
+
+# Keep generated lockfiles and binary assets stable.
+*.lock text eol=lf
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary

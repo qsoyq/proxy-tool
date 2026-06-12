@@ -19,11 +19,13 @@ def test_github_rate_limit(client: TestClient):
     assert response.status_code == 200
 
 
+@pytest.mark.skip(reason="Depends on an external upstream override source that can return 403")
 def test_override_NSRingo_WeatherKit(client: TestClient):
     response = client.get("/api/stash/stoverride/NSRingo/WeatherKit")
     assert response.status_code == 200
 
 
+@pytest.mark.skip(reason="Depends on an external upstream Loon override source that can return 403")
 def test_override_loon(client: TestClient):
     response = client.get(
         "/api/stash/stoverride/loon", params={"url": "https://kelee.one/Tool/Loon/Lpx/YouTube_remove_ads.lpx"}

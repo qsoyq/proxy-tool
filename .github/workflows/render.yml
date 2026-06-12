@@ -1,11 +1,22 @@
-name: build push deploy
+name: deploy to render
+
 on:
   push:
     branches:
-      - 'render'
+      - "render"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: render-production
+  cancel-in-progress: false
+
 jobs:
   render:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: production
     steps:
       - name: Deploy to production
         uses: johnbeynon/render-deploy-action@747373cdb7b9b3f561438e063ee0815b71584f1b
