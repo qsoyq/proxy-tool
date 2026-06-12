@@ -1,0 +1,115 @@
+name: update rssapi release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: rssapi release version to apply, for example 0.4.6
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: update-rssapi-release
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install -y libcairo2-dev
+
+      - name: Normalize rssapi release version
+        id: release
+        run: |
+          requested_version="${{ inputs.version }}"
+          normalized_version="${requested_version#v}"
+          echo "version=${normalized_version}" >> "$GITHUB_OUTPUT"
+          echo "Requested rssapi release: ${requested_version}; normalized version: ${normalized_version}"
+
+      - name: Update pyproject version pins
+        id: bump
+        run: python scripts/bump_rssapi_release.py --version "${{ steps.release.outputs.version }}"
+
+      - name: Sync dependency lockfile
+        if: steps.bump.outputs.updated == 'true'
+        run: uv sync --all-extras --dev
+
+      - name: Test
+        if: steps.bump.outputs.updated == 'true'
+        run: PYTHONPATH=./src uv run pytest
+
+      - name: Create pull request
+        if: steps.bump.outputs.updated == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          # Use RSSAPI_UPDATE_TOKEN when configured so merging the generated PR can trigger the post-merge release workflow.
+          token: ${{ secrets.RSSAPI_UPDATE_TOKEN || github.token }}
+          branch: ci/update-rssapi-${{ steps.bump.outputs.target_version }}
+          delete-branch: true
+          commit-message: >-
+            chore: bump rssapi to ${{ steps.bump.outputs.target_version }}
+          title: >-
+            chore: bump rssapi to ${{ steps.bump.outputs.target_version }}
+          body: |
+            > After this PR is reviewed and merged, `.github/workflows/release-rssapi-update.yml` creates GitHub Release `${{ steps.bump.outputs.project_version }}` and triggers the existing image workflow. If this PR was opened with the default `GITHUB_TOKEN`, manually create the release if GitHub suppresses the follow-up workflow.
+
+            ## Summary
+
+            - bump rssapi from `${{ steps.bump.outputs.current_version }}` to `${{ steps.bump.outputs.target_version }}`
+            - bump proxy-tool from `${{ steps.bump.outputs.previous_project_version }}` to `${{ steps.bump.outputs.project_version }}`
+            - refresh `uv.lock` with `uv sync --all-extras --dev`
+
+            ## Related issue
+
+            Related to #3
+
+            ## Change type
+
+            - [ ] Feature
+            - [ ] Bug fix
+            - [x] Tech task
+            - [ ] Refactor
+            - [ ] Documentation
+            - [x] CI / governance
+
+            ## Impact scope
+
+            - Release-driven dependency maintenance for the GitHub-hosted `rssapi` package.
+
+            ## Verification
+
+            - [ ] `make precommit`
+            - [ ] `make mypy`
+            - [x] `PYTHONPATH=./src uv run pytest`
+            - [ ] Manual verification: review generated dependency diff and workflow run logs.
+
+            ## Risk and rollback plan
+
+            - Risk: the new `rssapi` release may introduce runtime behavior changes not covered by tests.
+            - Rollback: revert this PR, redeploy the previous image/tag, or restore the previous deployment configuration.
+
+            ## AI assistance
+
+            - [ ] No AI assistance used
+            - [x] AI assistance used; output was reviewed and verified by the author
+
+            ## Reviewer focus
+
+            - Confirm the rssapi release diff is expected and the lockfile refresh only includes required dependency changes.

@@ -57,6 +57,16 @@ docker compose up --build
 - Pushing to the `render` branch triggers `.github/workflows/render.yml`, which deploys to the production Render service.
 - Production workflows use the `production` GitHub Environment. Repository admins should configure required reviewers for that environment before relying on it as an approval gate.
 
+### rssapi dependency release automation
+
+`rssapi` is pinned in `pyproject.toml` as a GitHub dependency under `[tool.uv.sources]`. Updates are release-driven, not scheduled: the `rssapi` repository should trigger `.github/workflows/update-rssapi.yml` in this repository when it publishes a release such as `0.4.6`.
+
+The proxy-tool workflow expects a specific `rssapi` release version input. When invoked, it updates the `rssapi` revision, bumps the proxy-tool patch version, runs `uv sync --all-extras --dev` to refresh `uv.lock`, runs tests, and opens a review PR.
+
+Generated rssapi update PRs currently use the branch marker `ci/update-rssapi-<version>`. `.github/workflows/release-rssapi-update.yml` uses that marker after merge to decide whether it should create the matching proxy-tool GitHub Release and call the image build workflow. If this marker changes, update both workflows together. A future improvement could replace the branch-name marker with a more explicit mechanism such as a dedicated PR label, but that requires the release workflow to fetch and verify PR labels before creating a release.
+
+`.github/workflows/release-image.yml` still runs for manually published GitHub Releases. It is also reusable through `workflow_call` so the rssapi post-merge workflow can build the image immediately after creating the release. Keep release creation on `GITHUB_TOKEN` plus the direct `workflow_call` path, or guard carefully against duplicate image builds if release creation later moves to a token that also triggers `release.published` workflows.
+
 ## Rollback
 
 - Docker image rollback: redeploy a previously known-good release image tag.
