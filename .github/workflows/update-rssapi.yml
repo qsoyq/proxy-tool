@@ -1,9 +1,12 @@
 name: update rssapi release
 
 on:
-  schedule:
-    - cron: "17 2 * * *"
   workflow_dispatch:
+    inputs:
+      version:
+        description: rssapi release version to apply, for example 0.4.6
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -32,19 +35,17 @@ jobs:
       - name: Install system dependencies
         run: sudo apt-get update && sudo apt-get install -y libcairo2-dev
 
-      - name: Read latest rssapi release
-        id: latest
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Normalize rssapi release version
+        id: release
         run: |
-          latest_version="$(gh release view --repo qsoyq/rssapi --json tagName --jq .tagName)"
-          normalized_version="${latest_version#v}"
+          requested_version="${{ inputs.version }}"
+          normalized_version="${requested_version#v}"
           echo "version=${normalized_version}" >> "$GITHUB_OUTPUT"
-          echo "Latest rssapi release: ${latest_version}; normalized version: ${normalized_version}"
+          echo "Requested rssapi release: ${requested_version}; normalized version: ${normalized_version}"
 
       - name: Update pyproject version pins
         id: bump
-        run: python scripts/bump_rssapi_release.py --version "${{ steps.latest.outputs.version }}"
+        run: python scripts/bump_rssapi_release.py --version "${{ steps.release.outputs.version }}"
 
       - name: Sync dependency lockfile
         if: steps.bump.outputs.updated == 'true'
@@ -90,7 +91,7 @@ jobs:
 
             ## Impact scope
 
-            - Scheduled dependency maintenance for the GitHub-hosted `rssapi` package.
+            - Release-driven dependency maintenance for the GitHub-hosted `rssapi` package.
 
             ## Verification
 
