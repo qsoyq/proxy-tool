@@ -7,11 +7,12 @@ WORKDIR /app/
 
 RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg && rm -rf /var/lib/apt/lists/*
 
-COPY pyproject.toml pyproject.toml
+COPY pyproject.toml uv.lock ./
 
 RUN pip install uv
 
 RUN uv sync
+RUN uv run playwright install --with-deps chromium
 
 COPY src /app/
 
