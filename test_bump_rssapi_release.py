@@ -1,9 +1,7 @@
 from pathlib import Path
 
 import pytest
-
 from scripts.bump_rssapi_release import bump_patch, parse_semver, update_pyproject_content
-
 
 PYPROJECT = """[project]
 name = "proxy-tool"

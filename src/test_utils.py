@@ -1,8 +1,8 @@
 import os
 
 import pytest
-from utils.basic import AsyncSSLClientContext
 from rssapi.utils.nga import NgaToolkit
+from utils.basic import AsyncSSLClientContext
 
 
 @pytest.mark.skip(reason="Depends on external hosts and can time out during SSL shutdown")
