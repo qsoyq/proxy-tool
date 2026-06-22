@@ -49,7 +49,9 @@ repos:
                 - types-python-dateutil
                 - yagmail
                 - beautifulsoup4
+                - cachetools==5.5.2
                 - cairosvg
+                - curl-cffi==0.14.0
                 - PyJWT
                 - utils
                 - ics
