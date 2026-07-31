@@ -10,6 +10,7 @@ from schemas.adapter import HttpUrl
 
 APNS_HOST_NAME = "api.push.apple.com"
 
+# Shared APNs key published by Bark Server for Bark notifications.
 # https://raw.githubusercontent.com/Finb/bark-server/master/deploy/AuthKey_LH4T9V5U4R_5U8LBRXG3A.p8
 BARK_TOKEN_PRIVATE_KEY = """
 -----BEGIN PRIVATE KEY-----

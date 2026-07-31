@@ -12,6 +12,9 @@ repos:
           - id: check-added-large-files
           - id: check-executables-have-shebangs
           - id: debug-statements
+          # Bark's published shared APNs key is intentionally kept as the default.
+          - id: detect-private-key
+            exclude: "^src/schemas/notifications/apple\\.py$"
           - id: end-of-file-fixer
           - id: trailing-whitespace
             files: "\\.(py|txt|yaml|json|md|toml|lock|cfg|html|sh|js|yml)$"
@@ -77,3 +80,11 @@ repos:
       rev: 0.9.28
       hooks:
           - id: uv-lock
+
+    - repo: https://github.com/gitleaks/gitleaks
+      rev: v8.30.1
+      hooks:
+          - id: gitleaks
+            args: [--config=.gitleaks.toml]
+            # Keep the exclusion aligned with detect-private-key above.
+            exclude: "^src/schemas/notifications/apple\\.py$"
