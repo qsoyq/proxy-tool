@@ -10,16 +10,6 @@ from schemas.adapter import HttpUrl
 
 APNS_HOST_NAME = "api.push.apple.com"
 
-# https://raw.githubusercontent.com/Finb/bark-server/master/deploy/AuthKey_LH4T9V5U4R_5U8LBRXG3A.p8
-BARK_TOKEN_PRIVATE_KEY = """
------BEGIN PRIVATE KEY-----
-MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQg4vtC3g5L5HgKGJ2+
-T1eA0tOivREvEAY2g+juRXJkYL2gCgYIKoZIzj0DAQehRANCAASmOs3JkSyoGEWZ
-sUGxFs/4pw1rIlSV2IC19M8u3G5kq36upOwyFWj9Gi3Ejc9d3sC7+SHRqXrEAJow
-8/7tRpV+
------END PRIVATE KEY-----
-""".strip()
-
 
 class JWTPayload(BaseModel):
     token: str
@@ -79,7 +69,9 @@ class ApplePushAuthParams(BaseModel):
     team_id: str = Field("5U8LBRXG3A")
     auth_key_id: str = Field("LH4T9V5U4R")
     topic: str = Field("me.fin.bark")
-    token_private_key: str = Field(BARK_TOKEN_PRIVATE_KEY)
+    token_private_key: str = Field(
+        ..., description="APNs signing key supplied by the caller; do not commit key material."
+    )
 
 
 class ApplePushMessage(ApplePushExtParams, ApplePushAuthParams):
