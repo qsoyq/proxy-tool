@@ -37,7 +37,7 @@ dependencies = [
     "types-dateparser",
     "psutil",
     "python-ssl-checker",
-    "pyopenssl<26",
+    "pyopenssl<27",
     "cryptography<48",
     "pytest-asyncio",
     "feedgen",
