@@ -38,7 +38,7 @@ dependencies = [
     "psutil",
     "python-ssl-checker",
     "pyopenssl<27",
-    "cryptography<48",
+    "cryptography<51",
     "pytest-asyncio",
     "feedgen",
     "pytz",
