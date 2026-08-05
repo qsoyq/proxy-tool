@@ -31,9 +31,13 @@ def test_nga_threads_v2(client: TestClient):
 
 def test_nga_sections(client: TestClient):
     response = client.get("/api/nga/sections")
+    if response.status_code in {502, 504}:
+        pytest.skip(f"NGA upstream unavailable: {response.text}")
     assert response.status_code == 200
 
 
 def test_nga_smiles(client: TestClient):
     response = client.get("/api/nga/smiles")
+    if response.status_code in {502, 504}:
+        pytest.skip(f"NGA upstream unavailable: {response.text}")
     assert response.status_code == 200
