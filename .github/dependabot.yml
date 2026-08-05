@@ -1,0 +1,20 @@
+version: 2
+
+updates:
+  - package-ecosystem: "uv"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    allow:
+      - dependency-type: "all"
+    groups:
+      uv:
+        patterns:
+          - "*"
+    ignore:
+      - dependency-name: "cryptography"
+        # Explicit range also blocks Dependabot security updates.
+        versions:
+          - ">=0"
+    commit-message:
+      prefix: "chore(deps)"
