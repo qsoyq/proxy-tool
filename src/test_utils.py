@@ -134,7 +134,7 @@ def test_nga_content_html_format():
     content_html = "[s:ac:goodjob]"
     formatted_emoji = NgaToolkit.format_content_html(content_html)
     if formatted_emoji != content_html:
-        assert formatted_emoji == """<img src="https://img4.nga.178.com/ngabbs/post/smile/ac1.png">"""
+        assert formatted_emoji == """<img src="https://img4.nga.cn/ngabbs/post/smile/ac1.png">"""
 
     # del
     content_html = "[del]Example[/del]"
