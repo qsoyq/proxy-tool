@@ -68,7 +68,7 @@ jobs:
             ${{ secrets.IMAGE }}:${{ steps.image.outputs.tag }}-${{ matrix.suffix }}
             ${{ secrets.IMAGE }}:latest-${{ matrix.suffix }}
           cache-from: type=gha,scope=release-image-${{ matrix.suffix }}
-          cache-to: type=gha,mode=max,scope=release-image-${{ matrix.suffix }}
+          cache-to: type=gha,mode=max,scope=release-image-${{ matrix.suffix }},ignore-error=true
 
   manifest:
     name: Create multi-arch manifests
