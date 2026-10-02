@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import sys
 import time
 from abc import ABC
 
@@ -9,6 +10,23 @@ from playwright._impl._errors import TargetClosedError
 logger = logging.getLogger(__file__)
 
 
+def _browser_platform(runtime_platform: str | None = None) -> str:
+    platform = runtime_platform or sys.platform
+    if platform == "darwin":
+        return "Macintosh; Intel Mac OS X 10_15_7"
+    if platform == "win32":
+        return "Windows NT 10.0; Win64; x64"
+    return "X11; Linux x86_64"
+
+
+def _browser_user_agent(browser_version: str, runtime_platform: str | None = None) -> str:
+    major_version = browser_version.split(".", 1)[0]
+    platform = _browser_platform(runtime_platform)
+    return (
+        f"Mozilla/5.0 ({platform}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{major_version}.0.0.0 Safari/537.36"
+    )
+
+
 class AsyncPlaywright(ABC):
     WATCH_URL_PATH = ""
     HEADLESS = True
@@ -16,7 +34,7 @@ class AsyncPlaywright(ABC):
     def __init__(
         self,
         url: str,
-        user_agent: str = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+        user_agent: str | None = None,
     ):
         self.url = url
         self._cookies: list = []
@@ -42,7 +60,8 @@ class AsyncPlaywright(ABC):
             chromium = playwright.chromium
             browser = await chromium.launch(headless=self.__class__.HEADLESS)
             logger.debug(f"{self.__class__.__name__} new browser: {self.url}")
-            browser = await browser.new_context(user_agent=self.user_agent)
+            user_agent = self.user_agent or _browser_user_agent(browser.version)
+            browser = await browser.new_context(user_agent=user_agent)
             logger.debug(f"{self.__class__.__name__} new context: {self.url}")
             if cookies:
                 await browser.add_cookies(cookies)  # type: ignore
