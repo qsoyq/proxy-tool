@@ -1,3 +1,4 @@
+import httpx
 import pytest
 from fastapi.testclient import TestClient
 from main import app
@@ -13,6 +14,16 @@ def client():
 CLOUDFLARE_DOH = "https://1.1.1.1/dns-query"
 ADGUARD_DOH = "https://dns.adguard-dns.com/dns-query"
 TEST_DOMAIN = "example.com"
+
+
+@pytest.fixture(scope="module")
+def adguard_doh_url() -> str:
+    # Some local and CI networks cannot establish a connection to AdGuard.
+    try:
+        _query_doh_wireformat(ADGUARD_DOH, TEST_DOMAIN)
+    except httpx.TransportError as exc:
+        pytest.skip(f"AdGuard DoH is unreachable from this test environment: {type(exc).__name__}: {exc}")
+    return ADGUARD_DOH
 
 
 def _assert_doh_result(data: dict):
@@ -43,8 +54,8 @@ class TestQueryDohJson:
         assert data is not None
         _assert_doh_result(data)
 
-    def test_adguard_returns_none(self):
-        data = _query_doh_json(ADGUARD_DOH, TEST_DOMAIN)
+    def test_adguard_returns_none(self, adguard_doh_url: str):
+        data = _query_doh_json(adguard_doh_url, TEST_DOMAIN)
         assert data is None
 
 
@@ -53,8 +64,8 @@ class TestQueryDohWireformat:
         data = _query_doh_wireformat(CLOUDFLARE_DOH, TEST_DOMAIN)
         _assert_doh_result(data)
 
-    def test_adguard(self):
-        data = _query_doh_wireformat(ADGUARD_DOH, TEST_DOMAIN)
+    def test_adguard(self, adguard_doh_url: str):
+        data = _query_doh_wireformat(adguard_doh_url, TEST_DOMAIN)
         _assert_doh_result(data)
 
 
@@ -72,8 +83,8 @@ class TestDohEndpoint:
         assert resp.status_code == 200
         _assert_doh_result(resp.json())
 
-    def test_adguard_doh(self, client: TestClient):
-        resp = client.get(DOH_ENDPOINT, params={"url": ADGUARD_DOH, "name": TEST_DOMAIN})
+    def test_adguard_doh(self, client: TestClient, adguard_doh_url: str):
+        resp = client.get(DOH_ENDPOINT, params={"url": adguard_doh_url, "name": TEST_DOMAIN})
         assert resp.status_code == 200
         _assert_doh_result(resp.json())
 
@@ -95,16 +106,16 @@ class TestDohEndpoint:
         assert resp.status_code == 200
         _assert_doh_result(resp.json())
 
-    def test_method_wireformat_adguard(self, client: TestClient):
-        resp = client.get(DOH_ENDPOINT, params={"url": ADGUARD_DOH, "name": TEST_DOMAIN, "method": "wireformat"})
+    def test_method_wireformat_adguard(self, client: TestClient, adguard_doh_url: str):
+        resp = client.get(DOH_ENDPOINT, params={"url": adguard_doh_url, "name": TEST_DOMAIN, "method": "wireformat"})
         assert resp.status_code == 200
         _assert_doh_result(resp.json())
 
-    def test_method_json_unsupported_returns_error(self, client: TestClient):
-        resp = client.get(DOH_ENDPOINT, params={"url": ADGUARD_DOH, "name": TEST_DOMAIN, "method": "json"})
+    def test_method_json_unsupported_returns_error(self, client: TestClient, adguard_doh_url: str):
+        resp = client.get(DOH_ENDPOINT, params={"url": adguard_doh_url, "name": TEST_DOMAIN, "method": "json"})
         assert resp.status_code == 400
 
-    def test_method_auto_fallback(self, client: TestClient):
-        resp = client.get(DOH_ENDPOINT, params={"url": ADGUARD_DOH, "name": TEST_DOMAIN, "method": "auto"})
+    def test_method_auto_fallback(self, client: TestClient, adguard_doh_url: str):
+        resp = client.get(DOH_ENDPOINT, params={"url": adguard_doh_url, "name": TEST_DOMAIN, "method": "auto"})
         assert resp.status_code == 200
         _assert_doh_result(resp.json())

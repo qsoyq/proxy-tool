@@ -37,7 +37,8 @@ dependencies = [
     "types-dateparser",
     "psutil",
     "python-ssl-checker",
-    "pyopenssl<27",
+    # python-ssl-checker requires X509.get_extension(), removed in pyOpenSSL 26.2.
+    "pyopenssl<26.2",
     "cryptography<48",
     "pytest-asyncio",
     "feedgen",
@@ -188,6 +189,11 @@ follow_untyped_imports = true
 
 [tool.pytest.ini_options]
 markers = ["nga_delay: add a delay before running the marked tests.d')"]
+
+[tool.uv]
+# fastapi-mcp 0.4.0 relies on the MCP 1.x server API.
+# https://github.com/tadata-org/fastapi_mcp/issues/321
+constraint-dependencies = ["mcp<2"]
 
 [tool.uv.sources]
 typer-utils = { git = "https://github.com/qsoyq/typer_utils.git" }
