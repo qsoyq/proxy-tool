@@ -1,6 +1,6 @@
 [project]
 name = "proxy-tool"
-version = "0.7.20"
+version = "0.7.21"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -197,7 +197,7 @@ constraint-dependencies = ["mcp<2"]
 
 [tool.uv.sources]
 typer-utils = { git = "https://github.com/qsoyq/typer_utils.git" }
-rssapi = { git = "https://github.com/qsoyq/rssapi.git", rev = "0.5.19" }
+rssapi = { git = "https://github.com/qsoyq/rssapi.git", rev = "0.5.26" }
 ical-api = { git = "https://github.com/qsoyq/ical-api", rev = "0.1.6" }
 
 [tool.isort]
